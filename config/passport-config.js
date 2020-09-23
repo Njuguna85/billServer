@@ -1,0 +1,49 @@
+const bcrypt = require('bcrypt');
+const User = require('../models/User');
+const localStrategy = require('passport-local').Strategy
+const GoogleStatergy = require('passport-google-oauth20').Strategy;
+
+function initialize(passport) {
+    // first we tell passport what strategy we 
+    //would like to use
+    passport.use(new GoogleStatergy({
+                clientID: process.env.GOOGLE_CLIENT_ID,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+                callbackURL: '/auth/google/callback'
+            },
+            // access the user details from the profile
+            async(accessToken, refreshToken, profile, done) => {
+                const newUser = {
+                        google_id: profile.id,
+                        full_name: profile.displayName,
+                        image: profile.photos[0].value,
+                        email: profile.emails[0].value
+                    }
+                    // search for an existing user or create one
+                try {
+                    //  check if there is a user
+                    let user = await User.findOne({ google_id: profile.id })
+                    if (user) {
+                        done(null, user)
+                    } else {
+                        user = await User.create(newUser);
+                        done(null, user)
+                    }
+                } catch (err) {
+
+                }
+            }
+
+        ))
+        // serialize the user to store inside the session
+    passport.serializeUser((user, done) => {
+        done(null, user.id)
+    })
+    passport.deserializeUser((id, done) => {
+        return done(null, getUserById(id))
+    })
+
+}
+
+
+module.exports = initialize;
