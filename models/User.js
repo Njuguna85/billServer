@@ -1,7 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
-const Joi = require('joi');
-
 
 class User extends Model {};
 
@@ -29,7 +27,8 @@ User.init({
     }
 }, {
     sequelize,
-    modelName: 'User'
+    modelName: 'user',
+    freezeTableName: true
 })
 
 

@@ -1,9 +1,9 @@
-const {
-    DataTypes
-} = require('sequelize');
+const { DataTypes, Model } = require('sequelize');
+const sequelize = require('../config/database');
 
-module.exports = sequelize => {
-    const attributes = {
+class Bars extends Model {}
+
+Bars.init({
         ogr_fid: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -40,16 +40,19 @@ module.exports = sequelize => {
             field: "wkb_geometry",
             autoIncrement: false
         }
-    };
-    const options = {
+    }, {
+        sequelize,
+        modelName: 'BarsModel',
         tableName: "bars",
         comment: "",
         indexes: [{
             name: "bars_wkb_geometry_geom_idx",
             unique: false,
             fields: ["wkb_geometry"]
-        }]
-    };
-    const BarsModel = sequelize.define("bars_model", attributes, options);
-    return BarsModel;
-};
+        }],
+        timestamps: false
+    }
+
+);
+
+module.exports = Bars;

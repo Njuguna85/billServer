@@ -1,6 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
-const Joi = require('joi');
 
 class Billboard extends Model {};
 
@@ -247,43 +246,16 @@ Billboard.init({
         primaryKey: false,
         field: "road_type",
         autoIncrement: false
+    },
+    user: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 1
     }
 }, {
     sequelize,
     modelName: "billboard_locations",
 });
 
-const validateBillboard = (billboard) => {
-    const schema = Joi.object({
-        billboardi: Joi.string().max(254),
-        routename: Joi.string().max(254),
-        scoutname: Joi.string().max(254),
-        date_: Joi.date().max(254),
-        mediaowner: Joi.string().max(254),
-        selectmedi: Joi.string().max(254),
-        billboard_: Joi.string().max(254),
-        customerin: Joi.string().max(254),
-        customerbr: Joi.string().max(254),
-        site_light: Joi.string().max(254),
-        zone_: Joi.string().max(254),
-        direction_: Joi.string().max(254),
-        size_: Joi.string().max(254),
-        orientatio: Joi.string().max(254),
-        site_run_u: Joi.string().max(254),
-        condition: Joi.string().max(254),
-        visibility: Joi.string().max(254),
-        traffic: Joi.string().max(254),
-        angle: Joi.string().max(254),
-        photo: Joi.string().max(254),
-        photo_long: Joi.string().max(254),
-        height: Joi.string().max(254),
-        lat: Joi.number().required(),
-        long_: Joi.number().required(),
-        constituen: Joi.string().max(254),
-        road_type: Joi.string().max(254),
-    })
-    return schema.validate(billboard)
-}
 
 exports.Billboard = Billboard;
-exports.validateBillboard = validateBillboard;

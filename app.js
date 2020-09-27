@@ -1,13 +1,22 @@
 const express = require('express');
 const app = express();
 const billboards = require('./routes/billboards')
-const bcrypt = require('bcrypt')
 const passport = require('passport')
 const session = require('express-session');
-const exphbs = require('express-handlebars');
+require('./models/models');
+const cors = require('cors')
 
 // use the json payload for body requests
 app.use(express.json());
+
+const corsOptions = {
+    'Origin': '*',
+    'optionsSuccessStatus': 200,
+    'Access-Control-Allow-Origin': '*',
+    "Access-Control-Allow-Headers": "X-Requested-With"
+}
+
+app.use(cors(corsOptions))
 
 // since we are using form , we use urlenconded 
 // this will enable the values sent from the form 
@@ -32,15 +41,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// set the view engine to ejs
-// handlebars
-app.engine('.hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }));
-app.set('view engine', '.hbs');
-
 // routes
-app.get('/', require('./routes/index'))
-app.get('/auth', require('./routes/auth'))
-
+app.use('/auth', require('./routes/auth'))
 
 // set the access the route of billboards 
 app.use('/api/billboards', billboards)

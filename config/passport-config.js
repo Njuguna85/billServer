@@ -13,6 +13,7 @@ function initialize(passport) {
             },
             // access the user details from the profile
             async(accessToken, refreshToken, profile, done) => {
+                console.log(profile);
                 const newUser = {
                         google_id: profile.id,
                         full_name: profile.displayName,
@@ -22,7 +23,7 @@ function initialize(passport) {
                     // search for an existing user or create one
                 try {
                     //  check if there is a user
-                    let user = await User.findOne({ google_id: profile.id })
+                    let user = await User.findOne({ where: { google_id: profile.id } })
                     if (user) {
                         done(null, user)
                     } else {
@@ -30,17 +31,17 @@ function initialize(passport) {
                         done(null, user)
                     }
                 } catch (err) {
-
+                    return done(null, false, err)
                 }
             }
 
         ))
         // serialize the user to store inside the session
     passport.serializeUser((user, done) => {
-        done(null, user.id)
+        done(null, user.user)
     })
-    passport.deserializeUser((id, done) => {
-        return done(null, getUserById(id))
+    passport.deserializeUser((user, done) => {
+        return done(null, User.findByPk(user))
     })
 
 }
