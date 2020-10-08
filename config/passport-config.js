@@ -13,7 +13,6 @@ function initialize(passport) {
             },
             // access the user details from the profile
             async(accessToken, refreshToken, profile, done) => {
-                console.log(profile);
                 const newUser = {
                         google_id: profile.id,
                         full_name: profile.displayName,
@@ -31,17 +30,18 @@ function initialize(passport) {
                         done(null, user)
                     }
                 } catch (err) {
-                    return done(null, false, err)
+                    done(null, false, err)
                 }
             }
 
         ))
         // serialize the user to store inside the session
+        // use the user primarykey(user)
     passport.serializeUser((user, done) => {
-        done(null, user.user)
+        done(null, { id: user.id, email: user.email, full_name: user.full_name })
     })
     passport.deserializeUser((user, done) => {
-        return done(null, User.findByPk(user))
+        done(null, { id: user.id, email: user.email, full_name: user.full_name })
     })
 
 }

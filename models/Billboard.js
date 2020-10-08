@@ -1,5 +1,6 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/database');
+const Joi = require('joi');
 
 class Billboard extends Model {};
 
@@ -13,16 +14,17 @@ Billboard.init({
         field: "id",
         autoIncrement: true
     },
-    billboardi: {
+    billboard_id: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
         comment: null,
         primaryKey: false,
         field: "billboardi",
-        autoIncrement: false
+        autoIncrement: false,
+        unique: true
     },
-    routename: {
+    route_name: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -31,7 +33,7 @@ Billboard.init({
         field: "routename",
         autoIncrement: false
     },
-    scoutname: {
+    scout_name: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -40,16 +42,16 @@ Billboard.init({
         field: "scoutname",
         autoIncrement: false
     },
-    date_: {
-        type: DataTypes.DATEONLY,
+    date: {
+        type: DataTypes.CHAR(254),
         allowNull: true,
-        defaultValue: null,
+        defaultValue: Date.now,
         comment: null,
         primaryKey: false,
         field: "date_",
         autoIncrement: false
     },
-    mediaowner: {
+    media_owner: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -58,7 +60,7 @@ Billboard.init({
         field: "mediaowner",
         autoIncrement: false
     },
-    selectmedi: {
+    select_medium: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -67,7 +69,7 @@ Billboard.init({
         field: "selectmedi",
         autoIncrement: false
     },
-    billboard_: {
+    billboard_empty: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -76,7 +78,7 @@ Billboard.init({
         field: "billboard_",
         autoIncrement: false
     },
-    customerin: {
+    customer_industry: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -85,7 +87,7 @@ Billboard.init({
         field: "customerin",
         autoIncrement: false
     },
-    customerbr: {
+    customer_brand: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -94,7 +96,7 @@ Billboard.init({
         field: "customerbr",
         autoIncrement: false
     },
-    site_light: {
+    site_lighting_illumination: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -103,7 +105,7 @@ Billboard.init({
         field: "site_light",
         autoIncrement: false
     },
-    zone_: {
+    zone: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -112,7 +114,7 @@ Billboard.init({
         field: "zone_",
         autoIncrement: false
     },
-    direction_: {
+    direction_from_cbd: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -121,7 +123,7 @@ Billboard.init({
         field: "direction_",
         autoIncrement: false
     },
-    size_: {
+    size: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -130,7 +132,7 @@ Billboard.init({
         field: "size_",
         autoIncrement: false
     },
-    orientatio: {
+    orientation: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -139,7 +141,7 @@ Billboard.init({
         field: "orientatio",
         autoIncrement: false
     },
-    site_run_u: {
+    site_run_up: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -193,7 +195,7 @@ Billboard.init({
         field: "photo",
         autoIncrement: false
     },
-    photo_long: {
+    photo_long_range: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -220,7 +222,7 @@ Billboard.init({
         field: "lat",
         autoIncrement: false
     },
-    long_: {
+    long: {
         type: DataTypes.DOUBLE,
         allowNull: false,
         defaultValue: null,
@@ -229,7 +231,7 @@ Billboard.init({
         field: "long_",
         autoIncrement: false
     },
-    constituen: {
+    constituency: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
@@ -257,5 +259,37 @@ Billboard.init({
     modelName: "billboard_locations",
 });
 
+const valdateBillboard = (billboard) => {
+    const schema = Joi.object({
+        billboard_id: Joi.string().required().trim(),
+        route_name: Joi.string().trim().allow(null, ''),
+        scout_name: Joi.string().trim().allow(null, ''),
+        date: Joi.string(),
+        media_owner: Joi.string().trim().allow(null, ''),
+        select_medium: Joi.string().trim().allow(null, ''),
+        billboard_empty: Joi.string().trim().allow(null, ''),
+        customer_industry: Joi.string().trim().allow(null, ''),
+        customer_brand: Joi.string().trim().allow(null, ''),
+        site_lighting_illumination: Joi.string().trim().allow(null, ''),
+        zone: Joi.string().trim().allow(null, ''),
+        direction_from_cbd: Joi.string().trim().allow(null, ''),
+        size: Joi.string().trim().allow(null, ''),
+        orientation: Joi.string().trim().allow(null, ''),
+        site_run_up: Joi.string().trim().allow(null, ''),
+        condition: Joi.string().trim().allow(null, ''),
+        visibility: Joi.string().trim().allow(null, ''),
+        traffic: Joi.string().trim().allow(null, ''),
+        angle: Joi.string().trim().allow(null, ''),
+        photo: Joi.string().trim().allow(null, ''),
+        photo_long_range: Joi.string().trim().allow(null, ''),
+        height: Joi.string().trim().allow(null, ''),
+        lat: Joi.number().required(),
+        long: Joi.number().required(),
+        constituency: Joi.string().trim().allow(null, ''),
+        road_type: Joi.string().trim().allow(null, ''),
+    });
+    return schema.validate(billboard)
+}
 
 exports.Billboard = Billboard;
+exports.valdateBillboard = valdateBillboard;
