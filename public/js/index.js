@@ -869,31 +869,3 @@ function loader() {
     document.getElementById("loader").style.display = "none";
     document.getElementById("billboardDetails").style.display = "block";
 }
-// create a modal
-// get modal elements
-const modal = document.querySelector('.modal');
-// open modal btn
-const modalBtn = document.querySelector('.modalBtn');
-//close btn
-const closeBtn = document.querySelector('.closeModal');
-// listen for open click
-modalBtn.addEventListener('click', openModal);
-// listen for close click
-closeBtn.addEventListener('click', closeModal);
-// listen for outside click
-window.addEventListener('click', clickOutside)
-
-function openModal(e) {
-    modal.style.display = 'block';
-}
-
-function closeModal(e) {
-    modal.style.display = 'none';
-}
-
-function clickOutside(e) {
-    if (e.target == modal) {
-        modal.style.display = 'none';
-    }
-
-}

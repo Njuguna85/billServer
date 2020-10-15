@@ -1,6 +1,7 @@
 const sequelize = require('../config/database');
 const { Billboard } = require('./Billboard')
 const User = require('./User')
+const Role = require('../models/Role')
 
 // emit handling:
 //call this function to drop all databases and recreate them
@@ -14,3 +15,4 @@ const runFirstTime = () => sequelize.sync({ force: true })
 // runFirstTime()
 
 User.hasMany(Billboard, { foreignKey: 'user' })
+Role.hasMany(User, { foreignKey: 'role' })

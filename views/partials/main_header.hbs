@@ -1,0 +1,106 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Linden+Hill&display=swap&family=Hind:wght@300');
+
+    *,
+    body {
+        margin: 0;
+        padding: 0;
+        line-height: 1.5em;
+    }
+
+    a,
+    a:active,
+    a:hover,
+    a:visited {
+        text-decoration: none;
+    }
+
+    .top_header {
+        background-color: #086972;
+        padding: .3em;
+        color: white;
+        height: 4.5em;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .top_header h2 {
+        font-family: 'Linden Hill', serif;
+        font-size: 2.4em;
+        text-transform: uppercase;
+        padding-left: 2em;
+    }
+
+    .top_header a {
+        font-family: 'Hind', sans-serif;
+        padding-right: 1em;
+        color: white;
+        text-decoration: none;
+    }
+
+    .nav {
+        height: 3em;
+        margin: 0 auto;
+        text-align: center;
+        background-color: #01a9b4;
+        z-index: 100;
+    }
+
+    .nav-link {
+        height: 100%;
+        display: inline-flex;
+        align-items: center;
+        background: #0d2280;
+        padding: 0 1em;
+        transform: skew(-20deg);
+        -webkit-transform: skew(-20deg);
+        -moz-transform: skew(-20deg);
+        color: white;
+        font-weight: bolder;
+        margin-right: auto;
+    }
+
+    .nav-link:hover,
+    .nav-link:focus {
+        background-color: #fbfd8a;
+        color: saddlebrown;
+    }
+
+    .nav-link-span {
+        display: inline-block;
+        transform: skew(20deg);
+        -webkit-transform: skew(20deg);
+        -moz-transform: skew(20deg);
+    }
+
+    .logout {
+        display: inline-flex;
+        background-color: #fbfd8a;
+        height: 100%;
+        align-items: center;
+        padding: 0 1em;
+        transform: skew(-20deg);
+        -webkit-transform: skew(-20deg);
+        -moz-transform: skew(-20deg);
+        color: black;
+        font-weight: bolder;
+    }
+
+    .logout:visited,
+    :active {
+        text-decoration: none;
+    }
+</style>
+<div class="top_header">
+    <h2>Geo Location Intelligent System</h2>
+    <a href="https://www.predictiveanalytics.co.ke">Our Organization</a>
+</div>
+<div class="nav">
+    <a href="/" class="nav-link" id="home"><span class="nav-link-span">Home<span></a>
+    <a href="/upload" class="nav-link" id="upload"><span class="nav-link-span">Upload Data </span></a>
+    <a href="/businesses" class="nav-link" id="discover"><span class="nav-link-span">Discover Businesses </span></a>
+    <a href="/learn" class="nav-link" id="learn"><span class="nav-link-span">Learn More </span></a>
+    <a href="/contact" class="nav-link" id="contact"><span class="nav-link-span">Contact Us </span></a>
+    <a href="/auth/google" class="logout"><span class="nav-link-span">Sign In</span></a>
+</div>

@@ -128,11 +128,9 @@ async function fetchMobileUploads() {
 
 function addOverlays(data) {
     addBillboards(data.billboards);
-
     addAtm(data.atm);
     addTrafficLayer();
     addNssf(data.nssf);
-    // addMetalWorks(data.metalworks)
     nairobiSublWMS();
     addNairobiUberSpeeds()
     addugPopProj();
@@ -142,6 +140,7 @@ function addOverlays(data) {
             add(key, value);
         }
     }
+    setTimeout(loader, 100);
 }
 
 const getTiles = (lyr) => {
@@ -847,3 +846,100 @@ function calcRoute(tracker) {
         });
     }
 }
+
+function loader() {
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("map").style.display = "block";
+}
+
+document.querySelector('.check').addEventListener('click', async(e) => {
+            const selectedBus = document.querySelector('#business-type')
+
+            if (!selectedBus) {
+                selectedBus.focus
+            }
+            const res = await fetch(`${bussinessesAPI}=` + selectedBus.value)
+
+            if (res.ok) {
+                let jsonData = await res.json()
+                jsonData = jsonData.data;
+
+                if (jsonData.length > 0) {
+
+                    document.querySelector('.businesses-details').innerHTML = '';
+
+                    jsonData.forEach(data => {
+                                htmlString =
+                                    `<h2>${data.name}</h2>
+                    <div id='overview'>
+                        <h3>Overview</h3>
+                        ${data.overview}
+                    </div>
+                    <div id='facts'>
+                        <h3>Facts</h3>
+                        ${data.facts ? data.facts : '<p>No info on Facts established yet.</p>'}
+                     </div> 
+                    <div id='competitors'>  
+                        <h3>Competitors</h3>
+                        ${data.competition ? data.competition : '<p>No Info on Competition established yet</p>'}
+                    </div>
+                    <div id='behaviour'>
+                        <h3>Consumer Behaviour</h3>
+                        ${data.behaviour ? data.behaviour : '<p>No Info on Consumer Behaviour established yet</p>'}
+                    </div>
+                    <div id='licences'>    
+                        <h3>Licenses</h3>
+                        ${data.licenses ?
+                        data.licenses.map(license => {
+                            return `<div id='license'>
+                                <h5>License Name: ${license.name}</h5>
+                                <h5>Fee: ${license.fee}</h5>
+                                ${license.description}                            
+                            </div>`
+                        }).join('') : '<p>No Info on Licenses</p>'}
+                    </div>
+                    <div id='man_powers'>
+                        <h3>Man Power</h3>
+                        ${data.man_powers ?
+                        data.man_power.map(man => {
+                            return `<div id='man_power'
+                                ${man.details} 
+                            </div>`
+                        })
+                        : '<p>No Info on Man Power</p>'}
+                    </div>
+                    <div id='stocks'>
+                        <h3>Stock</h3>
+                        ${data.stocks ?
+                        data.stocks.map(stock => {
+                            return ` <div id='stock'>
+                                    <h5>${stock.name}</h5>
+                                    <h5>${stock.price}</h5>
+                                    ${stock.description} 
+                                </div>`;
+                        }).join('') : '<p>No Info on Man Power</p>'}
+                    </div>
+                    <div id='suppliers'>
+                        <h3>Supplier</h3>
+                        ${data.suppliers ?
+                        data.suppliers.map(supplier => {
+                            return ` <div id='supplier'>
+                            <h5>${supplier.title}</h5>
+                                ${supplier.details}
+                                </div>
+                                `;
+                        }).join('') : '<p>No Info on Suppliers</p>'}
+                    </div>
+                    <h3>Revenue</h3>
+                        ${data.revenue ? data.revenue : '<p>No info on Revenues established yet.</p>'}
+                    <h3> Others</h3 >
+                        ${data.others ? data.others : '<p>No More information.</p>'}
+                `;
+                document.querySelector('.businesses-details').insertAdjacentHTML('beforeend', htmlString);
+            });
+
+        } else {
+            console.log('No Data')
+        }
+    }
+})

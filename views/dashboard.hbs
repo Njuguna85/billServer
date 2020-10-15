@@ -1,8 +1,2 @@
-<p>Welcome {{name}}</p>
-<form method="POST" action="/api/billboards/upload" id="uploadForm" enctype="multipart/form-data">
-    <span>Upload an xls or xlsx File: </span>
-    <input type="file" name="xlsFile" id="xlsFile" accept="application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-    <button type="submit" class="btn" >Upload</button>
-    <p class="uploadForm__alert">Use MM.DD.YYYY Date Format</p>
-</form>
-<div id="map"></div>
+<div id="loader"></div>
+<div id="map" style="display: none;"></div>

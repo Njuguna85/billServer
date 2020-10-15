@@ -70,7 +70,6 @@ const upload = async(req, res) => {
                 });
 
             }
-
         })
 
     } catch (err) {

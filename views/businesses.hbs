@@ -1,0 +1,91 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand&display=swap');
+
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    .container {
+        width: 100vw;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .businesses {
+        width: 40%;
+        background-color: turquoise;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .businesses-list {
+        height: 20%;
+        background-color: yellowgreen;
+        padding: 10px 0 0 15px;
+    }
+
+    .businesses-details {
+        height: 100%;
+        overflow: scroll;
+        background-color: white;
+        font-family: 'Quicksand', sans-serif;
+        padding: 0 10px !important;
+        margin: 0;
+        font-size: 1em;
+        line-height: 1em;
+    }
+
+    .businesses-details p,
+    .businesses-details h3,
+    .businesses-details figure,
+    .businesses-details h5 {
+        margin: 5px;
+    }
+
+    .businesses-details h3 {
+        text-align: center;
+        font-size: 1.2em;
+        text-decoration: underline;
+        text-transform: uppercase;
+    }
+     .businesses-details h2{
+        text-transform: uppercase;
+        text-align: center;
+        font-weight: bolder;
+    }
+    .businesses-details p,
+    .businesses-details li,
+    .businesses-details ol {
+        font-size: .8em;
+    }
+
+    #map {
+        width: 60%;
+        height: 100%;
+    }
+</style>
+<div class="container">
+    <div class="businesses">
+        <div class="businesses-list">
+            {{#if data}}
+            <form>
+                <label for="business-type">Select a bussiness type</label>
+                <select name="business-type" id="business-type">
+                    <option value="">Select A Business...</option>
+                    {{#each data as |business|}}
+                    <option value={{business.id}}>{{business.name}}</option>
+                    {{/each}}
+                </select>
+                <a class="btn check">Check</a>
+            </form>
+            {{/if}}
+        </div>
+        <div class="businesses-details"></div>
+    </div>
+    <div id="map"></div>
+</div>
+<script>
+    var bussinessesAPI = '{{bussinessesAPI}}'
+</script>

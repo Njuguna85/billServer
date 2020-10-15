@@ -10,6 +10,7 @@
     "author": "njuguna85",
     "license": "ISC",
     "dependencies": {
+        "axios": "^0.20.0",
         "bcrypt": "^5.0.0",
         "connect-session-sequelize": "^7.0.3",
         "dotenv": "^8.2.0",
@@ -20,6 +21,7 @@
         "joi": "^17.2.1",
         "morgan": "^1.10.0",
         "multer": "^1.4.2",
+        "nodemailer": "^6.4.13",
         "passport": "^0.4.1",
         "passport-google-oauth20": "^2.0.0",
         "passport-local": "^1.0.0",

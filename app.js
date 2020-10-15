@@ -12,13 +12,14 @@ const morgan = require('morgan');
 const index = require('./routes/index');
 require('./models/models');
 
-// use the json payload for body requests
-app.use(express.json());
 
 // since we are using form , we use urlenconded 
 // this will enable the values sent from the form 
 // to have a corresponding name of the input form element name
 app.use(express.urlencoded({ extended: false }));
+
+// use the json payload for body requests
+app.use(express.json());
 
 // use morgan to log request if in development mode
 if (process.env.NODE_ENV === 'development') {
@@ -53,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 // routes
 app.use('/auth', require('./routes/auth'))
 app.use('/', index)
+app.use('/roles', require('./routes/roles'))
 
 // set the access the route of billboards 
 app.use('/api/billboards', billboards)

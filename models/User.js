@@ -24,6 +24,10 @@ User.init({
     google_id: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+    role: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     }
 }, {
     sequelize,
