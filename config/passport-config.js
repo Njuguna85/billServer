@@ -9,7 +9,7 @@ function initialize(passport) {
     passport.use(new GoogleStatergy({
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: '/auth/google/callback'
+                callbackURL: 'https://gis.predictiveanalytics.co.ke/auth/google/callback'
             },
             // access the user details from the profile
             async(accessToken, refreshToken, profile, done) => {
