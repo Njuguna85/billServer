@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router();
 const ensureAuth = require('../middleware/auth')
-const { Billboard } = require('../models/Billboard');
 const nodemailer = require('nodemailer');
 const axios = require('axios')
+const logger = require('../controllers/logger')
 
 // @desc Main/Landing page
 // @route GET /
@@ -24,6 +24,7 @@ router.get('/dashboard', ensureAuth, async(req, res) => {
             apiKey: process.env.googleMapsAPIKey
         })
     } catch (err) {
+        logger.error(`${req}-${err}`)
         console.log(err);
     }
 })
@@ -66,7 +67,7 @@ router.get('/businesses', ensureAuth, async(req, res) => {
 
     } catch (err) {
         console.error(err);
-
+        logger.error(`${err}-${req}`)
         message = JSON.stringify({
             'message': 'Error in accessing businesses categories'
         })

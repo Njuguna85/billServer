@@ -1,12 +1,14 @@
 const { Billboard, valdateBillboard } = require('../models/Billboard');
 const XLSX = require('xlsx');
 const fs = require('fs');
+const logger = require('../controllers/logger')
 
 const expectedrows = ['billboard_id', 'route_name', 'scout_name', 'date', 'media_owner', 'select_medium', 'billboard_empty', 'customer_industry', 'customer_brand', 'site_lighting_illumination', 'zone', 'direction_from_cbd', 'size', 'orientation', 'site_run_up', 'condition', 'visibility', 'traffic', 'angle', 'photo', 'photo_long_range', 'height', 'lat', 'long', 'constituency', 'road_type'];
 
 const upload = async(req, res) => {
     try {
         if (req.file == undefined) {
+            logger.error(`${req.originalUrl}-undefined file`);
             return res.status(400).send('Please Upload an excel File');
         }
         let path = "./uploads/" + req.file.filename;
@@ -39,10 +41,12 @@ const upload = async(req, res) => {
 
                     if (error) {
                         console.error('Validation error', error);
+                        logger.error(`${req.method}-Error in the excel data ${req}`)
                         let message = JSON.stringify({
                             'Message': 'Error in the excel data',
                             'Error': error.details[0].message
                         });
+
                         return res.status(400).render('400', { message });
 
                     } else {
@@ -60,6 +64,7 @@ const upload = async(req, res) => {
                             })
                             .catch(err => {
                                 console.log('Billboard creation error', err);
+                                logger.error(`${req}-${err}`)
 
                                 message = JSON.stringify({
                                     'message': err || 'Some error occured while saving the records'
