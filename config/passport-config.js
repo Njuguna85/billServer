@@ -17,12 +17,13 @@ function initialize(passport) {
             // access the user details from the profile
             async(accessToken, refreshToken, profile, done) => {
                 const newUser = {
-                        google_id: profile.id,
-                        full_name: profile.displayName,
-                        image: profile.photos[0].value,
-                        email: profile.emails[0].value
-                    }
-                    // search for an existing user or create one
+                    google_id: profile.id,
+                    full_name: profile.displayName,
+                    image: profile.photos[0].value,
+                    email: profile.emails[0].value
+                }
+                console.log(profile.id, profile.displayName);
+                // search for an existing user or create one
                 try {
                     //  check if there is a user
                     let user = await User.findOne({ where: { google_id: profile.id } })
