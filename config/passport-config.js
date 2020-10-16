@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const localStrategy = require('passport-local').Strategy
 const GoogleStatergy = require('passport-google-oauth20').Strategy;
+const logger = require('../controllers/logger')
 
 function initialize(passport) {
     // first we tell passport what strategy we 
@@ -32,6 +33,7 @@ function initialize(passport) {
                         done(null, user)
                     }
                 } catch (err) {
+                    logger.error(`Creating or Finding a user---${err}`)
                     done(null, false, err)
                 }
             }
