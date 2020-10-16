@@ -9,7 +9,7 @@ User.init({
         primaryKey: true,
         autoIncrement: true,
         unique: true,
-        allowNull: false
+        allowNull: true
     },
     full_name: {
         type: DataTypes.STRING,
