@@ -1,3 +1,5 @@
+{"message":"Error: getaddrinfo EAI_AGAIN www.bi.predictiveanalytics.co.ke-[object Object]","level":"error","service":"user-service"}
+{"message":"Error: getaddrinfo EAI_AGAIN www.bi.predictiveanalytics.co.ke-[object Object]","level":"error","service":"user-service"}
 {"message":"POST-Error in the excel data [object Object]","level":"error","service":"user-service"}
 {"message":"POST-Error in the excel data [object Object]","level":"error","service":"user-service"}
 {"message":"POST-Error in the excel data [object Object]","level":"error","service":"user-service"}
@@ -21,5 +23,8 @@
 {"message":"POST-Error in the excel data [object Object]","level":"error","service":"user-service"}
 {"message":"POST-Error in the excel data [object Object]","level":"error","service":"user-service"}
 {"message":"POST-Error in the excel data [object Object]","level":"error","service":"user-service"}
-{"message":"Creating or Finding a user---SequelizeForeignKeyConstraintError: insert or update on table \"user\" violates foreign key constraint \"user_role_fkey\"","level":"error","service":"user-service"}
-{"message":"Creating or Finding a user---SequelizeForeignKeyConstraintError: insert or update on table \"user\" violates foreign key constraint \"user_role_fkey\"","level":"error","service":"user-service"}
+{"message":"Error: socket hang up-[object Object]","level":"error","service":"user-service"}
+{"message":"Error: getaddrinfo EAI_AGAIN www.bi.predictiveanalytics.co.ke-[object Object]","level":"error","service":"user-service"}
+{"message":"Error: getaddrinfo EAI_AGAIN www.bi.predictiveanalytics.co.ke-[object Object]","level":"error","service":"user-service"}
+{"message":"Error: getaddrinfo EAI_AGAIN www.bi.predictiveanalytics.co.ke-[object Object]","level":"error","service":"user-service"}
+{"message":"Error: getaddrinfo EAI_AGAIN www.bi.predictiveanalytics.co.ke-[object Object]","level":"error","service":"user-service"}

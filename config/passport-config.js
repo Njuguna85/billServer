@@ -22,7 +22,7 @@ function initialize(passport) {
                     image: profile.photos[0].value,
                     email: profile.emails[0].value
                 }
-                console.log(profile.id, profile.displayName);
+
                 // search for an existing user or create one
                 try {
                     //  check if there is a user

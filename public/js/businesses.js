@@ -85,7 +85,11 @@ function initMap() {
     map.controls[google.maps.ControlPosition.LEFT_CENTER].push(infoTab);
 
     var input = document.getElementById('searchInput');
-    var autocomplete = new google.maps.places.Autocomplete(input);
+    var autocomplete = new google.maps.places.Autocomplete(input, { bounds: defaultBounds });
+    var defaultBounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(-4.47166, 33.97559),
+        new google.maps.LatLng(3.93726, 41.85688));
+
     autocomplete.bindTo('bounds', map);
 
     var businessesListCont = document.querySelector('.businesses-list');
@@ -877,4 +881,207 @@ function loader() {
     const map = document.getElementById("map")
     if (loader) loader.style.display = "none";
     if (map) map.style.display = "block";
+}
+
+var businessesDiv = document.querySelector('.businesses-list')
+const modalContainer = document.querySelector('.businesses-details');
+
+addBusinessListHTML(businessesList);
+addPaginators(paginators);
+
+function addBusinessListHTML(businessesList) {
+    // where to place
+    const businessesListDiv = document.querySelector('.businesses-list-content');
+    // clear the container first
+    businessesListDiv.innerHTML = '';
+    // the bag to store the html tags
+    businessesListHTML = '';
+    businessesList.forEach(bus => {
+        // append to the bag
+        businessesListHTML += `
+                <a class="btn bus" data-id="${bus.id}">${bus.name}</a>
+            `;
+    });
+    // set the innerhtml with the bag
+    businessesListDiv.innerHTML = businessesListHTML;
+}
+
+function addPaginators(paginators) {
+    // receive an object 
+    // where to be appended
+    const pagDiv = document.querySelector('.businesses-list-paginators');
+    // clear it
+    pagDiv.innerHTML = '';
+    // the bag
+    let pagHTML = '';
+    if (paginators.prev_page_url) pagHTML += `<button data-url='${paginators.prev_page_url}' class="pag">Previous</button>`;
+    if (paginators.current_page) pagHTML += `<button>${paginators.current_page}</button>`;
+    if (paginators.next_page_url) pagHTML += `<button data-url='${paginators.next_page_url}' class="pag">Next</button>`;
+
+    pagDiv.innerHTML = pagHTML;
+}
+
+businessesDiv.addEventListener('click', async(e) => {
+    if (e.target.matches('.bus')) addBusinessDetails(e);
+    if (e.target.matches('.pag')) fetchBusinessLists(e);
+})
+
+window.addEventListener('click', clickOutside)
+
+async function fetchBusinessLists(e) {
+    url = e.target.dataset.url;
+    const res = await fetch(url);
+
+    if (res.ok) {
+        let resData = await res.json();
+
+        const { next_page_url, prev_page_url, current_page, data } = resData;
+        const paginatorBtns = { next_page_url, prev_page_url, current_page };
+        // add the business categories buttons again
+        addBusinessListHTML(resData.data)
+            // add the paginators again
+        addPaginators(paginatorBtns);
+    }
+}
+
+async function addBusinessDetails(e) {
+
+    selectedBus = e.target.dataset.id;
+
+    const res = await fetch(`${businessesAPI}=` + selectedBus)
+    console.log(res);
+    if (res.ok) {
+        let jsonData = await res.json()
+        jsonData = jsonData.data;
+
+        if (jsonData.length > 0) {
+
+            modalContainer.innerHTML = '';
+
+            jsonData.forEach(data => {
+                        htmlString =
+                            `
+                    <div class="sticky">
+                        <a href="#" class="btn" id="shop">Setup Shop</a>
+                        <div>
+                            <a href="#" class="btn" id="bookmark">Bookmark</a>
+                            <button id="closeModal">&times;</button>
+                        </div>
+                    </div>
+                        <div class="modal"> 
+                        <h2>${data.name}</h2>
+                    <div id='overview'>
+                        <h3>Overview</h3>
+                        ${data.overview}
+                    </div>
+                    <div id='facts'>
+                        <h3>Facts</h3>
+                        ${data.facts ? data.facts : '<p>No info on Facts established yet.</p>'}
+                     </div> 
+                    <div id='competitors'>  
+                        <h3>Competitors</h3>
+                        ${data.competition ?
+                        `<div id="competition">${data.competition.details}</div>`
+                        : '<p>No Info on Competition established yet</p>'}
+                    </div>
+                    <div id='behaviour'>
+                        <h3>Consumer Behaviour</h3>
+                        ${data.behaviour ?
+                        `<div id="behaviour">${data.behaviour.details}</div>`
+                        : '<p>No Info on Consumer Behaviour established yet</p>'}
+                    </div>
+                    <div id='licences'>    
+                        <h3>Licenses</h3>
+                        ${data.licenses ?
+                        data.licenses.map(license => {
+                            return `<div id='license'>
+                                <h5>License Name: ${license.name}</h5>
+                                <h5>Fee: ${license.fee}</h5>
+                                ${license.description}                            
+                            </div>`
+                        }).join('') : '<p>No Info on Licenses</p>'}
+                    </div>
+                    <div id='man_powers'>
+                        <h3>Man Power</h3>
+                        ${data.man_powers ?
+                        data.man_power.map(man => {
+                            return `<div id='man_power'
+                                ${man.details} 
+                            </div>`
+                        })
+                        : '<p>No Info on Man Power</p>'}
+                    </div>
+                    <div id='stocks'>
+                        <h3>Stock</h3>
+                        ${data.stocks ?
+                        data.stocks.map(stock => {
+                            return ` <div id='stock'>
+                                    <h5>${stock.name}: ${stock.price}</h5>
+                                    ${stock.description} 
+                                </div>`;
+                        }).join('') : '<p>No Info on Man Power</p>'}
+                    </div>
+                    <div id='suppliers'>
+                        <h3>Supplier</h3>
+                        ${data.suppliers ?
+                        data.suppliers.map(supplier => {
+                            return ` <div id='supplier'>
+                            <h5>${supplier.title}</h5>
+                                ${supplier.details}
+                                </div>
+                                `;
+                        }).join('') : '<p>No Info on Suppliers</p>'}
+                    </div>
+                    <h3>Revenue</h3>
+                        ${data.revenue ?
+                        `<div id="revenue">${data.revenue.details}</div>`
+                        : '<p>No info on Revenues established yet.</p>'}
+                    <h3> Others</h3 >
+                        ${data.others ? data.others : '<p>No More information.</p>'}
+                        </div>
+                `;
+
+                modalContainer.insertAdjacentHTML('beforeend', htmlString);
+
+            });
+            modalContainer.style.display = 'block';
+
+        } else {
+            console.log('No Data')
+        }
+    }
+}
+modalContainer.addEventListener('click', e => {
+    if (e.target.matches('#closeModal')) {
+        modalContainer.style.display = 'none';
+    }
+    if (e.target.matches('#shop')) {
+        e.preventDefault()
+        // first drop the modal
+        // then bring up a search box for places 
+        // focus to it
+        modalContainer.style.display = 'none';
+
+    }
+    if (e.target.matches('#bookmark')) {
+        console.log('Haweaeawe')
+    }
+})
+/*
+    const closeBtn = document.querySelector('#closeModal');
+    const shop = document.querySelector('.shop')
+ 
+    closeBtn.addEventListener('click', e => {
+        console.log('asdbjashbdbsa')
+        modalContainer.style.display = 'none';
+    });
+ 
+    shop.addEventListener('click', e => {
+        console.log('Hawau')
+    })
+    */
+function clickOutside(e) {
+    if (e.target == modalContainer) {
+        modalContainer.style.display = 'none';
+    }
 }

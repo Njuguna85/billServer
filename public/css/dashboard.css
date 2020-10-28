@@ -191,23 +191,6 @@ body {
     }
 }
 
-.closeBtn {
-    color: #cccccc;
-    position: absolute;
-    top: 0;
-    right: 5px;
-    font-size: 30px;
-    transition: all .2s;
-}
-
-.closeBtn:hover,
-.closeBtn:focus {
-    color: rgb(136, 52, 52);
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 35px;
-}
-
 .description__open {
     font-size: 16px;
 }
@@ -252,7 +235,7 @@ p {
 
 #legend {
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    background: #fffeee;
+    background: #FFF176;
     color: #050303;
     padding: 5px;
     font-weight: bold;
