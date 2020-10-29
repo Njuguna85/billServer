@@ -218,7 +218,7 @@
     var directionsRenderer;
     var mapContainer = document.getElementById("map");
     // where a user wants to setup a business 
-    var businessPlaceLocation, autocomplete, placesService, businessType;
+    var businessPlaceLocation, autocomplete, placesService, businessType, businessID;
     var businessMarkers = [];
 
     let legend = document.createElement('div');
@@ -280,7 +280,7 @@
             mapTypeControl: true,
             mapTypeControlOptions: {
                 style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-                position: google.maps.ControlPosition.BOTTOM_CENTER
+                position: google.maps.ControlPosition.LEFT_CENTER
             },
             zoomControl: true,
             zoomControlOptions: {
@@ -396,6 +396,8 @@
 
         addBusinessListHTML(businessesList);
         addPaginators(paginators);
+
+        fetchMyBusinesses();
 
         for (const [key, value] of Object.entries(data)) {
             if (commD.includes(key)) {
@@ -752,7 +754,7 @@
 
         const markerCluster = new MarkerClusterer(
             map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-        )
+        );
         div = document.createElement('div');
         div.innerHTML = `<img src='images/atm.png' alt="atm" />ATM<input id="atmCheck" type="checkbox">`;
         poiLayersAccordion.appendChild(div);
@@ -1091,6 +1093,8 @@
         if (e.target.matches('.bus')) addBusinessDetails(e);
 
         if (e.target.matches('.pag')) fetchBusinessLists(e);
+
+        if (e.target.matches('#saveBusiness')) saveBusiness(e);
     });
 
     function calcRoute(tracker) {
@@ -1166,8 +1170,9 @@
         if (paginators.prev_page_url) pagHTML += `<button data-url='${paginators.prev_page_url}' class="pag">Previous</button>`;
         if (paginators.current_page) pagHTML += `<button>${paginators.current_page}</button>`;
         if (paginators.next_page_url) pagHTML += `<button data-url='${paginators.next_page_url}' class="pag">Next</button>`;
+        pagHTML += ` <button id="saveBusiness" class='nav-link'>Save Business</button>`;
 
-        pagDiv.innerHTML = pagHTML;
+        pagDiv.insertAdjacentHTML('afterbegin', pagHTML);
     }
 
     window.addEventListener('click', clickOutside)
@@ -1198,10 +1203,10 @@
         // get the busnessname and assign it to the global var
         e.target.classList.add('active');
 
-        selectedBusID = e.target.dataset.id;
+        businessID = e.target.dataset.id;
         businessType = e.target.dataset.name;
 
-        const res = await fetch(`${businessesAPI}=` + selectedBusID)
+        const res = await fetch(`${businessesAPI}=` + businessID)
 
         if (res.ok) {
             let jsonData = await res.json()
@@ -1217,7 +1222,6 @@
                     <div class="sticky">
                         <a href="#" class="btn" id="shop">Setup Shop</a>
                         <div>
-                            <a href="#" class="btn" id="bookmark">Bookmark</a>
                             <button id="closeModal">&times;</button>
                         </div>
                     </div>
@@ -1317,23 +1321,7 @@
             modalContainer.style.display = 'none';
 
         }
-        if (e.target.matches('#bookmark')) {
-            console.log('Haweaeawe')
-        }
     })
-    /*
-        const closeBtn = document.querySelector('#closeModal');
-        const shop = document.querySelector('.shop')
-    
-        closeBtn.addEventListener('click', e => {
-            console.log('asdbjashbdbsa')
-            modalContainer.style.display = 'none';
-        });
-    
-        shop.addEventListener('click', e => {
-            console.log('Hawau')
-        })
-    */
 
     function clickOutside(e) {
         if (e.target == modalContainer) {
@@ -1398,7 +1386,7 @@
         getBusinesses(businessPlaceLocation);
     }
 
-    function getBusinesses(locat) {
+    async function getBusinesses(locat) {
         // check if the user has selected a busness
         if (businessType) {
             //close the current infowindow
@@ -1414,6 +1402,7 @@
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
                     // remove markers
                     clearMarkers();
+                    map.setZoom(13);
 
                     // Create a marker for each business found, and
                     // assign a letter of the alphabetic to each marker icon.
@@ -1487,4 +1476,101 @@
         };
     }
 
+    function saveBusiness(e) {
+
+        if (businessType === undefined) {
+            infoWindow.setContent('Please select a business in the list above, select the location again to save the business !')
+            infoWindow.open(map);
+        }
+
+        if (businessPlaceLocation === undefined) {
+            infoWindow.setContent('Please select a location to save!')
+            infoWindow.open(map);
+        }
+
+
+        if (businessType !== undefined && businessPlaceLocation !== undefined) {
+
+            latitude = businessPlaceLocation.toJSON().lat;
+            longitude = businessPlaceLocation.toJSON().lng;
+
+            const formData = {
+                "business_id": parseInt(businessID),
+                "name": businessType,
+                "latitude": latitude,
+                "longitude": longitude
+            };
+
+            fetch('/api/businesses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', },
+                body: JSON.stringify(formData)
+            })
+                .then(res => { res.text() })
+                .then(data => {
+                    console.log(data);
+                    infoWindow.setContent('Business saved succesfully!')
+                    infoWindow.open(map);
+                })
+                .catch(err => {
+                    console.log(err)
+                    infoWindow.setContent('Error in saving business!')
+                    infoWindow.open(map);
+                });
+
+        }
+    }
+
+    function fetchMyBusinesses() {
+        fetch('/api/businesses/all')
+            .then(res => res.json())
+            .then(data => {
+                console.log(data)
+                if (data) {
+                    const markers = data.map(bus => {
+                        let latlng = new google.maps.LatLng(bus.latitude, bus.longitude);
+                        let contentString = `<p>Business Name: ${bus.name}</p>`;
+                        let marker = new google.maps.Marker({
+                            position: latlng,
+                            icon: { url: `images/newBusiness1.png`, scaledSize: new google.maps.Size(20, 20) },
+                            optimized: false,
+                        });
+                        google.maps.event.addListener(marker, 'click', ((marker, bus) => {
+                            return () => {
+                                infoWindow.setContent(contentString);
+                                infoWindow.open(map, marker);
+                            }
+                        })(marker, bus));
+                        return marker
+                    });
+
+                    const markerCluster = new MarkerClusterer(
+                        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+                    );
+
+                    div = document.createElement('div');
+                    div.innerHTML = `<img src='images/newBusiness1.png' alt="business" />My Businesses<input id="busCheck" type="checkbox">`;
+                    essentialLayers.appendChild(div);
+
+                    legend.addEventListener('change', e => {
+                        if (e.target.matches('#busCheck')) {
+                            cb = document.getElementById('busCheck')
+                            // if on
+                            if (cb.checked) {
+                                markerCluster.addMarkers(markers)
+                            }
+                            if (!cb.checked) {
+                                // if off
+                                markerCluster.removeMarkers(markers)
+                            }
+                        }
+                    })
+                } else { return }
+            })
+            .catch(err => {
+                console.log(err)
+                infoWindow.setContent('Could not your businesses!')
+                infoWindow.open(map);
+            })
+    }
 </script>

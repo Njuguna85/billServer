@@ -13,14 +13,10 @@ const index = require('./routes/index');
 require('./models/models');
 const logger = require('./controllers/logger');
 
-// since we are using form , we use urlenconded 
-// this will enable the values sent from the form 
-// to have a corresponding name of the input form element name
-app.use(express.urlencoded({ extended: false }));
-
 // use the json payload for body requests
 app.use(express.json());
 
+app.use(express.urlencoded({ extended: true }));
 // use morgan to log request
 app.use(morgan('combined', { stream: logger.stream }));
 
@@ -57,6 +53,8 @@ app.use('/roles', require('./routes/roles'))
 
 // set the access the route of billboards 
 app.use('/api/billboards', billboards)
+
+app.use('/api/businesses', require('./routes/business'));
 
 const port = process.env.PORT || 5000;
 
