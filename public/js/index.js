@@ -450,17 +450,17 @@ function addBillboards(data) {
     div.innerHTML = `<img src='images/marker.png' alt='billboard'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
     essentialLayers.appendChild(div);
     legend.addEventListener('change', e => {
-        if (e.target.matches('#billboardChecked')) {
-            cb = document.getElementById('billboardChecked')
-                // if on
-            if (cb.checked) {
-                markerCluster.addMarkers(markers)
-            }
-            if (!cb.checked) {
-                // if off
-                markerCluster.removeMarkers(markers)
-            }
+
+        cb = document.getElementById('billboardChecked')
+            // if on
+        if (cb.checked) {
+            markerCluster.addMarkers(markers)
         }
+        if (!cb.checked) {
+            // if off
+            markerCluster.removeMarkers(markers)
+        }
+
     })
 
 }

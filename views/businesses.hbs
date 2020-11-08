@@ -679,7 +679,7 @@
     }
 
     async function addBillboards(data) {
-
+        console.log(data)
         const markers = data.map(el => {
             let latlng = new google.maps.LatLng(el.lat, el.long)
             let contentString =
