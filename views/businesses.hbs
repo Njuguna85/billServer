@@ -18,8 +18,7 @@
 
     .businesses-list {
         height: max-content;
-        width: 80%;
-        background-color: #fffeee;
+        width: 95vw;
         padding: 10px 0 0 15px;
         display: flex;
         flex-direction: column;
@@ -339,7 +338,7 @@
 
         // overlay businesslist div on map
         var businessesListCont = document.querySelector('.businesses-list');
-        map.controls[google.maps.ControlPosition.TOP_CENTER].push(businessesListCont);
+        //map.controls[google.maps.ControlPosition.TOP_CENTER].push(businessesListCont);
 
         fetchMobileUploads();
         fetchData();
@@ -362,13 +361,15 @@
 
     async function fetchMobileUploads() {
         // we need to make a request for mobile uploads within 
-        // the past one week from today(2 dates)
+        // the last one hour
         const today = new Date();
-        const oneWkAgo = today.setDate(today.getDate() - 7);
-        const oneWkAgoDate = new Date(oneWkAgo).toLocaleDateString('en-GB').split('/').join('-');
+        let lastHr = (today.getHours() - 1) + ':00';
+        let thisHr = today.getHours() + ':00';
         const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
-        const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${oneWkAgoDate}&end=${todaysDate}`;
-        let response = await fetch(url, {
+
+        const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todaysDate} ${lastHr}&end=${todaysDate} ${thisHr}`;
+
+        let response = await fetch(newUrl, {
             method: "GET",
             headers: {
                 'Access-Control-Allow-Methods': 'GET',
@@ -634,12 +635,14 @@
     }
 
     function add(key, value) {
+        const bounds = new google.maps.LatLngBounds();
         // create a markers array 
         const markers = value.map(el => {
             // the x and y of the marker
             latitude = el.geojson.coordinates[1];
             longitude = el.geojson.coordinates[0];
             let latlng = new google.maps.LatLng(latitude, longitude);
+            bounds.extend(latlng);
             iconUrl = `./images/${key}.png`
             let contentString = '<p><strong>' + el.name + '<strong></p>' +
                 '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
@@ -660,7 +663,7 @@
             return marker
         });
         const markerCluster = new MarkerClusterer(
-            map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+            map, [], { imagePath: 'images/m' }
         );
         div = document.createElement('div');
         div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
@@ -670,6 +673,8 @@
             // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
+                map.fitBounds(bounds);
+                map.panToBounds(bounds);
             }
             if (!cb.checked) {
                 // if off
@@ -679,9 +684,10 @@
     }
 
     async function addBillboards(data) {
-        console.log(data)
         const markers = data.map(el => {
             let latlng = new google.maps.LatLng(el.lat, el.long)
+            bounds.extend(latlng);
+
             let contentString =
                 '<div class ="infoWindow">' +
                 '<div>' + 'Name: <b>' + parseData(el.billboard_id) + '</b></div>' +
@@ -709,7 +715,7 @@
             return marker
         });
         const markerCluster = new MarkerClusterer(
-            map, markers, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+            map, markers, { imagePath: 'images/m' }
         )
         div = document.createElement('div');
         div.innerHTML = `<img src='images/marker.png' alt='billboard'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
@@ -720,6 +726,8 @@
                 // if on
                 if (cb.checked) {
                     markerCluster.addMarkers(markers)
+                    map.fitBounds(bounds);
+                    map.panToBounds(bounds);
                 }
                 if (!cb.checked) {
                     // if off
@@ -730,6 +738,7 @@
     }
 
     function addAtm(data) {
+        const bounds = new google.maps.LatLngBounds();
         const markers = data.map(el => {
             latitude = el.geojson.coordinates[1];
             longitude = el.geojson.coordinates[0]
@@ -753,7 +762,7 @@
         });
 
         const markerCluster = new MarkerClusterer(
-            map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+            map, [], { imagePath: 'images/m' }
         );
         div = document.createElement('div');
         div.innerHTML = `<img src='images/atm.png' alt="atm" />ATM<input id="atmCheck" type="checkbox">`;
@@ -764,6 +773,8 @@
                 // if on
                 if (cb.checked) {
                     markerCluster.addMarkers(markers)
+                    map.fitBounds(bounds);
+                    map.panToBounds(bounds);
                 }
                 if (!cb.checked) {
                     // if off
@@ -904,7 +915,7 @@
         });
         mobileMarkersDates.dates = uploadDates;
         const markerCluster = new MarkerClusterer(
-            map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
+            map, [], { imagePath: 'images/m' }
         )
         div = document.createElement('div');
         div.innerHTML = `<img src='images/place.png'/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
@@ -1090,11 +1101,7 @@
             directionsPanel.parentElement.removeChild(directionsPanel);
         }
 
-        if (e.target.matches('.bus')) addBusinessDetails(e);
 
-        if (e.target.matches('.pag')) fetchBusinessLists(e);
-
-        if (e.target.matches('#saveBusiness')) saveBusiness(e);
     });
 
     function calcRoute(tracker) {
@@ -1141,7 +1148,14 @@
         if (businessesDiv) businessesDiv.style.display = "flex"
 
     }
+    businessesDiv.addEventListener('click', e => {
 
+        if (e.target.matches('.bus')) addBusinessDetails(e);
+
+        if (e.target.matches('.pag')) fetchBusinessLists(e);
+
+        if (e.target.matches('#saveBusiness')) saveBusiness(e);
+    })
     function addBusinessListHTML(businessesList) {
         // where to place
         const businessesListDiv = document.querySelector('.businesses-list-content');
@@ -1526,7 +1540,7 @@
             .then(res => res.json())
             .then(data => {
                 console.log(data)
-                if (data) {
+                if (data.length >= 1) {
                     const markers = data.map(bus => {
                         let latlng = new google.maps.LatLng(bus.latitude, bus.longitude);
                         let contentString = `<p>Business Name: ${bus.name}</p>`;

@@ -118,11 +118,13 @@ async function fetchMobileUploads() {
     // we need to make a request for mobile uploads within 
     // the past one week from today(2 dates)
     const today = new Date();
-    const oneWkAgo = today.setDate(today.getDate() - 7);
-    const oneWkAgoDate = new Date(oneWkAgo).toLocaleDateString('en-GB').split('/').join('-');
+    let lastHr = (today.getHours() - 1) + ':00';
+    let thisHr = today.getHours() + ':00';
     const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
-    const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${oneWkAgoDate}&end=${todaysDate}`;
-    let response = await fetch(url, {
+
+    const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todaysDate} ${lastHr}&end=${todaysDate} ${thisHr}`;
+    
+    let response = await fetch(newUrl, {
         method: "GET",
         headers: {
             'Access-Control-Allow-Methods': 'GET',
@@ -132,6 +134,7 @@ async function fetchMobileUploads() {
     });
     if (response.ok) {
         mobileData = await response.json();
+        console.log(mobileData)
         getmobileMarkers(mobileData.data);
     } else {
         alert('Something went wrong while fetching Mobile Uploads. Error: ' + response.status);
