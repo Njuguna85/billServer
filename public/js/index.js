@@ -152,12 +152,12 @@ async function fetchMobileUploads() {
   const today = new Date();
   let lastHr = today.getHours() - 1 + ":00:00";
   let thisHr = today.getHours() + ":00:00";
-  const todaysDate = new Date()
-    .toLocaleDateString("en-GB")
-    .split("/")
-    .join("-");
 
-  const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todaysDate} ${lastHr}&end=${todaysDate} ${thisHr}`;
+  const yester = today.setDate(today.getDate() - 1);
+  const yesterDate = new Date(yester).toLocaleDateString('en-US').split('/').join('-')
+  const todaysDate = new Date().toLocaleDateString('en-US').split("/").join("-");
+ 
+  const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
   
   let response = await fetch(newUrl, {
     method: "GET",
@@ -170,7 +170,7 @@ async function fetchMobileUploads() {
   if (response.ok) {
     mobileData = await response.json();
     getmobileMarkers(mobileData.data);
-    
+
   } else {
     alert(
       "Something went wrong while fetching Mobile Uploads. Error: " +
@@ -193,6 +193,7 @@ function addOverlays(data) {
     }
   }
   setTimeout(loader, 100);
+  // addAromakare();
 }
 
 const getTiles = (lyr) => {

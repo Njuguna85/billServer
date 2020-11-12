@@ -363,12 +363,15 @@
         // we need to make a request for mobile uploads within 
         // the last one hour
         const today = new Date();
-        let lastHr = (today.getHours() - 1) + ':00';
-        let thisHr = today.getHours() + ':00';
-        const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
+        let lastHr = today.getHours() - 1 + ":00:00";
+        let thisHr = today.getHours() + ":00:00";
 
-        const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todaysDate} ${lastHr}&end=${todaysDate} ${thisHr}`;
+        const yester = today.setDate(today.getDate() - 1);
+        const yesterDate = new Date(yester).toLocaleDateString('en-US').split('/').join('-')
+        const todaysDate = new Date().toLocaleDateString('en-US').split("/").join("-");
 
+        const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
+        
         let response = await fetch(newUrl, {
             method: "GET",
             headers: {

@@ -114,11 +114,14 @@ async function fetchMobileUploads() {
     // we need to make a request for mobile uploads within 
     // the past one week from today(2 dates)
     const today = new Date();
-    let lastHr = (today.getHours() - 1) + ':00';
-    let thisHr = today.getHours() + ':00';
-    const todaysDate = new Date().toLocaleDateString('en-GB').split('/').join('-');
+    let lastHr = today.getHours() - 1 + ":00:00";
+    let thisHr = today.getHours() + ":00:00";
 
-    const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todaysDate} ${lastHr}&end=${todaysDate} ${thisHr}`;
+    const yester = today.setDate(today.getDate() - 1);
+    const yesterDate = new Date(yester).toLocaleDateString('en-US').split('/').join('-')
+    const todaysDate = new Date().toLocaleDateString('en-US').split("/").join("-");
+
+    const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
     
     let response = await fetch(newUrl, {
         method: "GET",
@@ -288,7 +291,7 @@ function nairobiSublWMS() {
     legend.addEventListener('change', e => {
         if (e.target.matches('#sublCheck')) {
             cb = document.getElementById('sublCheck')
-                // if on
+            // if on
             if (cb.checked) {
                 map.overlayMapTypes.setAt(0, nairobisublocations);
                 key();
@@ -342,7 +345,7 @@ function addNairobiUberSpeeds() {
     legend.addEventListener('change', e => {
         if (e.target.matches('#uberCheck')) {
             cb = document.getElementById('uberCheck')
-                // if on
+            // if on
             if (cb.checked) {
                 map.overlayMapTypes.setAt(3, uberspeeds);
                 key();
@@ -366,7 +369,7 @@ function addTrafficLayer() {
     legend.addEventListener('change', e => {
         if (e.target.matches('#trafficChecked')) {
             cb = document.getElementById(`trafficChecked`)
-                // if on
+            // if on
             if (cb.checked) {
                 trafficLayer.setMap(map);
             }
@@ -412,7 +415,7 @@ function add(key, value) {
     poiLayersAccordion.appendChild(div);
     legend.addEventListener('change', e => {
         cb = document.getElementById(`${key}Checked`)
-            // if on
+        // if on
         if (cb.checked) {
             markerCluster.addMarkers(markers)
         }
@@ -462,7 +465,7 @@ async function addBillboards(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#billboardChecked')) {
             cb = document.getElementById('billboardChecked')
-                // if on
+            // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -506,7 +509,7 @@ function addAtm(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#atmCheck')) {
             cb = document.getElementById('atmCheck')
-                // if on
+            // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -552,7 +555,7 @@ function addNssf(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#nssfChecked')) {
             cb = document.getElementById('nssfChecked')
-                // if on
+            // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -599,7 +602,7 @@ function addMetalWorks(data) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#hardwareChecked')) {
             cb = document.getElementById('hardwareChecked')
-                // if on
+            // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -657,7 +660,7 @@ function getmobileMarkers(deliveriesData) {
     legend.addEventListener('change', e => {
         if (e.target.matches('#mobileCheck')) {
             cb = document.getElementById('mobileCheck')
-                // if on
+            // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
             }
@@ -709,7 +712,7 @@ function addugPopProj() {
     legend.addEventListener('change', e => {
         if (e.target.matches('#ugPopProjCheck')) {
             cb = document.getElementById('ugPopProjCheck')
-                // if on
+            // if on
             if (cb.checked) {
                 map.overlayMapTypes.setAt(1, ugPopProj);
                 key();
@@ -717,7 +720,7 @@ function addugPopProj() {
             if (!cb.checked) {
                 // if off
                 map.overlayMapTypes.removeAt(1)
-                    //   
+                //   
                 infoTab.querySelector('.info').innerHTML = '';
             }
         }
@@ -762,7 +765,7 @@ function addGhanaPopulation() {
     legend.addEventListener('change', e => {
         if (e.target.matches('#ghCheck')) {
             cb = document.getElementById('ghCheck')
-                // if on
+            // if on
             if (cb.checked) {
                 map.overlayMapTypes.setAt(2, ghanaDist);
                 key();
@@ -861,7 +864,7 @@ function calcRoute(tracker) {
             optimizeWaypoints: true,
             travelMode: 'DRIVING'
         };
-        directionsService.route(request, function(response, status) {
+        directionsService.route(request, function (response, status) {
             if (status == 'OK') {
                 directionsRenderer.setDirections(response);
                 directionsRenderer.setPanel(div);
