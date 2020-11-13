@@ -117,13 +117,17 @@ async function fetchMobileUploads() {
     let lastHr = today.getHours() - 1 + ":00:00";
     let thisHr = today.getHours() + ":00:00";
 
-    const yester = today.setDate(today.getDate() - 1);
-    const yesterDate = new Date(yester).toLocaleDateString('en-US').split('/').join('-')
+    var todayDate = new Date().toISOString().slice(0, 10);
+    var yesDate = today.setDate(today.getDate() - 1);
+    const yesterDate = new Date(yesDate).toISOString().slice(0, 10);
+
+    // const yester = today.setDate(today.getDate() - 1);
+    // const yesterDate = new Date(yester).toLocaleDateString('en-US').split('/').join('-')
     const todaysDate = new Date().toLocaleDateString('en-US').split("/").join("-");
 
-    const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
-    
-    let response = await fetch(newUrl, {
+    const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todayDate}`;
+
+    let response = await fetch(url, {
         method: "GET",
         headers: {
             'Access-Control-Allow-Methods': 'GET',

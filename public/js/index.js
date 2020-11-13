@@ -163,8 +163,8 @@ async function fetchMobileUploads() {
   
   const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todayDate}`;
 
-  const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
-  console.log(url);
+  // const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
+  // console.log(url);
   let response = await fetch(url, {
     method: "GET",
     headers: {
