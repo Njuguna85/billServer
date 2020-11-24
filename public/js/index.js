@@ -192,7 +192,7 @@ function addOverlays(data) {
     }
   }
   setTimeout(loader, 100);
-  addAromakare();
+  // addAromakare();
 }
 
 const getTiles = (lyr) => {
@@ -439,37 +439,7 @@ function addTrafficLayer() {
   });
 }
 function addAromakare() {
-  data = [
-    { 'latitude': -0.098448, 'longitude': 34.752505, 'name': 'Ngegeways enterprises' },
-    { 'latitude': -1.146621, 'longitude': 36.960354, 'name': 'Visha Beauty' },
-    { 'latitude': 1.259872, 'longitude': 35.098961, 'name': 'Jirreh Beauty & Cosmetics' },
-    { 'latitude': -1.035376, 'longitude': 37.076715, 'name': 'Boston Cosmetics' },
-    { 'latitude': -0.285305, 'longitude': 36.073529, 'name': 'East Africa cosmetics' },
-    { 'latitude': -0.975436, 'longitude': 37.604000, 'name': 'Suzzy starlight salon' },
-    { 'latitude': -3.214486, 'longitude': 40.115525, 'name': 'Kyasuleni cosmetics' },
-    { 'latitude': -0.423632, 'longitude': 36.953541, 'name': 'Sawa Sawa Cosmetics' },
-    { 'latitude': 0.559708, 'longitude': 34.560841, 'name': 'Bungles Beauty' },
-    { 'latitude': -1.429003, 'longitude': 36.685849, 'name': 'Sunshine Beauty' },
-    { 'latitude': -3.393657, 'longitude': 37.673599, 'name': 'Joy Beauty Shop' },
-    { 'latitude': -1.280645, 'longitude': 36.963532, 'name': 'Masccarah Cosmetics' },
-    { 'latitude': -1.289929, 'longitude': 36.744615, 'name': 'Ideala Enterprises' },
-    { 'latitude': 0.515176, 'longitude': 35.273740, 'name': 'H.M Eldo Varieties' },
-    { 'latitude': 0.335238, 'longitude': 34.488517, 'name': 'Mumias Beauty Centre' },
-    { 'latitude': -1.780010, 'longitude': 37.627130, 'name': 'Patkam Enterprises' },
-    { 'latitude': -0.934136, 'longitude': 38.058724, 'name': 'Royal Beauty and cosmetics' },
-    { 'latitude': -1.282149, 'longitude': 36.825728, 'name': 'Maxim Beauty' },
-    { 'latitude': -1.147569, 'longitude': 37.547374, 'name': 'Grajos cosmetics' },
-    { 'latitude': -0.098859, 'longitude': 34.752063, 'name': 'GrammarJohn investments' },
-    { 'latitude': -1.264439, 'longitude': 36.907984, 'name': 'Asha & Arya Beauty Centre ' },
-    { 'latitude': -0.538191, 'longitude': 37.453862, 'name': 'Besco cosmetics' },
-    { 'latitude': -0.720135, 'longitude': 37.159467, 'name': 'Starbell Beauty Shop' },
-    { 'latitude': 0.518929, 'longitude': 35.271494, 'name': 'Hasmuk Dohia & Sons' },
-    { 'latitude': 0.045558, 'longitude': 37.653659, 'name': 'Milan R Shah ' },
-    { 'latitude': -4.058182, 'longitude': 39.673990, 'name': 'Super Cosmetics ' },
-    { 'latitude': -1.407833, 'longitude': 37.689556, 'name': 'Master beauty shop' },
-    { 'latitude': -0.934173, 'longitude': 38.058565, 'name': 'Calypso cosmetics' },
-    { 'latitude': -0.285944, 'longitude': 36.074277, 'name': 'Elegant Cosmetics' }
-  ]
+  
 
   const bounds = new google.maps.LatLngBounds();
 
