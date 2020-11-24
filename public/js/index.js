@@ -149,22 +149,15 @@ async function fetchData() {
 async function fetchMobileUploads() {
   // we need to make a request for mobile uploads within
   // the past one week from today(2 dates)
+  // format is yyyy-mm-dd hh:mm
   const today = new Date();
-  let lastHr = today.getHours() - 1 + ":00:00";
-  let thisHr = today.getHours() + ":00:00";
+  let lastHr = today.getHours() - 1 + ":00";
+  let thisHr = `${today.getHours()}:${today.getMinutes()}`;
 
-  var todayDate = new Date().toISOString().slice(0,10);
-  var yesDate = today.setDate(today.getDate() - 1);
-  const yesterDate = new Date(yesDate).toISOString().slice(0,10);
-
-  // const yester = today.setDate(today.getDate() - 1);
-  // const yesterDate = new Date(yester).toLocaleDateString('en-US').split('/').join('-')
-  const todaysDate = new Date().toLocaleDateString('en-US').split("/").join("-");
+  var todayDate = today.toISOString().slice(0,10);
   
-  const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todayDate}`;
+  const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todayDate} ${lastHr}&end=${todayDate} ${thisHr}`;
 
-  // const newUrl = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${yesterDate}&end=${todaysDate}`;
-  // console.log(url);
   let response = await fetch(url, {
     method: "GET",
     headers: {
