@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 class Bank extends Model {}
 
 Bank.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -13,15 +13,6 @@ Bank.init({
         field: "ogr_fid",
         autoIncrement: true
     },
-    full_id: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "full_id",
-        autoIncrement: false
-    },
     osm_id: {
         type: DataTypes.CHAR(254),
         allowNull: true,
@@ -29,24 +20,6 @@ Bank.init({
         comment: null,
         primaryKey: false,
         field: "osm_id",
-        autoIncrement: false
-    },
-    amenity: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "amenity",
-        autoIncrement: false
-    },
-    atm: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "atm",
         autoIncrement: false
     },
     name: {

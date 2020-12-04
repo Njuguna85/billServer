@@ -49,7 +49,23 @@ body {
         transform: rotate(360deg);
     }
 }
+.dataSource{
+    margin-top: 10px;
+    height: 40px;
+    width: 200px;
+    overflow: hidden;
+    background-color: whitesmoke;
+}
+.dataSource select{
+    padding: 5px 8px;
+    width: 100%;
+    background: inherit;
+    height: 100%;
+    font-size: large;
+    height: 100%;
+    border: none;
 
+}
 
 /*                 MAP             */
 

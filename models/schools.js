@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 
 class School extends Model {};
 School.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -11,15 +11,6 @@ School.init({
         primaryKey: true,
         field: "ogr_fid",
         autoIncrement: true
-    },
-    full_id: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "full_id",
-        autoIncrement: false
     },
     amenity: {
         type: DataTypes.CHAR(254),
@@ -37,15 +28,6 @@ School.init({
         comment: null,
         primaryKey: false,
         field: "name",
-        autoIncrement: false
-    },
-    accessibil: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "accessibil",
         autoIncrement: false
     },
     wkb_geometry: {

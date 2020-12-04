@@ -41,6 +41,7 @@ directionsPanel.innerHTML = `
             `;
 
 const commD = [
+  'atm',
   "bank",
   "hospital",
   "police",
@@ -48,7 +49,7 @@ const commD = [
   "university",
   "bar",
   "petrolStation",
-  "grocery",
+  // "grocery",
   "kiosk",
   "pharmacy",
   "restaraunt",
@@ -135,10 +136,11 @@ function initMap() {
 }
 
 async function fetchData() {
-  let response = await fetch("/api/billboards/");
+  let response = await fetch("/api/billboards/nairobi");
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
+    saveData(data)
   } else {
     alert(
       "Something went wrong while fetching data. Error: " + response.status
@@ -154,8 +156,8 @@ async function fetchMobileUploads() {
   let lastHr = today.getHours() - 1 + ":00";
   let thisHr = `${today.getHours()}:${today.getMinutes()}`;
 
-  var todayDate = today.toISOString().slice(0,10);
-  
+  var todayDate = today.toISOString().slice(0, 10);
+
   const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todayDate} ${lastHr}&end=${todayDate} ${thisHr}`;
 
   let response = await fetch(url, {
@@ -180,7 +182,6 @@ async function fetchMobileUploads() {
 
 function addOverlays(data) {
   addBillboards(data.billboard);
-  addAtm(data.atm);
   addTrafficLayer();
   nairobiSublWMS();
   addNairobiUberSpeeds();
@@ -192,7 +193,7 @@ function addOverlays(data) {
     }
   }
   setTimeout(loader, 100);
-  // addAromakare();
+
 }
 
 const getTiles = (lyr) => {
@@ -438,78 +439,14 @@ function addTrafficLayer() {
     }
   });
 }
-function addAromakare() {
-  
 
-  const bounds = new google.maps.LatLngBounds();
-
-  const markers = data.map((el) => {
-    
-    let latlng = new google.maps.LatLng(el.latitude, el.longitude);
-    bounds.extend(latlng);
-    let contentString =
-      "<p>Name: <strong>" +
-      el.name +
-      "<strong></p>" +
-      '<button class="btn end" data-lat=' +
-      el.latitude +
-      " data-long=" +
-      el.longitude +
-      " >Go Here</button>" +
-      '<button class="btn stop" data-lat=' +
-      el.latitude +
-      " data-long=" +
-      el.longitude +
-      " >Add Stop</button>" +
-      '<button class="btn start" data-lat=' +
-      el.latitude +
-      " data-long=" +
-      el.longitude +
-      " >Start Here</button>";
-    let marker = new google.maps.Marker({
-      position: latlng,
-      icon: { url: `images/newBusiness1.png`, scaledSize: new google.maps.Size(20, 20) },
-      optimized: false,
-    });
-    google.maps.event.addListener(
-      marker,
-      "click",
-      ((marker, el) => {
-        return () => {
-          infoWindow.setContent(contentString);
-          infoWindow.open(map, marker);
-        };
-      })(marker, el)
-    );
-    return marker;
-  });
-
-  const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
-  div = document.createElement("div");
-  div.innerHTML = `<img src='images/newBusiness1.png' alt="aroma" />Aromakare<input id="aromaCheck" type="checkbox">`;
-  poiLayersAccordion.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#aromaCheck")) {
-      cb = document.getElementById("aromaCheck");
-      // if on
-      if (cb.checked) {
-        markerCluster.addMarkers(markers);
-        map.fitBounds(bounds);
-        map.panToBounds(bounds);
-      }
-      if (!cb.checked) {
-        // if off
-        markerCluster.removeMarkers(markers);
-      }
-    }
-  });
-}
 function add(key, value) {
   const bounds = new google.maps.LatLngBounds();
 
   // create a markers array
   const markers = value.map((el) => {
     // the x and y of the marker
+    el.geojson = JSON.parse(el.geojson);
     latitude = el.geojson.coordinates[1];
     longitude = el.geojson.coordinates[0];
     let latlng = new google.maps.LatLng(latitude, longitude);
@@ -654,72 +591,6 @@ function addBillboards(data) {
   legend.addEventListener("change", (e) => {
     if (e.target.matches("#billboardChecked")) {
       cb = document.getElementById("billboardChecked");
-      // if on
-      if (cb.checked) {
-        markerCluster.addMarkers(markers);
-        map.fitBounds(bounds);
-        map.panToBounds(bounds);
-      }
-      if (!cb.checked) {
-        // if off
-        markerCluster.removeMarkers(markers);
-      }
-    }
-  });
-}
-
-
-function addAtm(data) {
-  const bounds = new google.maps.LatLngBounds();
-  const markers = data.map((el) => {
-    latitude = el.geojson.coordinates[1];
-    longitude = el.geojson.coordinates[0];
-    let latlng = new google.maps.LatLng(latitude, longitude);
-    bounds.extend(latlng);
-    let contentString =
-      "<p>Operator: <strong>" +
-      el.operator +
-      "<strong></p>" +
-      '<button class="btn end" data-lat=' +
-      latitude +
-      " data-long=" +
-      longitude +
-      " >Go Here</button>" +
-      '<button class="btn stop" data-lat=' +
-      latitude +
-      " data-long=" +
-      longitude +
-      " >Add Stop</button>" +
-      '<button class="btn start" data-lat=' +
-      latitude +
-      " data-long=" +
-      longitude +
-      " >Start Here</button>";
-    let marker = new google.maps.Marker({
-      position: latlng,
-      icon: { url: `images/atm.png`, scaledSize: new google.maps.Size(20, 20) },
-      optimized: false,
-    });
-    google.maps.event.addListener(
-      marker,
-      "click",
-      ((marker, el) => {
-        return () => {
-          infoWindow.setContent(contentString);
-          infoWindow.open(map, marker);
-        };
-      })(marker, el)
-    );
-    return marker;
-  });
-
-  const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
-  div = document.createElement("div");
-  div.innerHTML = `<img src='images/atm.png' alt="atm" />ATM<input id="atmCheck" type="checkbox">`;
-  poiLayersAccordion.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#atmCheck")) {
-      cb = document.getElementById("atmCheck");
       // if on
       if (cb.checked) {
         markerCluster.addMarkers(markers);
@@ -1012,4 +883,10 @@ function calcRoute(tracker) {
 function loader() {
   document.getElementById("loader").style.display = "none";
   document.getElementById("billboardDetails").style.display = "block";
+}
+
+function saveData(data) {
+  //clear 
+  localStorage.clear();
+  localStorage.setItem('nairobi', JSON.stringify(data));
 }

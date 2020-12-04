@@ -3,6 +3,8 @@ let infoWindow;
 var directionsService;
 var directionsRenderer;
 var mapContainer = document.getElementById("map");
+var markerCluster, gmarkers = {};
+var dataExisting;
 
 let legend = document.createElement('div');
 legend.setAttribute('id', 'legend');
@@ -41,10 +43,22 @@ directionsPanel.innerHTML = `
             `;
 
 const commD = [
-    'bank', 'hospital', 'police', 'school', 'university',
+    'atm', 'bank', 'hospital', 'police', 'school', 'university',
     'bar', 'petrolStation', 'grocery', 'kiosk', 'pharmacy',
     'restaraunt', 'saloon', 'supermarket'
 ];
+
+const source = document.createElement('div');
+source.className = `dataSource`;
+source.innerHTML =
+    `<select id="dataSourceSelect">
+        <option value="">Select Data Source</option>
+        <option value="nairobi">Nairobi</option>
+        <option value="kenya">Kenya</option>
+        <option value="uganda">Uganda</option>
+        <option value="ghana">Ghana</option>
+        <option value="all">All</option>
+    </select>`
 
 function initMap() {
     // set the zoom, scale, street view and full screen controls
@@ -55,7 +69,7 @@ function initMap() {
         mapTypeControl: true,
         mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-            position: google.maps.ControlPosition.BOTTOM_CENTER
+            position: google.maps.ControlPosition.TOP_CENTER
         },
         zoomControl: true,
         zoomControlOptions: {
@@ -83,13 +97,17 @@ function initMap() {
     infoWindow = new google.maps.InfoWindow;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     map.controls[google.maps.ControlPosition.LEFT_CENTER].push(infoTab);
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(source);
 
     var input = document.getElementById('searchInput');
     var autocomplete = new google.maps.places.Autocomplete(input);
     autocomplete.bindTo('bounds', map);
 
-    var businessesListCont = document.querySelector('.businesses-list');
-    map.controls[google.maps.ControlPosition.TOP_CENTER].push(businessesListCont);
+    // clusterer for the diff marker categories
+    markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+
+    // var businessesListCont = document.querySelector('.businesses-list');
+    // map.controls[google.maps.ControlPosition.TOP_CENTER].push(businessesListCont);
 
     fetchMobileUploads();
     fetchData();
@@ -98,15 +116,23 @@ function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
+
 }
 
 async function fetchData() {
-    let response = await fetch('/api/billboards/all');
-    if (response.ok) {
-        data = await response.json();
-        addOverlays(data);
+    checkData('nairobi');
+    if (dataExisting) {
+        sourceData = getData('nairobi');
+        addOverlays(sourceData);
     } else {
-        alert('Something went wrong while fetching data. Error: ' + response.status);
+        let response = await fetch('/api/billboards/nairobi');
+        if (response.ok) {
+            sourceData = await response.json();
+            addOverlays(sourceData);
+            saveData('nairobi', sourceData);
+        } else {
+            alert('Something went wrong while fetching data. Error: ' + response.status);
+        }
     }
 }
 
@@ -114,15 +140,15 @@ async function fetchMobileUploads() {
     // we need to make a request for mobile uploads within 
     // the past one week from today(2 dates)
     // we need to make a request for mobile uploads within
-  // the past one week from today(2 dates)
-  // format is yyyy-mm-dd hh:mm
-  const today = new Date();
-  let lastHr = today.getHours() - 1 + ":00";
-  let thisHr = `${today.getHours()}:${today.getMinutes()}`;
+    // the past one week from today(2 dates)
+    // format is yyyy-mm-dd hh:mm
+    const today = new Date();
+    let lastHr = today.getHours() - 1 + ":00";
+    let thisHr = `${today.getHours()}:${today.getMinutes()}`;
 
-  var todayDate = today.toISOString().slice(0,10);
-  
-  const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todayDate} ${lastHr}&end=${todayDate} ${thisHr}`;
+    var todayDate = today.toISOString().slice(0, 10);
+
+    const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todayDate} ${lastHr}&end=${todayDate} ${thisHr}`;
 
     let response = await fetch(url, {
         method: "GET",
@@ -141,20 +167,14 @@ async function fetchMobileUploads() {
 }
 
 function addOverlays(data) {
-    addBillboards(data.billboards);
-    addAtm(data.atm);
+    addBillboards(data.billboard);
     addTrafficLayer();
-    addNssf(data.nssf);
     nairobiSublWMS();
     addNairobiUberSpeeds()
     addugPopProj();
     addGhanaPopulation();
-    for (const [key, value] of Object.entries(data)) {
-        if (commD.includes(key)) {
-            add(key, value);
-        }
-    }
-    setTimeout(loader, 100);
+    addPOIs(data);
+   
 }
 
 const getTiles = (lyr) => {
@@ -382,15 +402,81 @@ function addTrafficLayer() {
     })
 }
 
+function checkJSON(json) {
+    if (typeof json == 'object') {
+        return json;
+    }
+    return JSON.parse(json);
+}
+
+// function add(key, value) {
+//     const bounds = new google.maps.LatLngBounds();
+
+//     // create a markers array 
+//     const markers = value.map(el => {
+//         el.geojson = checkJSON(el.geojson);
+//         // the x and y of the marker
+//         latitude = el.geojson.coordinates[1];
+//         longitude = el.geojson.coordinates[0];
+//         let latlng = new google.maps.LatLng(latitude, longitude);
+//         bounds.extend(latlng);
+
+//         iconUrl = `./images/${key}.png`
+//         let contentString = '<p><strong>' + parseData(el.name) + '<strong></p>' +
+//             '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
+//             '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
+//             '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
+//         let marker = new google.maps.Marker({
+//             position: latlng,
+//             icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
+//             optimized: false,
+//         });
+//         // open a popup on click
+//         google.maps.event.addListener(marker, 'click', ((marker, el) => {
+//             return () => {
+//                 infoWindow.setContent(contentString);
+//                 infoWindow.open(map, marker);
+//             }
+//         })(marker, el));
+//         return marker
+//     });
+
+//     const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+//     markerCluster.clearMarkers()
+
+//     div = document.createElement('div');
+//     div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
+//     poiLayersAccordion.appendChild(div);
+//     legend.addEventListener('change', e => {
+//         cb = document.getElementById(`${key}Checked`)
+//         // if on
+//         if (cb.checked) {
+//             markerCluster.addMarkers(markers);
+//             map.fitBounds(bounds);
+//             map.panToBounds(bounds);
+//         }
+//         if (!cb.checked) {
+//             // if off
+//             markerCluster.removeMarkers(markers)
+//         }
+//     })
+// }
+
+
 function add(key, value) {
+    const bounds = new google.maps.LatLngBounds();
+
     // create a markers array 
     const markers = value.map(el => {
+        el.geojson = checkJSON(el.geojson);
         // the x and y of the marker
         latitude = el.geojson.coordinates[1];
         longitude = el.geojson.coordinates[0];
         let latlng = new google.maps.LatLng(latitude, longitude);
+        bounds.extend(latlng);
+
         iconUrl = `./images/${key}.png`
-        let contentString = '<p><strong>' + el.name + '<strong></p>' +
+        let contentString = '<p><strong>' + parseData(el.name) + '<strong></p>' +
             '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
             '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
             '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
@@ -408,9 +494,10 @@ function add(key, value) {
         })(marker, el));
         return marker
     });
-    const markerCluster = new MarkerClusterer(
-        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-    );
+    gmarkers[key] = markers;
+    // const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+    // markerCluster.clearMarkers()
+
     div = document.createElement('div');
     div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
     poiLayersAccordion.appendChild(div);
@@ -418,19 +505,46 @@ function add(key, value) {
         cb = document.getElementById(`${key}Checked`)
         // if on
         if (cb.checked) {
-            markerCluster.addMarkers(markers)
+            // markerCluster.addMarkers(markers);
+            setOnMap(key)
+
+            map.fitBounds(bounds);
+            map.panToBounds(bounds);
         }
         if (!cb.checked) {
             // if off
-            markerCluster.removeMarkers(markers)
+            // markerCluster.removeMarkers(markers)
+            clearMarkers(key)
         }
     })
+}
+
+
+function setOnMap(key) {
+    markers = gmarkers[key];
+    markerCluster.addMarkers(markers);
+}
+
+
+function clearMarkers(key) {
+    markers = gmarkers[key];
+    markerCluster.removeMarkers(markers)
+}
+
+function deleteMarkers() {
+    // look at the gmarkers array
+    // get the keys of objects and get its values
+    // set the markers in the values as null on map
+    for (const [key, value] of Object.entries(gmarkers)) {
+        clearMarkers(key);
+    }
+    gmarkers = {};
 }
 
 async function addBillboards(data) {
 
     const markers = data.map(el => {
-        let latlng = new google.maps.LatLng(el.lat, el.long)
+        let latlng = new google.maps.LatLng(el.lat, el.long);
         let contentString =
             '<div class ="infoWindow">' +
             '<div>' + 'Name: <b>' + parseData(el.billboard_id) + '</b></div>' +
@@ -457,9 +571,9 @@ async function addBillboards(data) {
         })(marker, el));
         return marker
     });
-    const markerCluster = new MarkerClusterer(
-        map, markers, { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-    )
+    const mC = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+    // markerCluster.addMarkers(markers)
+
     div = document.createElement('div');
     div.innerHTML = `<img src='images/marker.png' alt='billboard'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
     essentialLayers.appendChild(div);
@@ -468,65 +582,24 @@ async function addBillboards(data) {
             cb = document.getElementById('billboardChecked')
             // if on
             if (cb.checked) {
-                markerCluster.addMarkers(markers)
+                mC.addMarkers(markers)
             }
             if (!cb.checked) {
                 // if off
-                markerCluster.removeMarkers(markers)
-            }
-        }
-    })
-}
-
-function addAtm(data) {
-    const markers = data.map(el => {
-        latitude = el.geojson.coordinates[1];
-        longitude = el.geojson.coordinates[0]
-        let latlng = new google.maps.LatLng(latitude, longitude);
-        let contentString = '<p>Operator: <strong>' + el.operator + '<strong></p>' +
-            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
-            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
-            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
-        let marker = new google.maps.Marker({
-            position: latlng,
-            icon: { url: `images/atm.png`, scaledSize: new google.maps.Size(20, 20) },
-            optimized: false,
-        });
-        google.maps.event.addListener(marker, 'click', ((marker, el) => {
-            return () => {
-                infoWindow.setContent(contentString);
-                infoWindow.open(map, marker);
-            }
-        })(marker, el));
-        return marker
-    });
-
-    const markerCluster = new MarkerClusterer(
-        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-    )
-    div = document.createElement('div');
-    div.innerHTML = `<img src='images/atm.png' alt="atm" />ATM<input id="atmCheck" type="checkbox">`;
-    poiLayersAccordion.appendChild(div);
-    legend.addEventListener('change', e => {
-        if (e.target.matches('#atmCheck')) {
-            cb = document.getElementById('atmCheck')
-            // if on
-            if (cb.checked) {
-                markerCluster.addMarkers(markers)
-            }
-            if (!cb.checked) {
-                // if off
-                markerCluster.removeMarkers(markers)
+                mC.removeMarkers(markers)
             }
         }
     })
 }
 
 function addNssf(data) {
+    const bounds = new google.maps.LatLngBounds();
+
     const markers = data.map(el => {
         latitude = el.geojson.coordinates[1];
         longitude = el.geojson.coordinates[0];
         let latlng = new google.maps.LatLng(latitude, longitude);
+        bounds.extend(latlng);
 
         let contentString =
             '<p><strong>' + el.name + '<strong></p>' +
@@ -547,9 +620,9 @@ function addNssf(data) {
         })(marker, el));
         return marker
     });
-    const markerCluster = new MarkerClusterer(
-        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-    )
+
+    // const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+
     div = document.createElement('div');
     div.innerHTML = `<img src='images/office.png' alt="nssf Offices" />NSSF Offices<input id="nssfChecked" type="checkbox">`;
     poiLayersAccordion.appendChild(div);
@@ -559,53 +632,8 @@ function addNssf(data) {
             // if on
             if (cb.checked) {
                 markerCluster.addMarkers(markers)
-            }
-            if (!cb.checked) {
-                // if off
-                markerCluster.removeMarkers(markers)
-            }
-        }
-
-    })
-}
-
-function addMetalWorks(data) {
-    const markers = data.map(el => {
-        latitude = JSON.parse(el.geojson).coordinates[1];
-        longitude = JSON.parse(el.geojson).coordinates[0];
-        let latlng = new google.maps.LatLng(latitude, longitude);
-
-        let contentString =
-            '<p><strong>' + parseData(el.name) + '<strong></p>' +
-            '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
-            '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
-            '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
-
-        let marker = new google.maps.Marker({
-            position: latlng,
-            icon: { url: `images/hammer.png`, scaledSize: new google.maps.Size(20, 20) },
-            optimized: false,
-        });
-        google.maps.event.addListener(marker, 'click', ((marker, el) => {
-            return () => {
-                infoWindow.setContent(contentString);
-                infoWindow.open(map, marker);
-            }
-        })(marker, el));
-        return marker
-    });
-    const markerCluster = new MarkerClusterer(
-        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-    )
-    div = document.createElement('div');
-    div.innerHTML = `<img src='images/hammer.png' alt="Hardware" />Hardware BlackSmiths<input id="hardwareChecked" type="checkbox">`;
-    poiLayersAccordion.appendChild(div);
-    legend.addEventListener('change', e => {
-        if (e.target.matches('#hardwareChecked')) {
-            cb = document.getElementById('hardwareChecked')
-            // if on
-            if (cb.checked) {
-                markerCluster.addMarkers(markers)
+                map.fitBounds(bounds);
+                map.panToBounds(bounds);
             }
             if (!cb.checked) {
                 // if off
@@ -652,9 +680,9 @@ function getmobileMarkers(deliveriesData) {
         return marker
     });
     mobileMarkersDates.dates = uploadDates;
-    const markerCluster = new MarkerClusterer(
-        map, [], { imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m' }
-    )
+
+    const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+
     div = document.createElement('div');
     div.innerHTML = `<img src='images/place.png'/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
     essentialLayers.appendChild(div);
@@ -663,7 +691,7 @@ function getmobileMarkers(deliveriesData) {
             cb = document.getElementById('mobileCheck')
             // if on
             if (cb.checked) {
-                markerCluster.addMarkers(markers)
+                markerCluster.addMarkers(markers);
             }
             if (!cb.checked) {
                 // if off
@@ -823,7 +851,6 @@ mapContainer.addEventListener('click', e => {
         calcRoute(tracker);
     }
     if (e.target.matches('.accordion')) {
-        // console.log(e);
         e.target.classList.toggle('is-open');
         const content = e.target.nextElementSibling;
         if (content.style.maxHeight) {
@@ -840,7 +867,45 @@ mapContainer.addEventListener('click', e => {
         directionsPanel.parentElement.removeChild(directionsPanel);
     }
 
+
 });
+
+source.addEventListener('change', async (e) => {
+    selected = document.querySelector('#dataSourceSelect').value;
+    if (selected) {
+        const loader = document.getElementById("loader")
+        loader.style.display = 'block';
+        //check if data exists
+        checkData(selected);
+        if (dataExisting) {
+            sourceData = getData(selected);
+            addPOIs(sourceData);
+        } else {
+            let response = await fetch(`/api/billboards/${selected}`);
+            if (response.ok) {
+                sourceData = await response.json();
+                saveData(selected, sourceData);
+                addPOIs(sourceData);
+            } else {
+                alert('Something went wrong while fetching data. Error: ' + response.status);
+            }
+        }
+    }
+})
+
+function addPOIs(sourceData) {
+    poiLayersAccordion.innerHTML = '';
+    deleteMarkers()
+    for (const [key, value] of Object.entries(sourceData)) {
+        if (commD.includes(key)) {
+            add(key, value);
+        }
+    }
+    addNssf(sourceData.nssf);
+    // loader.style.display = 'none'
+    setTimeout(loader, 100);
+
+}
 
 function calcRoute(tracker) {
     div = document.createElement('div');
@@ -883,4 +948,28 @@ function loader() {
     const map = document.getElementById("map")
     if (loader) loader.style.display = "none";
     if (map) map.style.display = "block";
+}
+
+function saveData(dataName, data) {
+    // the first time nairobi data will be loaded
+    // save it (overwrite the current one)
+    // on select change, first check if data is on ls
+    // if there is then load from it otherwise fetch
+    localStorage.setItem(`${dataName}`, JSON.stringify(data));
+}
+
+function checkData(dataName) {
+    let data = localStorage.getItem(`${dataName}`);
+    if (data) {
+        return dataExisting = true;
+    }
+    return dataExisting = false;
+}
+
+function getData(dataName) {
+    let data = localStorage.getItem(`${dataName}`);
+    if (data) {
+        return JSON.parse(data);
+    }
+    return;
 }

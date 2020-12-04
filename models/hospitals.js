@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 class Hospital extends Model {};
 
 Hospital.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -12,15 +12,6 @@ Hospital.init({
         primaryKey: true,
         field: "ogr_fid",
         autoIncrement: true
-    },
-    full_id: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "full_id",
-        autoIncrement: false
     },
     osm_id: {
         type: DataTypes.CHAR(254),
@@ -31,16 +22,7 @@ Hospital.init({
         field: "osm_id",
         autoIncrement: false
     },
-    amenity: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "amenity",
-        autoIncrement: false
-    },
-    name: {
+   name: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,

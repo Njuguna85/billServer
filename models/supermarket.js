@@ -13,15 +13,6 @@ Supermarket.init({
         field: "ogr_fid",
         autoIncrement: true
     },
-    shop: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "shop",
-        autoIncrement: false
-    },
     name: {
         type: DataTypes.CHAR(254),
         allowNull: true,

@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 class Saloon extends Model {};
 
 Saloon.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -20,15 +20,6 @@ Saloon.init({
         comment: null,
         primaryKey: false,
         field: "name",
-        autoIncrement: false
-    },
-    shop: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "shop",
         autoIncrement: false
     },
     wkb_geometry: {

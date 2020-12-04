@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 class Pharmacy extends Model {};
 
 Pharmacy.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -12,15 +12,6 @@ Pharmacy.init({
         primaryKey: true,
         field: "ogr_fid",
         autoIncrement: true
-    },
-    amenity: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "amenity",
-        autoIncrement: false
     },
     name: {
         type: DataTypes.CHAR(254),

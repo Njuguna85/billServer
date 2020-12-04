@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 
 class Kiosk extends Model {};
 Kiosk.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -11,15 +11,6 @@ Kiosk.init({
         primaryKey: true,
         field: "ogr_fid",
         autoIncrement: true
-    },
-    shop: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "shop",
-        autoIncrement: false
     },
     name: {
         type: DataTypes.CHAR(254),

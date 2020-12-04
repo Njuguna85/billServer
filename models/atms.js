@@ -5,7 +5,7 @@ class Atm extends Model {};
 
 
 Atm.init({
-    ogr_fid: {
+    ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
@@ -14,24 +14,6 @@ Atm.init({
         field: "ogr_fid",
         autoIncrement: true
     },
-    full_id: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "full_id",
-        autoIncrement: false
-    },
-    amenity: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "amenity",
-        autoIncrement: false
-    },
     name: {
         type: DataTypes.CHAR(254),
         allowNull: true,
@@ -39,15 +21,6 @@ Atm.init({
         comment: null,
         primaryKey: false,
         field: "name",
-        autoIncrement: false
-    },
-    operator: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "operator",
         autoIncrement: false
     },
     wkb_geometry: {
