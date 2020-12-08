@@ -6,7 +6,7 @@ const session = require("express-session");
 const dotenv = require("dotenv");
 // set the path of config file
 dotenv.config({ path: "./config/config.env" });
-const billboards = require("./routes/billboards");
+const pois  =  require('./routes/pois')
 const exhbs = require("express-handlebars");
 const morgan = require("morgan");
 const index = require("./routes/index");
@@ -53,8 +53,7 @@ app.use("/auth", require("./routes/auth"));
 app.use("/", index);
 app.use("/roles", require("./routes/roles"));
 
-// set the access the route of billboards
-app.use("/api/billboards", billboards);
+app.use("/api/pois", require("./routes/pois"));
 
 app.use("/api/businesses", require("./routes/business"));
 

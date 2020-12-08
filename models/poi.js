@@ -1,34 +1,44 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes, Model } = require('sequelize')
+const sequelize = require('../config/database')
 
-class Hospital extends Model {};
+class Poi extends Model { };
 
-Hospital.init({
+Poi.init({
+
     ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
         comment: null,
         primaryKey: true,
-        field: "ogr_fid",
+        field: "ogc_fid",
         autoIncrement: true
     },
     osm_id: {
         type: DataTypes.CHAR(254),
-        allowNull: true,
+        allowNull: false,
         defaultValue: null,
         comment: null,
-        primaryKey: false,
+        primaryKey: true,
         field: "osm_id",
         autoIncrement: false
     },
-   name: {
+    name: {
         type: DataTypes.CHAR(254),
         allowNull: true,
         defaultValue: null,
         comment: null,
         primaryKey: false,
         field: "name",
+        autoIncrement: false
+    },
+    type: {
+        type: DataTypes.CHAR(254),
+        allowNull: true,
+        defaultValue: null,
+        comment: null,
+        primaryKey: false,
+        field: "type",
         autoIncrement: false
     },
     wkb_geometry: {
@@ -43,14 +53,14 @@ Hospital.init({
 }, {
     sequelize,
     timestamps: false,
-    modelName: 'hospitals_model',
-    tableName: "hospitals",
+    tableName: "pois",
     comment: "",
     indexes: [{
-        name: "hospitals_wkb_geometry_geom_idx",
+        name: "pois_wkb_geometry_geom_idx",
         unique: false,
         fields: ["wkb_geometry"]
-    }]
+    }],
+    modelName: 'pois_model'
 });
 
-module.exports = Hospital;
+module.exports = Poi;

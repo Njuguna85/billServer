@@ -44,8 +44,8 @@ directionsPanel.innerHTML = `
 
 const commD = [
     'atm', 'bank', 'hospital', 'police', 'school', 'university',
-    'bar', 'petrolStation', 'grocery', 'kiosk', 'pharmacy',
-    'restaraunt', 'saloon', 'supermarket'
+    'bar', 'petrolStation', 'kiosk', 'pharmacy',
+    'restaurant', 'saloon', 'supermarket'
 ];
 
 const source = document.createElement('div');
@@ -173,8 +173,9 @@ function addOverlays(data) {
     addNairobiUberSpeeds()
     addugPopProj();
     addGhanaPopulation();
-    addPOIs(data);
-   
+    addPOIs(data.pois);
+    addNssf(data.nssf);
+
 }
 
 const getTiles = (lyr) => {
@@ -409,63 +410,9 @@ function checkJSON(json) {
     return JSON.parse(json);
 }
 
-// function add(key, value) {
-//     const bounds = new google.maps.LatLngBounds();
-
-//     // create a markers array 
-//     const markers = value.map(el => {
-//         el.geojson = checkJSON(el.geojson);
-//         // the x and y of the marker
-//         latitude = el.geojson.coordinates[1];
-//         longitude = el.geojson.coordinates[0];
-//         let latlng = new google.maps.LatLng(latitude, longitude);
-//         bounds.extend(latlng);
-
-//         iconUrl = `./images/${key}.png`
-//         let contentString = '<p><strong>' + parseData(el.name) + '<strong></p>' +
-//             '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
-//             '<button class="btn stop" data-lat=' + latitude + ' data-long=' + longitude + ' >Add Stop</button>' +
-//             '<button class="btn start" data-lat=' + latitude + ' data-long=' + longitude + ' >Start Here</button>';
-//         let marker = new google.maps.Marker({
-//             position: latlng,
-//             icon: { url: iconUrl, scaledSize: new google.maps.Size(20, 20) },
-//             optimized: false,
-//         });
-//         // open a popup on click
-//         google.maps.event.addListener(marker, 'click', ((marker, el) => {
-//             return () => {
-//                 infoWindow.setContent(contentString);
-//                 infoWindow.open(map, marker);
-//             }
-//         })(marker, el));
-//         return marker
-//     });
-
-//     const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
-//     markerCluster.clearMarkers()
-
-//     div = document.createElement('div');
-//     div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
-//     poiLayersAccordion.appendChild(div);
-//     legend.addEventListener('change', e => {
-//         cb = document.getElementById(`${key}Checked`)
-//         // if on
-//         if (cb.checked) {
-//             markerCluster.addMarkers(markers);
-//             map.fitBounds(bounds);
-//             map.panToBounds(bounds);
-//         }
-//         if (!cb.checked) {
-//             // if off
-//             markerCluster.removeMarkers(markers)
-//         }
-//     })
-// }
-
 
 function add(key, value) {
-    const bounds = new google.maps.LatLngBounds();
-
+    
     // create a markers array 
     const markers = value.map(el => {
         el.geojson = checkJSON(el.geojson);
@@ -473,8 +420,7 @@ function add(key, value) {
         latitude = el.geojson.coordinates[1];
         longitude = el.geojson.coordinates[0];
         let latlng = new google.maps.LatLng(latitude, longitude);
-        bounds.extend(latlng);
-
+        
         iconUrl = `./images/${key}.png`
         let contentString = '<p><strong>' + parseData(el.name) + '<strong></p>' +
             '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
@@ -495,28 +441,11 @@ function add(key, value) {
         return marker
     });
     gmarkers[key] = markers;
-    // const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
-    // markerCluster.clearMarkers()
-
+    
     div = document.createElement('div');
-    div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
+    div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" data-id="${key}" class='poi' type="checkbox" />`;
     poiLayersAccordion.appendChild(div);
-    legend.addEventListener('change', e => {
-        cb = document.getElementById(`${key}Checked`)
-        // if on
-        if (cb.checked) {
-            // markerCluster.addMarkers(markers);
-            setOnMap(key)
-
-            map.fitBounds(bounds);
-            map.panToBounds(bounds);
-        }
-        if (!cb.checked) {
-            // if off
-            // markerCluster.removeMarkers(markers)
-            clearMarkers(key)
-        }
-    })
+    
 }
 
 
@@ -870,6 +799,20 @@ mapContainer.addEventListener('click', e => {
 
 });
 
+poiLayersAccordion.addEventListener('change', (e) => {
+    if (e.target.matches(".poi")) {
+      targetPoi = e.target.dataset.id;
+      cb = document.getElementById(`${targetPoi}Checked`);
+      if (cb.checked) {
+        markerCluster.addMarkers(gmarkers[targetPoi]);
+       
+      }
+      if (!cb.checked) {
+        markerCluster.removeMarkers(gmarkers[targetPoi]);
+      }
+    }
+  }) 
+
 source.addEventListener('change', async (e) => {
     selected = document.querySelector('#dataSourceSelect').value;
     if (selected) {
@@ -879,13 +822,14 @@ source.addEventListener('change', async (e) => {
         checkData(selected);
         if (dataExisting) {
             sourceData = getData(selected);
+            console.log(sourceData);
             addPOIs(sourceData);
         } else {
-            let response = await fetch(`/api/billboards/${selected}`);
+            let response = await fetch(`/api/pois/${selected}`);
             if (response.ok) {
                 sourceData = await response.json();
-                saveData(selected, sourceData);
-                addPOIs(sourceData);
+                saveData(selected, sourceData.pois);
+                addPOIs(sourceData.pois);
             } else {
                 alert('Something went wrong while fetching data. Error: ' + response.status);
             }
@@ -901,7 +845,6 @@ function addPOIs(sourceData) {
             add(key, value);
         }
     }
-    addNssf(sourceData.nssf);
     // loader.style.display = 'none'
     setTimeout(loader, 100);
 

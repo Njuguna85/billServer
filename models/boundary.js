@@ -1,30 +1,20 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const {DataTypes} = require('sequelize');
 
-class Bank extends Model {}
+class Boundary extends Model {};
 
-Bank.init({
+Boundary.init({
     ogc_fid: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: null,
         comment: null,
         primaryKey: true,
-        field: "ogr_fid",
+        field: "ogc_fid",
         autoIncrement: true
-    },
-    osm_id: {
-        type: DataTypes.CHAR(254),
-        allowNull: true,
-        defaultValue: null,
-        comment: null,
-        primaryKey: false,
-        field: "osm_id",
-        autoIncrement: false
     },
     name: {
         type: DataTypes.CHAR(254),
-        allowNull: true,
+        allowNull: false,
         defaultValue: null,
         comment: null,
         primaryKey: false,
@@ -42,15 +32,13 @@ Bank.init({
     }
 }, {
     sequelize,
-    modelName: 'banks_model',
     timestamps: false,
-    tableName: "banks",
+    tableName: "boundaries",
     comment: "",
     indexes: [{
-        name: "banks_wkb_geometry_geom_idx",
+        name: "boundaries_wkb_geometry_geom_idx",
         unique: false,
         fields: ["wkb_geometry"]
-    }]
+    }],
+    modelName: 'boundaries_model'
 })
-
-module.exports = Bank;

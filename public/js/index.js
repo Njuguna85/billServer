@@ -3,6 +3,7 @@ let infoWindow;
 var directionsService;
 var directionsRenderer;
 const mapContainer = document.getElementById("map");
+var bounds, markerCluster, gmarkers = {};
 
 let legend = document.createElement("div");
 legend.setAttribute("id", "legend");
@@ -48,11 +49,9 @@ const commD = [
   "school",
   "university",
   "bar",
-  "petrolStation",
-  // "grocery",
   "kiosk",
   "pharmacy",
-  "restaraunt",
+  "restaurant",
   "saloon",
   "supermarket",
 ];
@@ -126,6 +125,9 @@ function initMap() {
   infoWindow = new google.maps.InfoWindow();
   map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
+
+  markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+
   fetchMobileUploads();
   fetchData();
 
@@ -133,10 +135,13 @@ function initMap() {
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer();
   directionsRenderer.setMap(map);
+
+  bounds = new google.maps.LatLngBounds();
+
 }
 
 async function fetchData() {
-  let response = await fetch("/api/billboards/nairobi");
+  let response = await fetch("/api/pois/nairobi");
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
@@ -187,7 +192,7 @@ function addOverlays(data) {
   addNairobiUberSpeeds();
   addugPopProj();
   addGhanaPopulation();
-  for (const [key, value] of Object.entries(data)) {
+  for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {
       add(key, value);
     }
@@ -441,7 +446,6 @@ function addTrafficLayer() {
 }
 
 function add(key, value) {
-  const bounds = new google.maps.LatLngBounds();
 
   // create a markers array
   const markers = value.map((el) => {
@@ -451,7 +455,6 @@ function add(key, value) {
     longitude = el.geojson.coordinates[0];
     let latlng = new google.maps.LatLng(latitude, longitude);
     bounds.extend(latlng);
-
     iconUrl = `./images/${key}.png`;
     let contentString =
       "<p><strong>" +
@@ -490,24 +493,13 @@ function add(key, value) {
     );
     return marker;
   });
-  const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+
+  gmarkers[key] = markers;
 
   div = document.createElement("div");
-  div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" type="checkbox" />`;
+  div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" data-id="${key}" class='poi' type="checkbox" />`;
   poiLayersAccordion.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    cb = document.getElementById(`${key}Checked`);
-    // if on
-    if (cb.checked) {
-      markerCluster.addMarkers(markers);
-      map.fitBounds(bounds);
-      map.panToBounds(bounds);
-    }
-    if (!cb.checked) {
-      // if off
-      markerCluster.removeMarkers(markers);
-    }
-  });
+  
 }
 
 function addBillboards(data) {
@@ -824,7 +816,6 @@ mapContainer.addEventListener("click", (e) => {
     calcRoute(tracker);
   }
   if (e.target.matches(".accordion")) {
-    // console.log(e);
     e.target.classList.toggle("is-open");
     const content = e.target.nextElementSibling;
     if (content.style.maxHeight) {
@@ -842,43 +833,58 @@ mapContainer.addEventListener("click", (e) => {
   }
 });
 
-function calcRoute(tracker) {
-  div = document.createElement("div");
-  let start, end, waypts;
-  if (tracker.start) {
-    start = tracker.start;
-  }
-  if (tracker.end) {
-    end = tracker.end;
-  }
-  if (tracker.stop) {
-    if (tracker.stop.length > 8) {
-      window.alert("Please Minimize the stop points to 8");
+poiLayersAccordion.addEventListener('change', (e) => {
+  if (e.target.matches(".poi")) {
+    targetPoi = e.target.dataset.id;
+    cb = document.getElementById(`${targetPoi}Checked`);
+    if (cb.checked) {
+      markerCluster.addMarkers(gmarkers[targetPoi]);
+      map.fitBounds(bounds);
+      map.panToBounds(bounds);
     }
-    waypts = tracker.stop;
+    if (!cb.checked) {
+      markerCluster.removeMarkers(gmarkers[targetPoi]);
+    }
   }
-  if (start != undefined && end != undefined) {
-    const request = {
-      origin: start,
-      destination: end,
-      waypoints: waypts,
-      optimizeWaypoints: true,
-      travelMode: "DRIVING",
-    };
-    directionsService.route(request, function (response, status) {
-      if (status == "OK") {
-        directionsRenderer.setDirections(response);
-        directionsRenderer.setPanel(div);
-        directionsPanel.appendChild(div);
-        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
-          directionsPanel
-        );
-      } else {
-        window.alert("Directions request failed due to " + status);
+}) 
+
+  function calcRoute(tracker) {
+    div = document.createElement("div");
+    let start, end, waypts;
+    if (tracker.start) {
+      start = tracker.start;
+    }
+    if (tracker.end) {
+      end = tracker.end;
+    }
+    if (tracker.stop) {
+      if (tracker.stop.length > 8) {
+        window.alert("Please Minimize the stop points to 8");
       }
-    });
+      waypts = tracker.stop;
+    }
+    if (start != undefined && end != undefined) {
+      const request = {
+        origin: start,
+        destination: end,
+        waypoints: waypts,
+        optimizeWaypoints: true,
+        travelMode: "DRIVING",
+      };
+      directionsService.route(request, function (response, status) {
+        if (status == "OK") {
+          directionsRenderer.setDirections(response);
+          directionsRenderer.setPanel(div);
+          directionsPanel.appendChild(div);
+          map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
+            directionsPanel
+          );
+        } else {
+          window.alert("Directions request failed due to " + status);
+        }
+      });
+    }
   }
-}
 
 function loader() {
   document.getElementById("loader").style.display = "none";
