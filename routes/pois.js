@@ -10,7 +10,7 @@ const ensureAuth = require('../middleware/auth')
 const { Sequelize } = require('../config/database')
 const { response } = require('express')
 const Nssf = require('../models/ug_nssf');
-const { array } = require('joi')
+const { array, any } = require('joi')
 
 router.get('/all', ensureAuth, async (req, res) => {
     if (req.user) {
@@ -75,7 +75,7 @@ router.get('/uganda', async (req, res) => {
     const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
 
     const pois = {};
-    
+
     for (const i of poiCategories) {
         pois[i] = await fetchPoi('ug', i)
     }
@@ -87,7 +87,7 @@ router.get('/uganda', async (req, res) => {
 
 router.get('/ghana', async (req, res) => {
     const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
-   
+
     const pois = {};
 
     for (const i of poiCategories) {
@@ -96,6 +96,18 @@ router.get('/ghana', async (req, res) => {
     const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
 
     res.status(200).json({ pois, billboard, nssf })
+})
+
+router.get('/eabl', async (req, res) => {
+    let results =  await sequelize.query(
+        `SELECT id, geom, "billboard sites", "brand name", 
+        "company name", industry, "sub industry", "billboard size",
+        lattitude, longitude, "county region", "billboard type", 
+        "billboard company", rate, "map link", "image link", date, "site run-up",
+        "site lighting", "site obstruction", "site clustering", 
+        "traffic density", "road name", "oct-20" FROM public."EABL ";`,
+        { type: sequelize.QueryTypes.SELECT });
+    res.status(200).json(results)
 })
 
 module.exports = router;

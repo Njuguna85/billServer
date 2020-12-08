@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 
 // @desc Dashboard
 // @route GET /
-router.get('/dashboard', ensureAuth, async(req, res) => {
+router.get('/dashboard', ensureAuth, async (req, res) => {
     try {
         res.render('dashboard', {
             layout: 'dashboard',
@@ -37,7 +37,7 @@ router.get('/dashboard', ensureAuth, async(req, res) => {
 
 // @desc Businesses API
 // @route GET /businesses
-router.get('/businesses', ensureAuth, async(req, res) => {
+router.get('/businesses', ensureAuth, async (req, res) => {
     try {
         /*
         then we let them know that they should select a place to set up the business
@@ -85,6 +85,13 @@ router.get('/businesses', ensureAuth, async(req, res) => {
     }
 });
 
+router.get('/eabl', (req, res) => {
+    res.render('eabl', {
+        apiKey: process.env.googleMapsAPIKey,
+        layout: 'eabl',
+    })
+})
+
 // upload data route
 router.get('/upload', ensureAuth, (req, res) => {
     res.status(200).render('upload', {
@@ -116,6 +123,7 @@ router.get('/contact', (req, res) => {
     }
     return res.status(200).render('contact', { layout: 'main' })
 })
+
 
 // email route
 router.post('/email', ensureAuth, (req, res) => {
