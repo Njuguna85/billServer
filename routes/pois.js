@@ -10,7 +10,6 @@ const ensureAuth = require('../middleware/auth')
 const { Sequelize } = require('../config/database')
 const { response } = require('express')
 const Nssf = require('../models/ug_nssf');
-const { array, any } = require('joi')
 
 router.get('/all', ensureAuth, async (req, res) => {
     if (req.user) {
@@ -30,8 +29,6 @@ const poiCategories = [
     'restaurant', 'saloon', 'supermarket', 'atm'
 ];
 
-// const poiCategories = ['school', 'bank'];
-
 const fetchPoi = async (withinTable, poiColumn) => {
     return await sequelize.query(
         `SELECT a.name, ST_AsGeoJSON(a.wkb_geometry) as geojson
@@ -42,7 +39,6 @@ const fetchPoi = async (withinTable, poiColumn) => {
         { type: sequelize.QueryTypes.SELECT }
     );
 }
-
 
 router.get('/nairobi', async (req, res) => {
     const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
@@ -100,12 +96,14 @@ router.get('/ghana', async (req, res) => {
 
 router.get('/eabl', async (req, res) => {
     let results =  await sequelize.query(
-        `SELECT id, geom, "billboard sites", "brand name", 
-        "company name", industry, "sub industry", "billboard size",
-        lattitude, longitude, "county region", "billboard type", 
-        "billboard company", rate, "map link", "image link", date, "site run-up",
-        "site lighting", "site obstruction", "site clustering", 
-        "traffic density", "road name", "oct-20" FROM public."EABL ";`,
+       `SELECT 
+            billboard, "brand name", "company na", 
+            industry, "sub indust", billboar_1 as "billboard size", lattitude, longitude, 
+            "county reg" as "county region", billboar_2 as "billboard type", billboar_3 as "billboard company", rate, "map link", 
+            "image link", date, "site run_u" as "site run-up", "site light" as "site lighting", "site obstr" as "site obstruction",
+            "site clust" as "site clustering", "traffic de" as "traffic density", "road name", oct_20, wkb_geometry as geom
+        FROM 
+            public.eabl;`,
         { type: sequelize.QueryTypes.SELECT });
     res.status(200).json(results)
 })
