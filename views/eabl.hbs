@@ -529,7 +529,8 @@ async function addBillboards() {
             "<tr><td>" +"Sub industry: <b>" +parseData(el["sub industry"]) +"</td></b></tr>" +
             "<tr><td>" +"Traffic: <b>" +parseData(el["traffic density"]) +"</td></b></tr>" +
             "<tr><td>" +"Industry: <b>" +parseData(el.industry) +"</td></b></tr>" +
-            "<tr><td>" +"Rate: <b>" +parseData(el.rate) +"</td></b></tr>" +'</table>'
+            "<tr><td>" +"Rate: <b>" +parseData(el.rate) +"</td></b></tr>" +'</table>'+
+            '<img class="billboardImage" alt="billboard photo" src=' + el['image link'] + '>' +
             '<button class="btn end" data-lat=' +el.lattitude +" data-long=" +el.longitude +
             " >Go Here</button>" +'<button class="btn stop" data-lat=' +el.latitude +
             " data-long=" +el.longitude +" >Add Stop</button>" +

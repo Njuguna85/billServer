@@ -97,7 +97,7 @@ router.get('/ghana', async (req, res) => {
 router.get('/eabl', async (req, res) => {
     let results =  await sequelize.query(
        `SELECT 
-            billboard, "brand name", "company na", 
+            billboard as "billboard sites" , "brand name", "company na", 
             industry, "sub indust", billboar_1 as "billboard size", lattitude, longitude, 
             "county reg" as "county region", billboar_2 as "billboard type", billboar_3 as "billboard company", rate, "map link", 
             "image link", date, "site run_u" as "site run-up", "site light" as "site lighting", "site obstr" as "site obstruction",
