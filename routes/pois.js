@@ -103,7 +103,7 @@ router.get('/eabl', async (req, res) => {
             "image link", date, "site run_u" as "site run-up", "site light" as "site lighting", "site obstr" as "site obstruction",
             "site clust" as "site clustering", "traffic de" as "traffic density", "road name", oct_20, wkb_geometry as geom
         FROM 
-            public.eabl;`,
+            public."EABL";`,
         { type: sequelize.QueryTypes.SELECT });
     res.status(200).json(results)
 })
