@@ -7,21 +7,76 @@ const upload = require('../middleware/upload')
 const excel = require('../controllers/excel')
 const sequelize = require('../config/database');
 const ensureAuth = require('../middleware/auth')
-const { Sequelize } = require('../config/database')
-const { response } = require('express')
 const Nssf = require('../models/ug_nssf');
+const logger = require('../controllers/logger')
+
+// use redis to cache .
+// redis is an open source , in-memory data structure store 
+// used as a dbase, cache and msg broker
+const redis = require('redis');
+
+const client = redis.createClient();
+
+client.on('error', (err) => {
+    console.log('Redis Connect Error', err);
+})
 
 router.get('/all', ensureAuth, async (req, res) => {
+    const all = 'all';
     if (req.user) {
-        const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
-        const pois = await Poi.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] })
-        const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+        try {
+            // client.del(all, async (err, reply) => {
+            //     if (!err) {
+            //         if (reply === 1) {
+            //             console.log("Key is deleted");
+            //         } else {
+            //             console.log("Does't exists");
+            //         }
+            //     }
+            // })
+            // since we using redis lets try to retrieve from cache 
+            client.get(all, async (err, data) => {
+                if (err) {
+                    logger.error(`${req}-${err}`)
+                    console.log('Error Fetching all redis Cache', err)
 
-        res.status(200).json(billboard, pois, nssf)
+                    return res.status(404).json({
+                        'message': 'Could not Fetch all Data'
+                    })
+                }
+
+                if (data) {
+                    return res.status(200).send(
+                        JSON.parse(data))
+
+                } else {
+                    const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+                    // poi is a heavy table with all the points data
+                    // fetch its name and geojson
+                    const pois = await Poi.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] })
+                    const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+
+                    client.set(all, JSON.stringify({ billboard, pois, nssf }))
+
+                    return res.status(200).json({
+                        billboard, pois, nssf,
+                        'message': 'cache miss'
+                    })
+                }
+            })
+        } catch (error) {
+            logger.error(`${req}-${error}`)
+            console.log(error)
+
+            return res.status(404).json({
+                'message': 'Could not Fetch all Data'
+            })
+        }
     } else {
         return res.status(401).json({ 'Message': "Please sign up and enjoy more" });
     }
 })
+
 
 const poiCategories = [
     'bank', 'hospital', 'police', 'school', 'university',
@@ -41,71 +96,279 @@ const fetchPoi = async (withinTable, poiColumn) => {
 }
 
 router.get('/nairobi', async (req, res) => {
-    const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+    const nairobi = 'nairobi';
+    try {
+        // client.del(nairobi, async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+        client.get(nairobi, async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching na redis Cache', err)
 
-    const pois = {};
+                return res.status(404).json({
+                    'message': 'Could not Fetch Nairobi Data'
+                })
+            }
 
-    for (const i of poiCategories) {
-        pois[i] = await fetchPoi('na', i)
+            if (data) {
+                return res.status(200).send(JSON.parse(data))
+            } else {
+                // struct to store all pois 
+                // eg key=> 'bar, value=> ['bars']
+                const pois = {};
+
+                const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+
+                for (const i of poiCategories) {
+                    pois[i] = await fetchPoi('na', i)
+                }
+
+                const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+
+                // save it to cache with a key of nairobi
+                client.set(nairobi, JSON.stringify({ pois, billboard, nssf }));
+
+                return res.status(200).json({
+                    pois, billboard, nssf,
+                    'message': 'cache miss'
+                })
+            }
+        });
+
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
+
+        return res.status(404).json({
+            'message': 'Could not Fetch Nairobi Data'
+        })
     }
-
-    const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
-
-    res.status(200).json({ pois, billboard, nssf })
 })
 
 router.get('/kenya', async (req, res) => {
-    const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+    const kenya = 'kenya';
+    try {
+        // client.del(kenya, async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+        client.get(kenya, async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching ke redis Cache', err)
 
-    const pois = {};
+                return res.status(404).json({
+                    'message': 'Could not Fetch Kenya Data'
+                })
+            }
 
-    for (const i of poiCategories) {
-        pois[i] = await fetchPoi('ke', i)
+            if (data) {
+                return res.status(200).send(
+                    JSON.parse(data))
+
+            } else {
+                const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+
+                const pois = {};
+
+                for (const i of poiCategories) {
+                    pois[i] = await fetchPoi('ke', i)
+                }
+                const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+
+                client.set(kenya, JSON.stringify({ billboard, pois, nssf }))
+
+                return res.status(200).json({ pois, billboard, nssf })
+            }
+        })
+
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
+
+        return res.status(404).json({
+            'message': 'Could not Fetch Kenya Data'
+        })
     }
-    const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
-
-    res.status(200).json({ pois, billboard, nssf })
 })
 
 router.get('/uganda', async (req, res) => {
-    const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+    const uganda = 'uganda';
+    try {
+        // client.del(uganda, async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+        client.get(uganda, async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching ug redis Cache', err)
 
-    const pois = {};
+                return res.status(404).json({
+                    'message': 'Could not Fetch Uganda Data'
+                })
+            }
 
-    for (const i of poiCategories) {
-        pois[i] = await fetchPoi('ug', i)
+            if (data) {
+                return res.status(200).send(JSON.parse(data))
+            } else {
+                // struct to store all pois 
+                // eg key=> 'bar, value=> ['bars']
+                const pois = {};
+
+                const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+
+                for (const i of poiCategories) {
+                    pois[i] = await fetchPoi('ug', i)
+                }
+
+                const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+
+                // save it to cache with a key of nairobi
+                client.set(uganda, JSON.stringify({ pois, billboard, nssf }));
+
+                return res.status(200).json({
+                    pois, billboard, nssf,
+                    'message': 'cache miss'
+                })
+            }
+        });
+
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
+
+        return res.status(404).json({
+            'message': 'Could not Fetch Uganda Data'
+        })
     }
-
-    const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
-
-    res.status(200).json({ pois, billboard, nssf })
 })
 
 router.get('/ghana', async (req, res) => {
-    const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+    const ghana = 'ghana';
+    try {
+        // client.del(ghana, async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+        client.get(ghana, async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching gh redis Cache', err)
 
-    const pois = {};
+                return res.status(404).json({
+                    'message': 'Could not Fetch Ghana Data'
+                })
+            }
 
-    for (const i of poiCategories) {
-        pois[i] = await fetchPoi('gh', i)
+            if (data) {
+                return res.status(200).send(JSON.parse(data))
+            } else {
+                // struct to store all pois 
+                // eg key=> 'bar, value=> ['bars']
+                const pois = {};
+
+                const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+
+                for (const i of poiCategories) {
+                    pois[i] = await fetchPoi('gh', i)
+                }
+
+                const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+
+                // save it to cache with a key of nairobi
+                client.set(ghana, JSON.stringify({ pois, billboard, nssf }));
+
+                return res.status(200).json({
+                    pois, billboard, nssf,
+                    'message': 'cache miss'
+                })
+            }
+        });
+
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
+
+        return res.status(404).json({
+            'message': 'Could not Fetch Ghana Data'
+        })
     }
-    const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
 
-    res.status(200).json({ pois, billboard, nssf })
 })
 
 router.get('/eabl', async (req, res) => {
-    let results =  await sequelize.query(
-       `SELECT 
-            billboard as "billboard sites" , "brand name", "company na" as "company name", 
-            industry, "sub indust" as "sub industry", billboar_1 as "billboard size", lattitude, longitude, 
-            "county reg" as "county region", billboar_2 as "billboard type", billboar_3 as "billboard company", rate, "map link", 
-            "image link", date, "site run_u" as "site run-up", "site light" as "site lighting", "site obstr" as "site obstruction",
-            "site clust" as "site clustering", "traffic de" as "traffic density", "road name", oct_20, wkb_geometry as geom
-        FROM 
-            public."EABL";`,
-        { type: sequelize.QueryTypes.SELECT });
-    res.status(200).json(results)
+    const eabl = 'eabl';
+    try {
+        // client.del(eabl, async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+        client.get(eabl, async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching eabl redis Cache', err)
+
+                return res.status(404).json({
+                    'message': 'Could not Fetch EABL Data'
+                })
+            }
+
+            if (data) {
+                return res.status(200).send(JSON.parse(data))
+            } else {
+                let results = await sequelize.query(
+                    `SELECT 
+                        billboard as "billboard sites" , "brand name", "company na" as "company name", 
+                        industry, "sub indust" as "sub industry", billboar_1 as "billboard size", lattitude, longitude, 
+                        "county reg" as "county region", billboar_2 as "billboard type", billboar_3 as "billboard company", rate, "map link", 
+                        "image link", date, "site run_u" as "site run-up", "site light" as "site lighting", "site obstr" as "site obstruction",
+                        "site clust" as "site clustering", "traffic de" as "traffic density", "road name", oct_20, wkb_geometry as geom
+                    FROM 
+                        public."EABL";`,
+                    { type: sequelize.QueryTypes.SELECT });
+
+                client.set(eabl, JSON.stringify(results));
+
+                return res.status(200).json(results)
+            }
+        });
+
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
+
+        return res.status(404).json({
+            'message': 'Could not Fetch EABL Data'
+        })
+    }
 })
 
 module.exports = router;
