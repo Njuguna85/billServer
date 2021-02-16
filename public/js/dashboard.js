@@ -822,7 +822,6 @@ source.addEventListener('change', async (e) => {
         checkData(selected);
         if (dataExisting) {
             sourceData = getData(selected);
-            console.log(sourceData);
             addPOIs(sourceData);
         } else {
             let response = await fetch(`/api/pois/${selected}`);

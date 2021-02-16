@@ -21,9 +21,9 @@ client.on('error', (err) => {
     console.log('Redis Connect Error', err);
 })
 
-router.get('/all', ensureAuth, async (req, res) => {
+router.get('/all',  async (req, res) => {
     const all = 'all';
-    if (req.user) {
+    // if (req.user) {
         try {
             // client.del(all, async (err, reply) => {
             //     if (!err) {
@@ -72,9 +72,9 @@ router.get('/all', ensureAuth, async (req, res) => {
                 'message': 'Could not Fetch all Data'
             })
         }
-    } else {
-        return res.status(401).json({ 'Message': "Please sign up and enjoy more" });
-    }
+    // } else {
+    //     return res.status(401).json({ 'Message': "Please sign up and enjoy more" });
+    // }
 })
 
 
