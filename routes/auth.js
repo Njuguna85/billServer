@@ -13,6 +13,18 @@ router.get('/google/callback', passport.authenticate('google', { failureRedirect
     return res.status(200).redirect('/dashboard')
 });
 
+// local login
+router.post('/local',
+    passport.authenticate('local', {
+        failureRedirect: '/login',
+        successRedirect: '/aq'
+    }),
+    function (req, res, next) {
+        console.log(req);
+        next()
+    });
+
+
 // @desc Logout user
 // @route /auth/logout
 router.get('/logout', (req, res) => {

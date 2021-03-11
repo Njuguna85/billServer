@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router();
-const ensureAuth = require('../middleware/auth')
+const { ensureAuth, ensureAuthLocal } = require('../middleware/auth')
 const nodemailer = require('nodemailer');
 const axios = require('axios')
 const logger = require('../controllers/logger')
@@ -85,8 +85,23 @@ router.get('/businesses', ensureAuth, async (req, res) => {
     }
 });
 
+// login using local strategy
+router.get('/login', (req, res) => {
+    res.render('login', { layout: false })
+})
+
 router.get('/eabl', (req, res) => {
     res.render('eabl', {
+        apiKey: process.env.googleMapsAPIKey,
+        layout: 'eabl'
+    })
+})
+
+
+// african queen 
+// use local strategy to redirect if no user
+router.get('/aq', ensureAuthLocal, (req, res) => {
+    res.render('aq', {
         apiKey: process.env.googleMapsAPIKey,
         layout: 'eabl',
     })

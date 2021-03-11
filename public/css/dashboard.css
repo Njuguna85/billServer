@@ -267,7 +267,7 @@ p {
 }
 
 .essentialLayers>div,
-.aqLayers>div,
+
 .accordion-content>div,
 .eablpoiLayer>div {
     display: flex;

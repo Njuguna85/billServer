@@ -21,62 +21,61 @@ client.on('error', (err) => {
     console.log('Redis Connect Error', err);
 })
 
-router.get('/all',  async (req, res) => {
+router.get('/all', async (req, res) => {
     const all = 'all';
     // if (req.user) {
-        try {
-            // client.del(all, async (err, reply) => {
-            //     if (!err) {
-            //         if (reply === 1) {
-            //             console.log("Key is deleted");
-            //         } else {
-            //             console.log("Does't exists");
-            //         }
-            //     }
-            // })
-            // since we using redis lets try to retrieve from cache 
-            client.get(all, async (err, data) => {
-                if (err) {
-                    logger.error(`${req}-${err}`)
-                    console.log('Error Fetching all redis Cache', err)
+    try {
+        // client.del(all, async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+        // since we using redis lets try to retrieve from cache 
+        client.get(all, async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching all redis Cache', err)
 
-                    return res.status(404).json({
-                        'message': 'Could not Fetch all Data'
-                    })
-                }
+                return res.status(404).json({
+                    'message': 'Could not Fetch all Data'
+                })
+            }
 
-                if (data) {
-                    return res.status(200).send(
-                        JSON.parse(data))
+            if (data) {
+                return res.status(200).send(
+                    JSON.parse(data))
 
-                } else {
-                    const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
-                    // poi is a heavy table with all the points data
-                    // fetch its name and geojson
-                    const pois = await Poi.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] })
-                    const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
+            } else {
+                const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+                // poi is a heavy table with all the points data
+                // fetch its name and geojson
+                const pois = await Poi.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] })
+                const nssf = await Nssf.findAll({ attributes: ['name', ['wkb_geometry', 'geojson']] });
 
-                    client.set(all, JSON.stringify({ billboard, pois, nssf }))
+                client.set(all, JSON.stringify({ billboard, pois, nssf }))
 
-                    return res.status(200).json({
-                        billboard, pois, nssf,
-                        'message': 'cache miss'
-                    })
-                }
-            })
-        } catch (error) {
-            logger.error(`${req}-${error}`)
-            console.log(error)
+                return res.status(200).json({
+                    billboard, pois, nssf,
+                    'message': 'cache miss'
+                })
+            }
+        })
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
 
-            return res.status(404).json({
-                'message': 'Could not Fetch all Data'
-            })
-        }
+        return res.status(404).json({
+            'message': 'Could not Fetch all Data'
+        })
+    }
     // } else {
     //     return res.status(401).json({ 'Message': "Please sign up and enjoy more" });
     // }
 })
-
 
 const poiCategories = [
     'bank', 'hospital', 'police', 'school', 'university',
@@ -369,6 +368,61 @@ router.get('/eabl', async (req, res) => {
             'message': 'Could not Fetch EABL Data'
         })
     }
+})
+
+// african queen
+router.get('/aq', async (req, res) => {
+    try {
+        // client.del('aq', async (err, reply) => {
+        //     if (!err) {
+        //         if (reply === 1) {
+        //             console.log("Key is deleted");
+        //         } else {
+        //             console.log("Does't exists");
+        //         }
+        //     }
+        // })
+
+        client.get('aq', async (err, data) => {
+            if (err) {
+                logger.error(`${req}-${err}`)
+                console.log('Error Fetching all redis Cache', err)
+
+                return res.status(404).json({
+                    'message': 'Could not Fetch AQ Data'
+                })
+            }
+
+            if (data) {
+                return res.status(200).send(JSON.parse(data))
+
+            } else {
+                const pois = {};
+
+                const aq = await AQ.findAll({ attributes: { exclude: ['wkb_geometry'] } });
+
+                const billboard = await Billboard.findAll({ attributes: { exclude: ['id', 'createdAt', 'updatedAt'] } });
+
+                for (const i of poiCategories) {
+                    pois[i] = await fetchPoi('ug', i)
+                }
+
+                client.set('aq', JSON.stringify({ aq, pois, billboard }))
+
+                return res.status(200).json({ aq, pois, billboard, 'message': 'cache miss' })
+            }
+        });
+    } catch (error) {
+        logger.error(`${req}-${error}`)
+        console.log(error)
+
+        return res.status(404).json({
+            'message': 'Could not Fetch AQ Data'
+        })
+    }
+
+
+
 })
 
 module.exports = router;

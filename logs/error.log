@@ -1,1 +1,2 @@
 {"message":"[object Object]-ReferenceError: data is not defined","level":"error","service":"user-service"}
+{"message":"[object Object]-ReferenceError: aq is not defined","level":"error","service":"user-service"}

@@ -1,0 +1,80 @@
+<div id="loginContainer">
+  <form id="userForm" action="/auth/local" method="post">
+    <div class="form-item">
+      <label for="username">Name: </label>
+      <input type="text" name="username" id="username" placeholder="User Name" required />
+    </div>
+    <div class="form-item">
+      <label for="password">Password: </label><input type="password" name="password" id="password"
+        placeholder="password" required />
+    </div>
+    <div class="signin-item">
+      <button type="submit" class="btn" id="signIn">Log In</button>
+    </div>
+  </form>
+</div>
+
+<style>
+  #loginContainer {
+    box-sizing: border-box;
+    width: 380px;
+    height: 300px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #cfd8dc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #userForm {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .form-item {
+    padding: 20px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #userForm input[type="password"],
+  #userForm input[type="text"] {
+    border: none;
+    background: transparent;
+    text-align: center;
+    outline: none;
+    padding: 8px;
+    background-image: none;
+    border: 1px solid #3498db;
+    width: 70%;
+  }
+
+  .btn {
+    display: inline-block;
+    background: #3949ab;
+    outline: none;
+    border: 1px #27ae60;
+    padding: 5px;
+    margin: 2px;
+    color: white;
+  }
+
+  .btn:hover {
+    background: #9ea8e6;
+    transition: all 0.2s;
+    transform: scale(1.1);
+  }
+
+  .signin-item {
+    margin: 0 auto;
+  }
+</style>
