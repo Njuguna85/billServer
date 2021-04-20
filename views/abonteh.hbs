@@ -173,7 +173,7 @@
     function addOverlays(data) {
         addTrafficLayer();
         addGhanaPopulation();
-        addBillboards2(data.billboards);
+        addBillboards(data.billboards);
         for (const [key, value] of Object.entries(data.pois)) {
             if (commD.includes(key)) {
                 add(key, value);
@@ -378,102 +378,8 @@
 
     }
 
+  
     function addBillboards(data) {
-        const bounds = new google.maps.LatLngBounds();
-
-        const markers = data.map((el) => {
-            let latlng = new google.maps.LatLng(el.lat, el.long);
-            bounds.extend(latlng);
-            let contentString =
-                '<div class ="infoWindow">' +
-                "<div>" +
-                "Name: <b>" +
-                parseData(el.billboardi) +
-                "</b></div>" +
-                "<div>" +
-                "Route: <b>" +
-                parseData(el.routename) +
-                "</b></div>" +
-                "<div>" +
-                "Size: <b>" +
-                parseData(el.size) +
-                "</b></div>" +
-                "<div>" +
-                "Visibility: <b>" +
-                parseData(el.visibility) +
-                "</b> </div>" +
-                "<div>" +
-                "Medium: <b>" +
-                parseData(el.selectmedi) +
-                "</b> </div>" +
-                "<div>" +
-                "Traffic: <b>" +
-                parseData(el.traffic) +
-                "</b> </div>" +
-                "</div>" +
-                '<img class="billboardImage" alt="billboard photo" src=' +
-                el.photo +
-                ">" +
-                '<button class="btn end" data-lat=' +
-                el.latitude +
-                " data-long=" +
-                el.longitude +
-                " >Go Here</button>" +
-                '<button class="btn stop" data-lat=' +
-                el.latitude +
-                " data-long=" +
-                el.longitude +
-                " >Add Stop</button>" +
-                '<button class="btn start" data-lat=' +
-                el.latitude +
-                " data-long=" +
-                el.longitude +
-                " >Start Here</button>";
-
-            let marker = new google.maps.Marker({
-                position: latlng,
-                icon: {
-                    url: `images/marker.png`,
-                    scaledSize: new google.maps.Size(20, 20),
-                },
-                optimized: false,
-            });
-            google.maps.event.addListener(
-                marker,
-                "click",
-                ((marker, el) => {
-                    return () => {
-                        infoWindow.setContent(contentString);
-                        infoWindow.open(map, marker);
-                    };
-                })(marker, el)
-            );
-            return marker;
-        });
-
-        const markerCluster = new MarkerClusterer(map, markers, { imagePath: "images/m" });
-
-        div = document.createElement("div");
-        div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
-        essentialLayers.appendChild(div);
-        legend.addEventListener("change", (e) => {
-            if (e.target.matches("#billboardChecked")) {
-                cb = document.getElementById("billboardChecked");
-                // if on
-                if (cb.checked) {
-                    markerCluster.addMarkers(markers);
-                    map.fitBounds(bounds);
-                    map.panToBounds(bounds);
-                }
-                if (!cb.checked) {
-                    // if off
-                    markerCluster.removeMarkers(markers);
-                }
-            }
-        });
-    }
-
-    function addBillboards2(data) {
 
         const bounds = new google.maps.LatLngBounds();
         var spiderConfig = {
