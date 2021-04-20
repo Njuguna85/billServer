@@ -10,7 +10,6 @@ const ensureAuthLocal = (req, res, next) => {
     if (req.isAuthenticated()) {
         return next()
     } else {
-        console.log(req.originalUrl);
         res.redirect('/login')
     }
 }

@@ -1,410 +1,1860 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi step</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            outline: none;
-            font-family: Georgia, 'Times New Roman', Times, serif;
-        }
-        
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(#0250c5, #d43f8d);
-        }
-        
-        .container {
-            width: 330px;
-            background: #ffffff;
-            border-radius: 5px;
-            text-align: center;
-            padding: 50px 35px 10px 35px;
-        }
-        
-        .container header {
-            font-size: 35px;
-            font-weight: 500;
-            margin: 0 0 30px 0;
-        }
-        
-        .container .form-outer {
-            width: 100%;
-            overflow: hidden;
-        }
-        
-        .form-outer form {
-            display: flex;
-            width: 400%;
-        }
-        
-        .form-outer form .page {
-            width: 25%;
-            transform: margin-left .3s ease-in-out;
-        }
-        
-        .form-outer form .page .title {
-            text-align: left;
-            font-size: 25px;
-            font-weight: 500;
-        }
-        
-        .form-outer form .page .field {
-            height: 45px;
-            width: 330px;
-            margin: 45px 0;
-            position: relative;
-            display: flex;
-        }
-        
-        .form-outer form .page .field input {
-            height: 100%;
-            width: 100%;
-            border: 1px solid lightgray;
-            border-radius: 5px;
-            font-size: 18px;
-            padding-left: 15px;
-        }
-        
-        .form-outer form .page .field .label {
-            position: absolute;
-            top: -30px;
-            font-weight: 500;
-        }
-        
-        form .page .field select {
-            width: 100%;
-            padding-left: 10px;
-            font-size: 17px;
-            font-weight: 500;
-        }
-        
-        .form-outer form .page .field button {
-            width: 100%;
-            height: calc(100% + 5px);
-            margin-top: -20px;
-            border: none;
-            border-radius: 5px;
-            background: #d43f8d;
-            color: #ffffff;
-            font-size: 18px;
-            text-transform: uppercase;
-            font-weight: 500;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: .3s ease;
-        }
-        
-        .form-outer form .page .field button:hover {
-            background: #000000;
-        }
-        
-        .form-outer form .page .btns button {
-            margin-top: -20px !important;
-        }
-        
-        form .page .btns button.prev {
-            margin-right: 3px;
-            font-size: 17px;
-        }
-        
-        form .page .btns button.next {
-            margin-left: 3px;
-        }
-        
-        .container .progress-bar {
-            display: flex;
-            margin: 40px 0;
-        }
-        
-        .container .progress-bar .step {
-            text-align: center;
-            position: relative;
-            width: 100%;
-        }
-        
-        .progress-bar .step p {
-            font-size: 18px;
-            font-weight: 500;
-            color: #000000;
-            margin-bottom: 8px;
-            transition: .2s;
-        }
-        
-        .progress-bar .step p.active {
-            color: #d43f8d;
-        }
-        
-        .progress-bar .step .bullet {
-            position: relative;
-            height: 25px;
-            width: 25px;
-            border: 2px solid #000000;
-            display: inline-block;
-            border-radius: 50%;
-            transition: .2s;
-        }
-        
-        .progress-bar .step:last-child .bullet:before,
-        .progress-bar .step:last-child .bullet:after {
-            display: none;
-        }
-        
-        .progress-bar .step .bullet.active {
-            border-color: #d43f8d;
-            background: #d43f8d;
-        }
-        
-        .progress-bar .step .bullet:before,
-        .progress-bar .step .bullet:after {
-            position: absolute;
-            content: '';
-            bottom: 11px;
-            right: -51px;
-            height: 3px;
-            width: 44px;
-            background: #9bcc1626;
-        }
-        
-        .progress-bar .step .bullet.active:after {
-            background-color: #d43f8d;
-            transform: scale(0);
-            transform-origin: left;
-            animation: animate .3s linear forwards;
-        }
-        
-        @keyframes animate {
-            100% {
-                transform: scaleX(1);
-            }
-        }
-        
-        .progress-bar .step .bullet span {
-            font-weight: 500;
-            line-height: 25px;
-            font-size: 17px;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .progress-bar .step .bullet.active span {
-            display: none;
-        }
-        
-        .progress-bar .step .check {
-            position: absolute;
-            left: 50%;
-            top: 70%;
-            font-size: 15px;
-            transform: translate(-50%, -50%);
-            display: none;
-        }
-        
-        .progress-bar .step .check.active {
-            display: block;
-            color: #ffffff;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <header>Signup Form</header>
-        <div class="progress-bar">
-            <div class="step">
-                <p>
-                    Name</p>
-                <div class="bullet">
-                    <span>1</span>
-                </div>
-                <div class="check fas fa-check">
-                </div>
-            </div>
-            <div class="step">
-                <p>
-                    Contact</p>
-                <div class="bullet">
-                    <span>2</span>
-                </div>
-                <div class="check fas fa-check">
-                </div>
-            </div>
-            <div class="step">
-                <p>
-                    Birth</p>
-                <div class="bullet">
-                    <span>3</span>
-                </div>
-                <div class="check fas fa-check">
-                </div>
-            </div>
-            <div class="step">
-                <p>
-                    Submit</p>
-                <div class="bullet">
-                    <span>4</span>
-                </div>
-                <div class="check fas fa-check">
-                </div>
-            </div>
-        </div>
-        <div class="form-outer">
-            <form action="#">
-                <div class="page slide-page">
-                    <div class="title">
-                        Basic Info:</div>
-                    <div class="field">
-                        <div class="label">
-                            First Name</div>
-                        <input type="text">
-                    </div>
-                    <div class="field">
-                        <div class="label">
-                            Last Name</div>
-                        <input type="text">
-                    </div>
-                    <div class="field nextBtn">
-                        <button class="firstNext next">Next</button>
-                    </div>
-                </div>
-                <div class="page">
-                    <div class="title">
-                        Contact Info:</div>
-                    <div class="field">
-                        <div class="label">
-                            Email Address</div>
-                        <input type="text">
-                    </div>
-                    <div class="field">
-                        <div class="label">
-                            Phone Number</div>
-                        <input type="Number">
-                    </div>
-                    <div class="field btns">
-                        <button class="prev-1 prev">Previous</button>
-                        <button class="next-1 next">Next</button>
-                    </div>
-                </div>
-                <div class="page">
-                    <div class="title">
-                        Date of Birth:</div>
-                    <div class="field">
-                        <div class="label">
-                            Date</div>
-                        <input type="text">
-                    </div>
-                    <div class="field">
-                        <div class="label">
-                            Gender</div>
-                        <select>
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-                    <div class="field btns">
-                        <button class="prev-2 prev">Previous</button>
-                        <button class="next-2 next">Next</button>
-                    </div>
-                </div>
-                <div class="page">
-                    <div class="title">
-                        Login Details:</div>
-                    <div class="field">
-                        <div class="label">
-                            Username</div>
-                        <input type="text">
-                    </div>
-                    <div class="field">
-                        <div class="label">
-                            Password</div>
-                        <input type="password">
-                    </div>
-                    <div class="field btns">
-                        <button class="prev-3 prev">Previous</button>
-                        <button class="submit">Submit</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
     <script>
-        const slidePage = document.querySelector('.slide-page')
-        const firstNextBtn = document.querySelector('.nextBtn')
-        const prevSecBtn = document.querySelector('.prev-1')
-        const nextSecBtn = document.querySelector('.next-1')
-        const prevThirdBtn = document.querySelector('.prev-2')
-        const nextThirdBtn = document.querySelector('.next-2')
-        const prevFourthBtn = document.querySelector('.prev-3')
-        const submitBtn = document.querySelector('.submit')
-        const progressText = document.querySelectorAll('.step')
-        const progressCheck = document.querySelectorAll('.step .check')
-        const bullet = document.querySelectorAll('.step .bullet')
+      const data = [
+        {
+          id: 27,
+          user_id: 101,
+          medium_id: 1,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 30,
+          orientation_id: 9,
+          size_id: 31,
+          height_id: 15,
+          faces_id: 17,
+          site_run_up: "100m",
+          angle_id: 42,
+          side_of_road_id: 43,
+          image: "https://bi.predictiveanalytics.africa/storage/216094327.png",
+          latitude: "5.6110803",
+          longitude: "-0.205818",
+          address: "16 , #7, Dzorwulu Cres, Accra, Ghana",
+          created_at: "2021-04-16T14:58:41.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 1,
+            characteristic_type: "medium",
+            characteristic_value: "Wall Wrap",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 17,
+            characteristic_type: "faces",
+            characteristic_value: "2",
+          },
+          clutter: {
+            id: 30,
+            characteristic_type: "Clutter",
+            characteristic_value: "Cluttered",
+          },
+          size: {
+            id: 31,
+            characteristic_type: "size",
+            characteristic_value: "12*9",
+          },
+          orientation: {
+            id: 9,
+            characteristic_type: "orientation",
+            characteristic_value: "Potrait",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: {
+            id: 43,
+            characteristic_type: "side_of_road",
+            characteristic_value: "left",
+          },
+          angle: {
+            id: 42,
+            characteristic_type: "angle",
+            characteristic_value: "45",
+          },
+        },
+        {
+          id: 26,
+          user_id: 101,
+          medium_id: 18,
+          lighting_id: 29,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 32,
+          height_id: 15,
+          faces_id: 17,
+          site_run_up: "100m",
+          angle_id: null,
+          side_of_road_id: 43,
+          image: "https://bi.predictiveanalytics.africa/storage/288871018.png",
+          latitude: "5.6896318",
+          longitude: "-0.0852237",
+          address: "Tema Metropolitan , Unnamed Road, Ghana",
+          created_at: "2021-04-16T14:50:54.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 18,
+            characteristic_type: "medium",
+            characteristic_value: "Regular",
+          },
+          lighting: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 17,
+            characteristic_type: "faces",
+            characteristic_value: "2",
+          },
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 32,
+            characteristic_type: "size",
+            characteristic_value: "9*12",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: {
+            id: 43,
+            characteristic_type: "side_of_road",
+            characteristic_value: "left",
+          },
+          angle: null,
+        },
+        {
+          id: 25,
+          user_id: 101,
+          medium_id: 44,
+          lighting_id: 29,
+          direction_id: 5,
+          clutter_id: 30,
+          orientation_id: 9,
+          size_id: 38,
+          height_id: 15,
+          faces_id: 39,
+          site_run_up: "1",
+          angle_id: 42,
+          side_of_road_id: 43,
+          image: "https://bi.predictiveanalytics.africa/storage/219062635.png",
+          latitude: "-1.2625888",
+          longitude: "36.8063899",
+          address: "Victoria Plaza , 11th Parklands Rd, Nairobi, Kenya",
+          created_at: "2021-04-16T13:51:25.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 44,
+            characteristic_type: "medium",
+            characteristic_value: "fear",
+          },
+          lighting: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 39,
+            characteristic_type: "faces",
+            characteristic_value: "3",
+          },
+          clutter: {
+            id: 30,
+            characteristic_type: "Clutter",
+            characteristic_value: "Cluttered",
+          },
+          size: {
+            id: 38,
+            characteristic_type: "size",
+            characteristic_value: "6*4",
+          },
+          orientation: {
+            id: 9,
+            characteristic_type: "orientation",
+            characteristic_value: "Potrait",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: {
+            id: 43,
+            characteristic_type: "side_of_road",
+            characteristic_value: "left",
+          },
+          angle: {
+            id: 42,
+            characteristic_type: "angle",
+            characteristic_value: "45",
+          },
+        },
+        {
+          id: 24,
+          user_id: 101,
+          medium_id: 18,
+          lighting_id: 29,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 32,
+          height_id: 15,
+          faces_id: 17,
+          site_run_up: "100meters",
+          angle_id: 42,
+          side_of_road_id: 43,
+          image: "https://bi.predictiveanalytics.africa/storage/152677718.png",
+          latitude: "5.6896153",
+          longitude: "-0.085172",
+          address: "Tema Metropolitan , Unnamed Road, Ghana",
+          created_at: "2021-04-16T11:45:20.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 18,
+            characteristic_type: "medium",
+            characteristic_value: "Regular",
+          },
+          lighting: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 17,
+            characteristic_type: "faces",
+            characteristic_value: "2",
+          },
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 32,
+            characteristic_type: "size",
+            characteristic_value: "9*12",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: {
+            id: 43,
+            characteristic_type: "side_of_road",
+            characteristic_value: "left",
+          },
+          angle: {
+            id: 42,
+            characteristic_type: "angle",
+            characteristic_value: "45",
+          },
+        },
+        {
+          id: 23,
+          user_id: 101,
+          medium_id: 40,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: 42,
+          side_of_road_id: 43,
+          image: "https://bi.predictiveanalytics.africa/storage/553898327.png",
+          latitude: "-1.1820832",
+          longitude: "36.9026129",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-16T04:14:09.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 40,
+            characteristic_type: "medium",
+            characteristic_value: "test medium",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: {
+            id: 43,
+            characteristic_type: "side_of_road",
+            characteristic_value: "left",
+          },
+          angle: {
+            id: 42,
+            characteristic_type: "angle",
+            characteristic_value: "45",
+          },
+        },
+        {
+          id: 22,
+          user_id: 101,
+          medium_id: 41,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/456844097.png",
+          latitude: "-1.2080261",
+          longitude: "36.8794207",
+          address: "Mirema , Northern Bypass Rd, Nairobi, Kenya",
+          created_at: "2021-04-15T18:45:45.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 41,
+            characteristic_type: "medium",
+            characteristic_value: "new medium",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 21,
+          user_id: 101,
+          medium_id: 40,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test run up",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/734874316.png",
+          latitude: "-1.2080258",
+          longitude: "36.8794199",
+          address: "Mirema , Northern Bypass Rd, Nairobi, Kenya",
+          created_at: "2021-04-15T18:29:15.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 40,
+            characteristic_type: "medium",
+            characteristic_value: "test medium",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 20,
+          user_id: 101,
+          medium_id: 18,
+          lighting_id: 29,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 32,
+          height_id: 15,
+          faces_id: 17,
+          site_run_up: "100",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/223992678.png",
+          latitude: "5.6896318",
+          longitude: "-0.0852237",
+          address: "Tema Metropolitan , Unnamed Road, Ghana",
+          created_at: "2021-04-15T15:43:10.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 18,
+            characteristic_type: "medium",
+            characteristic_value: "Regular",
+          },
+          lighting: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 17,
+            characteristic_type: "faces",
+            characteristic_value: "2",
+          },
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 32,
+            characteristic_type: "size",
+            characteristic_value: "9*12",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 19,
+          user_id: 101,
+          medium_id: 3,
+          lighting_id: 28,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 9,
+          size_id: 33,
+          height_id: 14,
+          faces_id: 17,
+          site_run_up: "50 meters",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/174566132.png",
+          latitude: "5.5776767",
+          longitude: "-0.1630454",
+          address: "4 , 8 Obenesu Cres, Accra, Ghana",
+          created_at: "2021-04-15T15:40:53.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 3,
+            characteristic_type: "medium",
+            characteristic_value: "Rooftops",
+          },
+          lighting: {
+            id: 28,
+            characteristic_type: "lighting",
+            characteristic_value: "Backlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 17,
+            characteristic_type: "faces",
+            characteristic_value: "2",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 33,
+            characteristic_type: "size",
+            characteristic_value: "5*10",
+          },
+          orientation: {
+            id: 9,
+            characteristic_type: "orientation",
+            characteristic_value: "Potrait",
+          },
+          height: {
+            id: 14,
+            characteristic_type: "height",
+            characteristic_value: "Too high",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 18,
+          user_id: 101,
+          medium_id: 2,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 15,
+          faces_id: 39,
+          site_run_up: "Magnate",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/457057485.png",
+          latitude: "0.3206239",
+          longitude: "32.5898438",
+          address: "4b , 77 Yusuf Lule Road, Kampala, Uganda",
+          created_at: "2021-04-15T15:39:29.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 2,
+            characteristic_type: "medium",
+            characteristic_value: "RoadArch/Gantry",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 39,
+            characteristic_type: "faces",
+            characteristic_value: "3",
+          },
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 17,
+          user_id: 101,
+          medium_id: 18,
+          lighting_id: 29,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 32,
+          height_id: 14,
+          faces_id: 17,
+          site_run_up: "50 meters",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/596365263.png",
+          latitude: "5.5776519",
+          longitude: "-0.1630453",
+          address: "28 , 8 Obenesu Cres, Accra, Ghana",
+          created_at: "2021-04-15T12:37:45.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 18,
+            characteristic_type: "medium",
+            characteristic_value: "Regular",
+          },
+          lighting: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 17,
+            characteristic_type: "faces",
+            characteristic_value: "2",
+          },
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 32,
+            characteristic_type: "size",
+            characteristic_value: "9*12",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 14,
+            characteristic_type: "height",
+            characteristic_value: "Too high",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 16,
+          user_id: 101,
+          medium_id: 21,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "Test jiji account",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/826024722.png",
+          latitude: "-1.1819973",
+          longitude: "36.9025703",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T11:05:57.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 21,
+            characteristic_type: "medium",
+            characteristic_value: "LEDs",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 15,
+          user_id: 101,
+          medium_id: 21,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/530078860.png",
+          latitude: "-1.182064",
+          longitude: "36.9025899",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T11:04:41.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 21,
+            characteristic_type: "medium",
+            characteristic_value: "LEDs",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 14,
+          user_id: 101,
+          medium_id: null,
+          lighting_id: 28,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/402870018.png",
+          latitude: "-1.1820386",
+          longitude: "36.9025734",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T10:53:27.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: null,
+          lighting: {
+            id: 28,
+            characteristic_type: "lighting",
+            characteristic_value: "Backlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 13,
+          user_id: 101,
+          medium_id: null,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/154324522.png",
+          latitude: "-1.1820914",
+          longitude: "36.9026279",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T10:49:25.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: null,
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 12,
+          user_id: 101,
+          medium_id: null,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/823544265.png",
+          latitude: "-1.1820667",
+          longitude: "36.9025961",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T10:48:50.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: null,
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 11,
+          user_id: 101,
+          medium_id: null,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/959759898.png",
+          latitude: "-1.2080258",
+          longitude: "36.8794199",
+          address: "Mirema , Northern Bypass Rd, Nairobi, Kenya",
+          created_at: "2021-04-15T10:47:08.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: null,
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 10,
+          user_id: 101,
+          medium_id: 4,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/419849803.png",
+          latitude: "-1.1819765",
+          longitude: "36.9025363",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T10:42:15.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 9,
+          user_id: 101,
+          medium_id: 4,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/646981375.png",
+          latitude: "-1.2080258",
+          longitude: "36.8794199",
+          address: "Mirema , Northern Bypass Rd, Nairobi, Kenya",
+          created_at: "2021-04-15T10:40:03.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 8,
+          user_id: 101,
+          medium_id: 29,
+          lighting_id: 29,
+          direction_id: 5,
+          clutter_id: 30,
+          orientation_id: 10,
+          size_id: 38,
+          height_id: 15,
+          faces_id: 39,
+          site_run_up: "test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/421402995.png",
+          latitude: "-1.2080265",
+          longitude: "36.8794183",
+          address: "Mirema , Northern Bypass Rd, Nairobi, Kenya",
+          created_at: "2021-04-15T10:31:33.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          lighting: {
+            id: 29,
+            characteristic_type: "lighting",
+            characteristic_value: "Unlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 39,
+            characteristic_type: "faces",
+            characteristic_value: "3",
+          },
+          clutter: {
+            id: 30,
+            characteristic_type: "Clutter",
+            characteristic_value: "Cluttered",
+          },
+          size: {
+            id: 38,
+            characteristic_type: "size",
+            characteristic_value: "6*4",
+          },
+          orientation: {
+            id: 10,
+            characteristic_type: "orientation",
+            characteristic_value: "Square",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 7,
+          user_id: 101,
+          medium_id: 4,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 30,
+          orientation_id: 10,
+          size_id: 36,
+          height_id: 15,
+          faces_id: 39,
+          site_run_up: "Test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/111582368.png",
+          latitude: "-1.1819787",
+          longitude: "36.9025344",
+          address: "Kahawa West , Colimor Lane, Githurai, Kenya",
+          created_at: "2021-04-15T10:28:26.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 39,
+            characteristic_type: "faces",
+            characteristic_value: "3",
+          },
+          clutter: {
+            id: 30,
+            characteristic_type: "Clutter",
+            characteristic_value: "Cluttered",
+          },
+          size: {
+            id: 36,
+            characteristic_type: "size",
+            characteristic_value: "6*9",
+          },
+          orientation: {
+            id: 10,
+            characteristic_type: "orientation",
+            characteristic_value: "Square",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 6,
+          user_id: 101,
+          medium_id: 4,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 30,
+          orientation_id: 10,
+          size_id: 36,
+          height_id: 15,
+          faces_id: 39,
+          site_run_up: "Test",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/827262625.png",
+          latitude: "-1.2080258",
+          longitude: "36.8794199",
+          address: "Mirema , Northern Bypass Rd, Nairobi, Kenya",
+          created_at: "2021-04-15T10:27:53.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 39,
+            characteristic_type: "faces",
+            characteristic_value: "3",
+          },
+          clutter: {
+            id: 30,
+            characteristic_type: "Clutter",
+            characteristic_value: "Cluttered",
+          },
+          size: {
+            id: 36,
+            characteristic_type: "size",
+            characteristic_value: "6*9",
+          },
+          orientation: {
+            id: 10,
+            characteristic_type: "orientation",
+            characteristic_value: "Square",
+          },
+          height: {
+            id: 15,
+            characteristic_type: "height",
+            characteristic_value: "Moderate",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 5,
+          user_id: 101,
+          medium_id: 1,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 7,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "100 meters",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/322065680.png",
+          latitude: "-1.2681852",
+          longitude: "36.7642012",
+          address: "Bernard Estate , Kabarsiran Cl, Nairobi, Kenya",
+          created_at: "2021-04-08T08:55:15.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 1,
+            characteristic_type: "medium",
+            characteristic_value: "Wall Wrap",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 7,
+            characteristic_type: "size",
+            characteristic_value: "4.5*18",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 4,
+          user_id: 101,
+          medium_id: 2,
+          lighting_id: 28,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 33,
+          height_id: 14,
+          faces_id: null,
+          site_run_up: "50",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/561469826.png",
+          latitude: "5.5776701",
+          longitude: "-0.1630461",
+          address: null,
+          created_at: "2021-04-07T10:48:07.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 2,
+            characteristic_type: "medium",
+            characteristic_value: "RoadArch/Gantry",
+          },
+          lighting: {
+            id: 28,
+            characteristic_type: "lighting",
+            characteristic_value: "Backlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: null,
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 33,
+            characteristic_type: "size",
+            characteristic_value: "5*10",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 14,
+            characteristic_type: "height",
+            characteristic_value: "Too high",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 3,
+          user_id: 101,
+          medium_id: 18,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 12,
+          orientation_id: 8,
+          size_id: 6,
+          height_id: 13,
+          faces_id: 16,
+          site_run_up: "wekk",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/850311991.png",
+          latitude: "-1.3460559",
+          longitude: "36.9482898",
+          address: null,
+          created_at: "2021-04-07T06:11:25.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 18,
+            characteristic_type: "medium",
+            characteristic_value: "Regular",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: {
+            id: 16,
+            characteristic_type: "faces",
+            characteristic_value: "1",
+          },
+          clutter: {
+            id: 12,
+            characteristic_type: "Clutter",
+            characteristic_value: "Average",
+          },
+          size: {
+            id: 6,
+            characteristic_type: "size",
+            characteristic_value: "6*20",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 2,
+          user_id: 101,
+          medium_id: 1,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 7,
+          height_id: 13,
+          faces_id: null,
+          site_run_up: "24",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/964246058.png",
+          latitude: "-1.1818539",
+          longitude: "36.90256",
+          address: null,
+          created_at: "2021-04-06T17:50:48.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 1,
+            characteristic_type: "medium",
+            characteristic_value: "Wall Wrap",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: null,
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 7,
+            characteristic_type: "size",
+            characteristic_value: "4.5*18",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+        {
+          id: 1,
+          user_id: 101,
+          medium_id: 1,
+          lighting_id: 4,
+          direction_id: 5,
+          clutter_id: 11,
+          orientation_id: 8,
+          size_id: 7,
+          height_id: 13,
+          faces_id: null,
+          site_run_up: "24",
+          angle_id: null,
+          side_of_road_id: null,
+          image: "https://bi.predictiveanalytics.africa/storage/641676133.png",
+          latitude: "-1.1818539",
+          longitude: "36.90256",
+          address: null,
+          created_at: "2021-04-06T17:50:48.000000Z",
+          user: {
+            id: 101,
+            first_name: "Timothy",
+            last_name: "Oriedo",
+          },
+          medium: {
+            id: 1,
+            characteristic_type: "medium",
+            characteristic_value: "Wall Wrap",
+          },
+          lighting: {
+            id: 4,
+            characteristic_type: "lighting",
+            characteristic_value: "Frontlit",
+          },
+          direction: {
+            id: 5,
+            characteristic_type: "direction",
+            characteristic_value: "FTF ( Facing traffic from )",
+          },
+          faces: null,
+          clutter: {
+            id: 11,
+            characteristic_type: "Clutter",
+            characteristic_value: "Solus",
+          },
+          size: {
+            id: 7,
+            characteristic_type: "size",
+            characteristic_value: "4.5*18",
+          },
+          orientation: {
+            id: 8,
+            characteristic_type: "orientation",
+            characteristic_value: "Landscape",
+          },
+          height: {
+            id: 13,
+            characteristic_type: "height",
+            characteristic_value: "Eye Level",
+          },
+          side_of_road: null,
+          angle: null,
+        },
+      ];
 
-        let max = 4,
-            current = 1;
+      function parseData(val) {
+        if (val === null || val === undefined) {
+          return "";
+        }
+        return val;
+      }
 
-        firstNextBtn.addEventListener('click', () => {
-            slidePage.style.marginLeft = '-25%';
-            bullet[current - 1].classList.add('active');
-            progressText[current - 1].classList.add('active');
-            progressCheck[current - 1].classList.add('active');
-            current += 1;
-        })
-        nextSecBtn.addEventListener('click', () => {
-            slidePage.style.marginLeft = '-50%';
-            bullet[current - 1].classList.add('active');
-            progressText[current - 1].classList.add('active');
-            progressCheck[current - 1].classList.add('active');
-            current += 1;
-        })
-        nextThirdBtn.addEventListener('click', () => {
-            slidePage.style.marginLeft = '-75%';
-            bullet[current - 1].classList.add('active');
-            progressText[current - 1].classList.add('active');
-            progressCheck[current - 1].classList.add('active');
-            current += 1;
-        })
+      data.map((el) => {
+        let lighting = el && el.lighting && el.lighting["characteristic_value"];
+        let direction =
+          el && el.direction && el.direction["characteristic_value"];
+        let faces = el && el.faces && el.faces["characteristic_value"];
+        let clutter =
+          el && el && el.clutter && el.clutter["characteristic_value"];
+        let size = el && el && el.size && el.size["characteristic_value"];
+        let orientation =
+          el && el && el.orientation && el.orientation["characteristic_value"];
+        let height = el && el && el.height && el.height["characteristic_value"];
+        let side_of_road =
+          el && el.side_of_road && el.side_of_road["characteristic_value"];
+        let angle = el && el && el.angle && el.angle["characteristic_value"];
+        let image = el && el.image;
+        let latitude = el && el.latitude;
+        let longitude = el && el.longitude;
 
-        submitBtn.addEventListener('click', () => {
-            bullet[current - 1].classList.add('active');
-            progressText[current - 1].classList.add('active');
-            progressCheck[current - 1].classList.add('active');
-            current += 1;
-        })
-
-        prevSecBtn.addEventListener('click', () => {
-            slidePage.style.marginLeft = '0%';
-            bullet[current - 2].classList.remove('active');
-            progressText[current - 2].classList.remove('active');
-            progressCheck[current - 2].classList.remove('active');
-            current -= 1;
-        })
-        prevThirdBtn.addEventListener('click', () => {
-            slidePage.style.marginLeft = '-25%';
-            bullet[current - 2].classList.remove('active');
-            progressText[current - 2].classList.remove('active');
-            progressCheck[current - 2].classList.remove('active');
-            current -= 1;
-        })
-        prevFourthBtn.addEventListener('click', () => {
-            slidePage.style.marginLeft = '-50%';
-            bullet[current - 2].classList.remove('active');
-            progressText[current - 2].classList.remove('active');
-            progressCheck[current - 2].classList.remove('active');
-            current -= 1;
-        })
+       console.log(el && el.medium && el.medium["characteristic_value"]);
+      });
     </script>
-</body>
-
+  </body>
 </html>

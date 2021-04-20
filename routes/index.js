@@ -39,26 +39,6 @@ router.get('/dashboard', ensureAuth, async (req, res) => {
 // @route GET /businesses
 router.get('/businesses', ensureAuth, async (req, res) => {
     try {
-        /*
-        then we let them know that they should select a place to set up the business
-        the user will then be directed to choose a location
-        search frome lock to location (or unlock to choose another one)
-        then we use go a text box or click on map location or both
-        then choosogle maps to search the location with
-        similar places 
-        we store the the xy of the place 
-        we also add a slider bar to allow users to +-crease the radius 
-        of search
-
-        ** to note**
-            the businesses api category is paginated
-            the roles api is note yet done
-            UI fintuning
-            .africa
-            geoserver interactivity
-            emails thing
-            delete excel after upload
-        */
 
         // fetch for the businesses categories
         let response = await axios.get(process.env.businessesCategories);
@@ -102,6 +82,13 @@ router.get('/eabl', (req, res) => {
 // use local strategy to redirect if no user
 router.get('/aq', ensureAuthLocal, (req, res) => {
     res.render('aq', {
+        apiKey: process.env.googleMapsAPIKey,
+        layout: 'eabl',
+    })
+});
+
+router.get('/abonteeh', (req, res) => {
+    res.render('abonteh', {
         apiKey: process.env.googleMapsAPIKey,
         layout: 'eabl',
     })

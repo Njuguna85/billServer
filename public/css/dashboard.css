@@ -368,7 +368,7 @@ h5.accordion.is-open {
 
 .infoWindow>div {
     display: flex;
-    justify-content: centre;
+    justify-content: space-between;
 }
 
 .billboardImage {
