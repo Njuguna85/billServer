@@ -436,12 +436,15 @@ router.get('/abonteh', async (req, res) => {
 
         const responseBillboards = await axios.get('https://bi.predictiveanalytics.africa/api/billboard/', {
             headers: {
-                'Authorization': `Bearer ${responseToken.data.access_token}`
+                'Authorization': `Bearer ${responseToken.data.access_token}`,
+                'Access-Control-Allow-Methods': 'GET',
+                'Access-Control-Allow-Origin': '*',
+                "Access-Control-Allow-Headers": "X-Requested-With"
             }
         });
 
         billboards = responseBillboards.data;
-        console.log(billboards);
+        
         // client.del('abonteh', async (err, reply) => {
         //     if (!err) {
         //         if (reply === 1) {
@@ -464,7 +467,7 @@ router.get('/abonteh', async (req, res) => {
             if (data) {
                 abonteehData = JSON.parse(data)
                 return res.status(200).json({
-                    ...abonteehData
+                    ...abonteehData, billboards
                 })
             } else {
 
