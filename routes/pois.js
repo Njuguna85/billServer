@@ -425,7 +425,7 @@ router.get('/aq', async (req, res) => {
 
 router.get('/abonteh', async (req, res) => {
     const pois = {};
-    const now = new Date().getTime();
+
     let billboards, abonteehData;
     try {
         const responseToken = await axios.post('https://bi.predictiveanalytics.co.ke/oauth/token', {
@@ -441,7 +441,7 @@ router.get('/abonteh', async (req, res) => {
         });
 
         billboards = responseBillboards.data;
-
+        console.log(billboards);
         // client.del('abonteh', async (err, reply) => {
         //     if (!err) {
         //         if (reply === 1) {
