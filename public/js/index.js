@@ -6,9 +6,8 @@ const mapContainer = document.getElementById("map");
 let bounds, markerCluster, gmarkers = {};
 const filters = [];
 let billboardMarkers = [];
-let overallScore = 0;
+let overallScore = 0, totalBB = 0;
 const billboardTable = document.getElementById('billboardTable');
-const scoreBoard = document.getElementById('score')
 
 let legend = document.createElement("div");
 legend.setAttribute("id", "legend");
@@ -517,7 +516,9 @@ function parseBBProps(filterScoreProp, bbProp) {
 
 function addBillboards(data) {
   const bounds = new google.maps.LatLngBounds();
+
   const markers = data.map((el) => {
+    totalBB++
     const iconUrl = `images/billboardColored.png`;
     let score;
 
@@ -612,6 +613,7 @@ function addBillboards(data) {
 
   billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
   billboardTable.style.display = 'block';
+  drawBBLegend()
 
   div = document.createElement("div");
   div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
@@ -626,14 +628,14 @@ function addBillboards(data) {
         map.panToBounds(bounds);
 
         billboardTable.style.display = 'block';
-
+        drawBBLegend()
       }
       if (!cb.checked) {
         // if off
         billboardMarkers.removeMarkers(markers);
 
         billboardTable.style.display = 'none';
-
+        clearBBLegend()
       }
     }
   });
@@ -957,9 +959,10 @@ function saveData(data) {
   localStorage.setItem('nairobi', JSON.stringify(data));
 }
 
-//
 function accumulateFilters(name, value, remove = false) {
   const index = filters.findIndex(f => f.name === name);
+  drawFilterIcon()
+  const scoreBoard = infoTab.querySelector('#score')
 
   // remove a filter
   if (remove) {
@@ -969,7 +972,6 @@ function accumulateFilters(name, value, remove = false) {
     // then remove it from the overall score
     if (filters.length > 0) {
       const prevFilterVal = filters[index]['value']
-      // const prevScore = filterScores[name][prevFilterVal]
       const prevScore = filterScores[name][prevFilterVal].score
       overallScore -= prevScore
       scoreBoard.innerHTML = overallScore
@@ -977,6 +979,7 @@ function accumulateFilters(name, value, remove = false) {
 
     filters.splice(index, 1);
     applyFilters()
+    updateFilterHtml()
     return;
   }
 
@@ -989,6 +992,7 @@ function accumulateFilters(name, value, remove = false) {
 
     filters.push({ name: name, value: value });
     applyFilters()
+    updateFilterHtml()
     return;
   }
 
@@ -1000,10 +1004,9 @@ function accumulateFilters(name, value, remove = false) {
   overallScore += newScore;
   scoreBoard.innerHTML = overallScore
 
-
   filters[index].value = value;
   applyFilters()
-
+  updateFilterHtml()
 }
 
 // apply all fillters in the filters array
@@ -1036,8 +1039,7 @@ const applyFilters = () => {
     bm.setIcon(greyedIcon);
 
   })
-  info = infoTab.querySelector(".info");
-  info.innerHTML = `<div id="billboardInfo">${counter} billboards meet your category </div>`
+  infoTab.querySelector("#bbCount").innerHTML = counter;
 }
 
 function stopAnimation(marker) {
@@ -1127,7 +1129,7 @@ function drawCatIcons(category) {
   let html = "";
   for (const [k, v] of Object.entries(filterScores[category])) {
     html +=
-      `<div> <h4> ${k} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+      `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
   }
 
   info.innerHTML =
@@ -1138,4 +1140,50 @@ function drawCatIcons(category) {
         </div>
     </div>`
 
+}
+
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function drawBBLegend() {
+  const html = `
+    <div class="billboardFilInfo">
+      <div><h4>Score:</h4><span id="score">0</span> </div>
+      <hr class="hr">
+      <div><span id="bbCount">${totalBB}</span> Billboards</div>
+      <hr class="hr">
+      <div style="text-align:centre;"> Filters </div>
+      <div id="filters"></div>
+      <hr class="hr">
+      <div id="filterIcons"> </div>
+    </div>
+  `
+  infoTab.querySelector(".info").innerHTML = html
+}
+
+function clearBBLegend() {
+  infoTab.querySelector(".info").innerHTML = '';
+
+}
+
+function updateFilterHtml() {
+  // filters :[...filter]
+  // filter: {name: value}
+  let html = ''
+  filters.forEach(({ name, value }) => {
+    html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`
+  });
+  infoTab.querySelector('#filters').innerHTML = html
+}
+
+function drawFilterIcon() {
+  infoTab.querySelector('#filterIcons').innerHTML = `
+  <div>
+  Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+  </div>
+  <div>
+  Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
+  </div>
+  `;
 }

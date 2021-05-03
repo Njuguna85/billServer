@@ -691,7 +691,7 @@ tr:nth-child(even) {
 }
 
 #score {
-  font-size: 4rem;
+  font-size: 2rem;
   color: rgb(255, 72, 0);
 }
 
@@ -700,7 +700,8 @@ tr:nth-child(even) {
   color: #ef5350;
   font-weight: 700;
 }
-.billboardCatInfo div {
+.billboardCatInfo div,
+.billboardFilInfo div {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -710,4 +711,19 @@ tr:nth-child(even) {
   display: block;
   height: 30px;
   width: 30px;
+}
+
+#filterIcons,
+#filters {
+  display: flex;
+  flex-direction: column;
+  align-items: normal;
+}
+
+.hr {
+  border-top: 2px solid rgb(197, 187, 187);
+}
+
+.info {
+  font-size: 1rem;
 }
