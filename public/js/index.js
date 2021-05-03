@@ -8,7 +8,7 @@ const filters = [];
 let billboardMarkers = [];
 let overallScore = 0;
 const billboardTable = document.getElementById('billboardTable');
-
+const scoreBoard = document.getElementById('score')
 
 let legend = document.createElement("div");
 legend.setAttribute("id", "legend");
@@ -892,14 +892,10 @@ poiLayersAccordion.addEventListener('change', (e) => {
 })
 
 billboardTable.addEventListener('click', e => {
-  if (e.target.matches('#lighting')) {
-    billboardMarkers.getMarkers().forEach(bb => {
-      const icon = {
-        url: `./images/billboardGreyed2.png`,
-        scaledSize: new google.maps.Size(30, 30)
-      };
-      bb.setIcon(icon)
-    });
+  if (e.target.matches('.category')) {
+    // get the id/name of category
+    const category = e.target.value
+    categorizeBB(category)
   }
 
   if (e.target.matches('.filter_selector')) {
@@ -961,19 +957,23 @@ function saveData(data) {
   localStorage.setItem('nairobi', JSON.stringify(data));
 }
 
-function accumulateScores() {
-
-}
-
 //
 function accumulateFilters(name, value, remove = false) {
   const index = filters.findIndex(f => f.name === name);
 
   // remove a filter
   if (remove) {
-    // score = filterScores[name][value]
-    // overallScore -= score;
-    // console.log(overallScore);
+    // user wants to remove a whole filter category
+    // thus get the category from the accumulated filters
+    // and also get the score of the value previously added 
+    // then remove it from the overall score
+    if (filters.length > 0) {
+      const prevFilterVal = filters[index]['value']
+      // const prevScore = filterScores[name][prevFilterVal]
+      const prevScore = filterScores[name][prevFilterVal].score
+      overallScore -= prevScore
+      scoreBoard.innerHTML = overallScore
+    }
 
     filters.splice(index, 1);
     applyFilters()
@@ -983,9 +983,9 @@ function accumulateFilters(name, value, remove = false) {
   // add a filter
   // if name was not found in filters, push.
   if (index < 0) {
-    // score = filterScores[name][value]
-    // overallScore += score;
-    // console.log(overallScore);
+    const score = filterScores[name][value].score
+    overallScore += score;
+    scoreBoard.innerHTML = overallScore
 
     filters.push({ name: name, value: value });
     applyFilters()
@@ -994,7 +994,12 @@ function accumulateFilters(name, value, remove = false) {
 
   // update a filter
   // if name was found, update with new value
-  // console.log(overallScore);
+  const prevScore = filterScores[name][filters[index].value].score
+  overallScore -= prevScore;
+  const newScore = filterScores[name][value].score
+  overallScore += newScore;
+  scoreBoard.innerHTML = overallScore
+
 
   filters[index].value = value;
   applyFilters()
@@ -1003,6 +1008,7 @@ function accumulateFilters(name, value, remove = false) {
 
 // apply all fillters in the filters array
 const applyFilters = () => {
+  let counter = 0;
   // for each billboard check if it meets the filters 
   billboardMarkers.getMarkers().forEach(bm => {
 
@@ -1021,6 +1027,7 @@ const applyFilters = () => {
     }
 
     if (viable) {
+      counter++
       bm.setIcon(coloredIcon);
       bm.setAnimation(google.maps.Animation.BOUNCE)
       stopAnimation(bm);
@@ -1029,6 +1036,8 @@ const applyFilters = () => {
     bm.setIcon(greyedIcon);
 
   })
+  info = infoTab.querySelector(".info");
+  info.innerHTML = `<div id="billboardInfo">${counter} billboards meet your category </div>`
 }
 
 function stopAnimation(marker) {
@@ -1039,42 +1048,94 @@ function stopAnimation(marker) {
 
 const filterScores = {
   site_lighting_illumination: {
-    backlit: 3,
-    frontlit: 2,
-    unlit: 1,
+    backlit: { score: 3, icon: 'bbBacklit1' },
+    frontlit: { score: 2, icon: "bbFrontlit1" },
+    unlit: { score: 1, icon: "bbNolit" },
   },
-
-
   condition: {
-    excellent: 4,
-    good: 3,
-    average: 2,
-    poor: 1,
+    excellent: { score: 4, icon: "bbDgreen" },
+    good: { score: 3, icon: "bbLgreen" },
+    average: { score: 2, icon: "bbAmber" },
+    poor: { score: 1, icon: "bbRed" },
   },
-
   visibility: {
-    excellent: 3,
-    good: 2,
-    poor: 1,
+    excellent: { score: 3, icon: "bbDgreen" },
+    good: { score: 2, icon: "bbAmber" },
+    poor: { score: 1, icon: "bbRed" },
   },
-
   height: {
-    "eye level": 3,
-    moderate: 2,
-    "too high": 1,
+    "eye level": { score: 3, icon: "bbDgreen" },
+    moderate: { score: 2, icon: "bbAmber" },
+    "too high": { score: 1, icon: "bbRed" },
   },
-
   traffic: {
-    slow: 3,
-    average: 2,
-    fast: 1,
+    slow: { score: 3, icon: 'bbDgreen' },
+    average: { score: 2, icon: 'bbAmber' },
+    fast: { score: 1, icon: 'bbRed' },
   },
-
-  traffic_q: { heavy: 3, medium: 2, light: 1 },
-
+  traffic_q: {
+    heavy: { score: 3, icon: 'bbDgreen' },
+    medium: { score: 2, icon: 'bbAmber' },
+    light: { score: 1, icon: 'bbRed' }
+  },
   clutter: {
-    solus: 3,
-    average: 2,
-    cluttered: 1,
+    solus: { score: 3, icon: "bbBlue" },
+    average: { score: 2, icon: "bbNolit" },
+    cluttered: { score: 1, icon: "billboardGreyed1" },
   },
 };
+
+function categorizeBB(category) {
+  const defaultIcon = {
+    url: `./images/billboardColored.png`,
+    scaledSize: new google.maps.Size(30, 30)
+  }
+  billboardMarkers.getMarkers().forEach(bm => {
+    for (let [billboardProp, value] of Object.entries(bm.data)) {
+      if (billboardProp.toLowerCase() === category.toLowerCase()) {
+        if (
+          value == null ||
+          value == "null" ||
+          value == undefined ||
+          value == "undefined"
+        ) {
+          // condition: null/undefined
+          bm.setIcon(defaultIcon);
+        } else {
+          // condition:poor
+          if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
+            const newIcon = {
+              url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
+              scaledSize: new google.maps.Size(30, 30)
+            }
+
+            bm.setIcon(newIcon);
+            bm.setAnimation(google.maps.Animation.BOUNCE)
+            stopAnimation(bm);
+          } else {
+            bm.setIcon(defaultIcon);
+          }
+        }
+      }
+    }
+  })
+  drawCatIcons(category);
+}
+
+function drawCatIcons(category) {
+  const info = infoTab.querySelector(".info");
+  let html = "";
+  for (const [k, v] of Object.entries(filterScores[category])) {
+    html +=
+      `<div> <h4> ${k} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+  }
+
+  info.innerHTML =
+    `<div class="billboardCatInfo">
+        ${html} 
+        <div>
+          <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+        </div>
+    </div>`
+
+}

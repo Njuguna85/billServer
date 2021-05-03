@@ -674,6 +674,9 @@ tr:nth-child(even) {
 #billboardTable tr:nth-child(even) {
   background-color: #dddddd;
 }
+#billboardTable tr:nth-child(even) td {
+  border: 2px solid #eeeeee;
+}
 
 .cell {
   display: flex;
@@ -686,42 +689,25 @@ tr:nth-child(even) {
   padding: 3px;
   height: 30px;
 }
-.color_codes {
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-  margin: 0 3px;
-}
-.color_codes div {
-  height: 20px;
-  width: 5em;
-  margin: 0 0 3px 0;
-  color: rgb(5, 1, 1);
-  text-align: center;
-}
+
 #score {
   font-size: 4rem;
   color: rgb(255, 72, 0);
 }
-.three {
-  background-color: rgb(72, 231, 44);
+
+#billboardInfo {
+  font-size: 0.9rem;
+  color: #ef5350;
+  font-weight: 700;
+}
+.billboardCatInfo div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.two {
-  background-color: rgb(235, 238, 83);
-}
-.one {
-  background-color: rgb(233, 32, 32);
-}
-.excellent {
-  background-color: rgb(76, 226, 231);
-}
-.backlit {
-  background-color: azure;
-}
-.frontlit {
-  background-color: rgb(236, 184, 104);
-}
-.unlit {
-  background-color: rgb(39, 37, 37);
+.billboardCatInfo-img {
+  display: block;
+  height: 30px;
+  width: 30px;
 }
