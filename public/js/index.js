@@ -1,9 +1,14 @@
 let map;
 let infoWindow;
-var directionsService;
-var directionsRenderer;
+let directionsService;
+let directionsRenderer;
 const mapContainer = document.getElementById("map");
-var bounds, markerCluster, gmarkers = {};
+let bounds, markerCluster, gmarkers = {};
+const filters = [];
+let billboardMarkers = [];
+let overallScore = 0;
+const billboardTable = document.getElementById('billboardTable');
+
 
 let legend = document.createElement("div");
 legend.setAttribute("id", "legend");
@@ -26,6 +31,7 @@ const poiLayers = document.createElement("div");
 poiLayers.innerHTML = '<h5 class="accordion">POIs</h5>';
 poiLayers.className = "poiLayers";
 legend.appendChild(poiLayers);
+
 const poiLayersAccordion = document.createElement("div");
 poiLayersAccordion.className = "accordion-content";
 poiLayers.appendChild(poiLayersAccordion);
@@ -164,7 +170,6 @@ async function fetchMobileUploads() {
   var todayDate = today.toISOString().slice(0, 10);
 
   const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todayDate} ${lastHr}&end=${todayDate} ${thisHr}`;
-
   let response = await fetch(url, {
     method: "GET",
     headers: {
@@ -499,20 +504,37 @@ function add(key, value) {
   div = document.createElement("div");
   div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" data-id="${key}" class='poi' type="checkbox" />`;
   poiLayersAccordion.appendChild(div);
-  
+
+}
+
+function parseBBProps(filterScoreProp, bbProp) {
+  if (filterScores[filterScoreProp].hasOwnProperty(bbProp?.toLowerCase())) {
+    return filterScores[filterScoreProp][bbProp.toLowerCase()]
+  } else {
+    return 0;
+  }
 }
 
 function addBillboards(data) {
   const bounds = new google.maps.LatLngBounds();
-
   const markers = data.map((el) => {
+    const iconUrl = `images/billboardColored.png`;
+    let score;
+
     let latlng = new google.maps.LatLng(el.lat, el.long);
     bounds.extend(latlng);
+
+    score = parseBBProps('site_lighting_illumination', el.site_lighting_illumination) + parseBBProps('condition', el.condition) +
+      parseBBProps('visibility', el.visibility) + parseBBProps('height', el.height) + parseBBProps('traffic', el.traffic)
+      + parseBBProps('traffic_q', el.traffic_q) + parseBBProps('clutter', el.clutter)
+
+    el['score'] = score;
+
     let contentString =
       '<div class ="infoWindow">' +
       "<div>" +
-      "Name: <b>" +
-      parseData(el.billboardi) +
+      "Lighting: <b>" +
+      parseData(el.site_lighting_illumination) +
       "</b></div>" +
       "<div>" +
       "Route: <b>" +
@@ -527,12 +549,24 @@ function addBillboards(data) {
       parseData(el.visibility) +
       "</b> </div>" +
       "<div>" +
+      "Height: <b>" +
+      parseData(el.height) +
+      "</b> </div>" +
+      "<div>" +
+      "Condition: <b>" +
+      parseData(el.condition) +
+      "</b> </div>" +
+      "<div>" +
       "Medium: <b>" +
-      parseData(el.selectmedi) +
+      parseData(el.selectmedium) +
       "</b> </div>" +
       "<div>" +
       "Traffic: <b>" +
       parseData(el.traffic) +
+      "</b> </div>" +
+      "<div>" +
+      "Score: <b>" +
+      el.score +
       "</b> </div>" +
       "</div>" +
       '<img class="billboardImage" alt="billboard photo" src=' +
@@ -548,7 +582,7 @@ function addBillboards(data) {
       " data-long=" +
       el.longitude +
       " >Add Stop</button>" +
-      '<button class="btn start" data-lat=' +
+      '<button class="btn start" data -lat=' +
       el.latitude +
       " data-long=" +
       el.longitude +
@@ -557,10 +591,11 @@ function addBillboards(data) {
     let marker = new google.maps.Marker({
       position: latlng,
       icon: {
-        url: `images/marker.png`,
-        scaledSize: new google.maps.Size(20, 20),
+        url: iconUrl,
+        scaledSize: new google.maps.Size(30, 30),
       },
       optimized: false,
+      data: el
     });
     google.maps.event.addListener(
       marker,
@@ -575,7 +610,8 @@ function addBillboards(data) {
     return marker;
   });
 
-  const markerCluster = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+  billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+  billboardTable.style.display = 'block';
 
   div = document.createElement("div");
   div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
@@ -585,16 +621,23 @@ function addBillboards(data) {
       cb = document.getElementById("billboardChecked");
       // if on
       if (cb.checked) {
-        markerCluster.addMarkers(markers);
+        billboardMarkers.addMarkers(markers);
         map.fitBounds(bounds);
         map.panToBounds(bounds);
+
+        billboardTable.style.display = 'block';
+
       }
       if (!cb.checked) {
         // if off
-        markerCluster.removeMarkers(markers);
+        billboardMarkers.removeMarkers(markers);
+
+        billboardTable.style.display = 'none';
+
       }
     }
   });
+
 }
 
 function getmobileMarkers(deliveriesData) {
@@ -776,7 +819,7 @@ function addGhanaPopulation() {
 
 function parseData(val) {
   if (val == null || val == undefined) {
-    return "";
+    return "Not Available";
   }
   return val;
 }
@@ -846,45 +889,66 @@ poiLayersAccordion.addEventListener('change', (e) => {
       markerCluster.removeMarkers(gmarkers[targetPoi]);
     }
   }
-}) 
+})
 
-  function calcRoute(tracker) {
-    div = document.createElement("div");
-    let start, end, waypts;
-    if (tracker.start) {
-      start = tracker.start;
-    }
-    if (tracker.end) {
-      end = tracker.end;
-    }
-    if (tracker.stop) {
-      if (tracker.stop.length > 8) {
-        window.alert("Please Minimize the stop points to 8");
-      }
-      waypts = tracker.stop;
-    }
-    if (start != undefined && end != undefined) {
-      const request = {
-        origin: start,
-        destination: end,
-        waypoints: waypts,
-        optimizeWaypoints: true,
-        travelMode: "DRIVING",
+billboardTable.addEventListener('click', e => {
+  if (e.target.matches('#lighting')) {
+    billboardMarkers.getMarkers().forEach(bb => {
+      const icon = {
+        url: `./images/billboardGreyed2.png`,
+        scaledSize: new google.maps.Size(30, 30)
       };
-      directionsService.route(request, function (response, status) {
-        if (status == "OK") {
-          directionsRenderer.setDirections(response);
-          directionsRenderer.setPanel(div);
-          directionsPanel.appendChild(div);
-          map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
-            directionsPanel
-          );
-        } else {
-          window.alert("Directions request failed due to " + status);
-        }
-      });
+      bb.setIcon(icon)
+    });
+  }
+
+  if (e.target.matches('.filter_selector')) {
+    const value = e.target.value.trim()
+    if (value == "") {
+      accumulateFilters(e.target.name.toLowerCase(), "", true)
+    } else {
+      accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase())
     }
   }
+})
+
+function calcRoute(tracker) {
+  div = document.createElement("div");
+  let start, end, waypts;
+  if (tracker.start) {
+    start = tracker.start;
+  }
+  if (tracker.end) {
+    end = tracker.end;
+  }
+  if (tracker.stop) {
+    if (tracker.stop.length > 8) {
+      window.alert("Please Minimize the stop points to 8");
+    }
+    waypts = tracker.stop;
+  }
+  if (start != undefined && end != undefined) {
+    const request = {
+      origin: start,
+      destination: end,
+      waypoints: waypts,
+      optimizeWaypoints: true,
+      travelMode: "DRIVING",
+    };
+    directionsService.route(request, function (response, status) {
+      if (status == "OK") {
+        directionsRenderer.setDirections(response);
+        directionsRenderer.setPanel(div);
+        directionsPanel.appendChild(div);
+        map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(
+          directionsPanel
+        );
+      } else {
+        window.alert("Directions request failed due to " + status);
+      }
+    });
+  }
+}
 
 function loader() {
   document.getElementById("loader").style.display = "none";
@@ -896,3 +960,121 @@ function saveData(data) {
   localStorage.clear();
   localStorage.setItem('nairobi', JSON.stringify(data));
 }
+
+function accumulateScores() {
+
+}
+
+//
+function accumulateFilters(name, value, remove = false) {
+  const index = filters.findIndex(f => f.name === name);
+
+  // remove a filter
+  if (remove) {
+    // score = filterScores[name][value]
+    // overallScore -= score;
+    // console.log(overallScore);
+
+    filters.splice(index, 1);
+    applyFilters()
+    return;
+  }
+
+  // add a filter
+  // if name was not found in filters, push.
+  if (index < 0) {
+    // score = filterScores[name][value]
+    // overallScore += score;
+    // console.log(overallScore);
+
+    filters.push({ name: name, value: value });
+    applyFilters()
+    return;
+  }
+
+  // update a filter
+  // if name was found, update with new value
+  // console.log(overallScore);
+
+  filters[index].value = value;
+  applyFilters()
+
+}
+
+// apply all fillters in the filters array
+const applyFilters = () => {
+  // for each billboard check if it meets the filters 
+  billboardMarkers.getMarkers().forEach(bm => {
+
+    const viable = filters.reduce((acc, { name, value }) => {
+      return acc && bm.data[`${name}`]?.toLowerCase() === value
+    }, true);
+
+    const greyedIcon = {
+      url: `./images/billboardGreyed2.png`,
+      scaledSize: new google.maps.Size(30, 30)
+    };
+
+    const coloredIcon = {
+      url: `./images/billboardColored.png`,
+      scaledSize: new google.maps.Size(30, 30)
+    }
+
+    if (viable) {
+      bm.setIcon(coloredIcon);
+      bm.setAnimation(google.maps.Animation.BOUNCE)
+      stopAnimation(bm);
+      return;
+    }
+    bm.setIcon(greyedIcon);
+
+  })
+}
+
+function stopAnimation(marker) {
+  setTimeout(function () {
+    marker.setAnimation(null);
+  }, 3000);
+}
+
+const filterScores = {
+  site_lighting_illumination: {
+    backlit: 3,
+    frontlit: 2,
+    unlit: 1,
+  },
+
+
+  condition: {
+    excellent: 4,
+    good: 3,
+    average: 2,
+    poor: 1,
+  },
+
+  visibility: {
+    excellent: 3,
+    good: 2,
+    poor: 1,
+  },
+
+  height: {
+    "eye level": 3,
+    moderate: 2,
+    "too high": 1,
+  },
+
+  traffic: {
+    slow: 3,
+    average: 2,
+    fast: 1,
+  },
+
+  traffic_q: { heavy: 3, medium: 2, light: 1 },
+
+  clutter: {
+    solus: 3,
+    average: 2,
+    cluttered: 1,
+  },
+};
