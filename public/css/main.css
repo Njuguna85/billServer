@@ -706,6 +706,10 @@ tr:nth-child(even) {
   justify-content: space-between;
   align-items: center;
 }
+.billboardFilInfo {
+  border-bottom: 2px dashed #3949ab;
+  margin-bottom: 20px;
+}
 
 .billboardCatInfo-img {
   display: block;
@@ -726,4 +730,11 @@ tr:nth-child(even) {
 
 .info {
   font-size: 1rem;
+}
+
+.info-header {
+  text-align: center;
+  font-size: 1rem;
+  text-decoration: underline;
+  text-transform: uppercase;
 }

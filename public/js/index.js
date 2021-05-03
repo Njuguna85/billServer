@@ -37,7 +37,12 @@ poiLayers.appendChild(poiLayersAccordion);
 
 const infoTab = document.createElement("div");
 infoTab.setAttribute("id", "infoTab");
-infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
+infoTab.innerHTML =
+  `<h3>More Info</h3>
+  <div class="info"></div>
+  <div class="billboardFilInfo"></div>
+  <div class="billboardCatInfo"></div>
+  `;
 
 const directionsPanel = document.createElement("div");
 directionsPanel.className = "directionsPanel";
@@ -508,7 +513,7 @@ function add(key, value) {
 
 function parseBBProps(filterScoreProp, bbProp) {
   if (filterScores[filterScoreProp].hasOwnProperty(bbProp?.toLowerCase())) {
-    return filterScores[filterScoreProp][bbProp.toLowerCase()]
+    return filterScores[filterScoreProp][bbProp.toLowerCase()].score
   } else {
     return 0;
   }
@@ -628,14 +633,13 @@ function addBillboards(data) {
         map.panToBounds(bounds);
 
         billboardTable.style.display = 'block';
-        drawBBLegend()
       }
       if (!cb.checked) {
         // if off
         billboardMarkers.removeMarkers(markers);
 
         billboardTable.style.display = 'none';
-        clearBBLegend()
+        drawBBLegend()
       }
     }
   });
@@ -1125,19 +1129,17 @@ function categorizeBB(category) {
 }
 
 function drawCatIcons(category) {
-  const info = infoTab.querySelector(".info");
   let html = "";
   for (const [k, v] of Object.entries(filterScores[category])) {
     html +=
       `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
   }
 
-  info.innerHTML =
-    `<div class="billboardCatInfo">
-        ${html} 
-        <div>
-          <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
-        </div>
+  infoTab.querySelector(".billboardCatInfo").innerHTML =
+    `<h4 class="info-header">Categories Key</h4>
+    ${html}
+    <div>
+      <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
     </div>`
 
 }
@@ -1145,10 +1147,10 @@ function drawCatIcons(category) {
 function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
+drawCatIcons
 function drawBBLegend() {
   const html = `
-    <div class="billboardFilInfo">
+      <h4 class="info-header">Filter Key</h4>
       <div><h4>Score:</h4><span id="score">0</span> </div>
       <hr class="hr">
       <div><span id="bbCount">${totalBB}</span> Billboards</div>
@@ -1156,16 +1158,11 @@ function drawBBLegend() {
       <div style="text-align:centre;"> Filters </div>
       <div id="filters"></div>
       <hr class="hr">
-      <div id="filterIcons"> </div>
-    </div>
-  `
-  infoTab.querySelector(".info").innerHTML = html
+      <div id="filterIcons"> </div>`
+
+  infoTab.querySelector(".billboardFilInfo").innerHTML = html
 }
 
-function clearBBLegend() {
-  infoTab.querySelector(".info").innerHTML = '';
-
-}
 
 function updateFilterHtml() {
   // filters :[...filter]
