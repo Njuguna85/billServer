@@ -1,4 +1,138 @@
 <div id="loader"></div>
+<div id="billboardTable" class="active">
+    <table>
+
+        <tr class="filter_row">
+            <th>Filter By:</th>
+            <td>
+
+                <select class="filter_selector" title="Lighting Filter" name="site_lighting_illumination"
+                    id="site_lighting_illumination_filter">
+                    <option selected value="">Choose one</option>
+                    <option class="backlit" value="backlit">Backlit (3)</option>
+                    <option class="frontlit" value="frontlit">Frontlit (2)</option>
+                    <option class="unlit" value="unlit">Unlit (1)</option>
+                </select>
+
+            </td>
+
+            <td>
+
+                <select class="filter_selector" title="Condition Filter" name="condition" id="condition_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="excellent">Excelent (4)</option>
+                    <option value="good">Good (3)</option>
+                    <option value="average">Average (2)</option>
+                    <option value="poor">Poor (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Visibility filter" name="visibility" id="visibility_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="excellent">Excellent (3)</option>
+                    <option value="good">Good (2)</option>
+                    <option value="Poor">Poor (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Heigt Filter" name="height" id="height_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="eye level">Eye Level (3)</option>
+                    <option value="moderate">Moderate (2)</option>
+                    <option value="too high">Too High (1)</option>
+                </select>
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Traffic Filter" name="traffic" id="traffic_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="Slow">Slow (3)</option>
+                    <option value="average">Average (2)</option>
+                    <option value="Fast">Fast (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title=" Traffic Quality Filter" name="traffic_q" id="trafficq_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="heavy">Heavy (3)</option>
+                    <option value="medium">Medium (2)</option>
+                    <option value="light">Light (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Clutter Filter" name="clutter" id="clutter_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="solus">Solus (3)</option>
+                    <option value="average">Average (2)</option>
+                    <option value="cluttered">Cluttered (1)</option>
+                </select>
+
+            </td>
+
+        </tr>
+
+        <tr class="categorize_row">
+            <th>Categorize By:</th>
+            <td>
+                <div class="cell">
+                    <label for="lighting">Lighting</label><br />
+                    <input type="radio" id="lighting" name="category" class="category"
+                        value="site_lighting_illumination" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="condition">Condition</label><br />
+                    <input type="radio" id="condition" name="category" class="category" value="condition" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="visibility">Visibility</label><br />
+                    <input type="radio" id="visibility" name="category" class="category" value="visibility" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="height">Height</label><br />
+                    <input type="radio" id="height" name="category" class="category" value="height" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="traffic">Traffic</label><br />
+                    <input type="radio" id="traffic" name="category" class="category" value="traffic" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="traffic_q">Traffic Quality</label><br />
+                    <input type="radio" id="traffic_q" name="category" class="category" value="traffic_q" />
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <label for="clutter">Clutter</label><br />
+                    <input type="radio" id="clutter" name="category" class="category" value="clutter" />
+                </div>
+            </td>
+
+        </tr>
+    </table>
+</div>
 <div id="map" style="display: none;"></div>
 
 <script>
@@ -7,7 +141,11 @@
     var directionsService;
     var directionsRenderer;
     const mapContainer = document.getElementById("map");
-    var bounds, markerCluster, gmarkers = {}
+    var bounds, markerCluster, gmarkers = {};
+    const filters = [];
+    let billboardMarkers = [];
+    let overallScore = 0, totalBB = 0;
+    const billboardTable = document.getElementById('billboardTable');
 
     let legend = document.createElement("div");
     legend.setAttribute("id", "legend");
@@ -37,7 +175,11 @@
 
     const infoTab = document.createElement("div");
     infoTab.setAttribute("id", "infoTab");
-    infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
+    infoTab.innerHTML =
+        `<h3>More Info</h3>
+        <div class="info"></div>
+        <div class="billboardFilInfo"></div>
+        <div class="billboardCatInfo"></div>`;
 
     const directionsPanel = document.createElement("div");
     directionsPanel.className = "directionsPanel";
@@ -378,9 +520,18 @@
 
     }
 
+    function parseBBProps(filterScoreProp, bbProp) {
+        if (filterScores[filterScoreProp].hasOwnProperty(bbProp?.toLowerCase())) {
+            return filterScores[filterScoreProp][bbProp.toLowerCase()].score
+        } else {
+            return 0;
+        }
+    }
+
     function addBillboards(data) {
 
         const bounds = new google.maps.LatLngBounds();
+
         var spiderConfig = {
             keepSpiderfied: true,
             event: 'mouseover'
@@ -388,9 +539,13 @@
         var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
 
         const markers = data.map((el) => {
+            totalBB++;
+            const iconUrl = `images/billboardColored.png`;
+            let score;
+
             let address = el && parseData(el.address);
             let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
-            let lighting = el && el.lighting && parseData(el.lighting["characteristic_value"]);
+            let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
             let direction =
                 el && el.direction && parseData(el.direction["characteristic_value"]);
             let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
@@ -402,10 +557,29 @@
             let height = el && el.height && parseData(el.height["characteristic_value"]);
             let side_of_road =
                 el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
+            let condition =
+                el && el.condition && parseData(el.condition["characteristic_value"]);
+            let visibility =
+                el && el.visibility && parseData(el.visibility["characteristic_value"]);
+            let traffic =
+                el && el.traffic && parseData(el.traffic["characteristic_value"]);
+            let traffic_q =
+                el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
+
             let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
             let image = el && parseData(el.image);
             let latitude = el && parseData(el.latitude);
             let longitude = el && parseData(el.longitude);
+
+            score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('condition', condition) +
+                parseBBProps('visibility', visibility) + parseBBProps('height', height) + parseBBProps('traffic', traffic)
+                + parseBBProps('traffic_q', traffic_q) + parseBBProps('clutter', clutter)
+
+            el['score'] = score;
+
+            data = {
+                site_lighting_illumination, condition, visibility, height, traffic, traffic_q, clutter
+            }
 
             let latlng = new google.maps.LatLng(el.latitude, el.longitude);
 
@@ -422,7 +596,7 @@
                 "</b></div>" +
                 "<div>" +
                 "Lighting: <b>" +
-                lighting +
+                site_lighting_illumination +
                 "</b></div>" +
                 "<div>" +
                 "Direction: <b>" +
@@ -435,6 +609,18 @@
                 "<div>" +
                 "Clutter: <b>" +
                 clutter +
+                "</b> </div>" +
+                "<div>" +
+                "Visibility: <b>" +
+                parseData(visibility) +
+                "</b> </div>" +
+                "<div>" +
+                "Condition: <b>" +
+                parseData(condition) +
+                "</b> </div>" +
+                "<div>" +
+                "Traffic: <b>" +
+                parseData(traffic) +
                 "</b> </div>" +
                 "<div>" +
                 "Size: <b>" +
@@ -450,12 +636,17 @@
                 "</b> </div>" +
                 "<div>" +
                 "Road Side: <b>" +
-                side_of_road +
+                parseData(side_of_road) +
                 "</b> </div>" +
                 "<div>" +
                 "Angle: <b>" +
-                angle +
+                parseData(angle) +
                 "</b> </div>" +
+                "<div>" +
+                "Score: <b>" +
+                el.score +
+                "</b> </div>" +
+                "</div>" +
                 '<img class="billboardImage" alt="billboard photo" src=' +
                 el.image +
                 ">" +
@@ -478,10 +669,11 @@
             let marker = new google.maps.Marker({
                 position: latlng,
                 icon: {
-                    url: `images/marker.png`,
-                    scaledSize: new google.maps.Size(20, 20),
+                    url: iconUrl,
+                    scaledSize: new google.maps.Size(30, 30),
                 },
                 optimized: false,
+                data
             });
             google.maps.event.addListener(
                 marker,
@@ -494,7 +686,8 @@
                 })(marker, el)
             );
 
-            markerSpiderfier.addMarker(marker);  // Adds the Marker to OverlappingMarkerSpiderfier
+            // Adds the Marker to OverlappingMarkerSpiderfier
+            markerSpiderfier.addMarker(marker);
             return marker;
 
         });
@@ -509,10 +702,12 @@
             infoWindow.close();
         });
 
-        const markerCluster = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+        billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
 
-        markerCluster.setMaxZoom(15);
+        billboardMarkers.setMaxZoom(15);
 
+        billboardTable.style.display = 'block';
+        drawBBLegend()
 
         div = document.createElement("div");
         div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
@@ -522,13 +717,19 @@
                 cb = document.getElementById("billboardChecked");
                 // if on
                 if (cb.checked) {
-                    markerCluster.addMarkers(markers);
+                    billboardMarkers.addMarkers(markers);
                     map.fitBounds(bounds);
                     map.panToBounds(bounds);
+
+                    billboardTable.style.display = 'block';
+
                 }
                 if (!cb.checked) {
                     // if off
-                    markerCluster.removeMarkers(markers);
+                    billboardMarkers.removeMarkers(markers);
+
+                    billboardTable.style.display = 'none';
+                    drawBBLegend()
                 }
             }
         });
@@ -600,6 +801,7 @@
         }
         return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
+
     //
     // create routes
     const tracker = new Object();
@@ -661,6 +863,24 @@
         }
     })
 
+
+    billboardTable.addEventListener('click', e => {
+        if (e.target.matches('.category')) {
+            // get the id/name of category
+            const category = e.target.value
+            categorizeBB(category)
+        }
+
+        if (e.target.matches('.filter_selector')) {
+            const value = e.target.value.trim()
+            if (value == "") {
+                accumulateFilters(e.target.name.toLowerCase(), "", true)
+            } else {
+                accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase())
+            }
+        }
+    })
+
     function calcRoute(tracker) {
         div = document.createElement("div");
         let start, end, waypts;
@@ -704,5 +924,226 @@
         document.getElementById("map").style.display = "block";
     }
 
+    function accumulateFilters(name, value, remove = false) {
+        const index = filters.findIndex(f => f.name === name);
+        drawFilterIcon()
+        const scoreBoard = infoTab.querySelector('#score')
+
+        // remove a filter
+        if (remove) {
+            // user wants to remove a whole filter category
+            // thus get the category from the accumulated filters
+            // and also get the score of the value previously added 
+            // then remove it from the overall score
+            if (filters.length > 0) {
+                const prevFilterVal = filters[index]['value']
+                const prevScore = filterScores[name][prevFilterVal].score
+                overallScore -= prevScore
+                scoreBoard.innerHTML = overallScore
+            }
+
+            filters.splice(index, 1);
+            applyFilters()
+            updateFilterHtml()
+            return;
+        }
+
+        // add a filter
+        // if name was not found in filters, push.
+        if (index < 0) {
+            const score = filterScores[name][value].score
+            overallScore += score;
+            scoreBoard.innerHTML = overallScore
+
+            filters.push({ name: name, value: value });
+            applyFilters()
+            updateFilterHtml()
+            return;
+        }
+
+        // update a filter
+        // if name was found, update with new value
+        const prevScore = filterScores[name][filters[index].value].score
+        overallScore -= prevScore;
+        const newScore = filterScores[name][value].score
+        overallScore += newScore;
+        scoreBoard.innerHTML = overallScore
+
+        filters[index].value = value;
+        applyFilters()
+        updateFilterHtml()
+    }
+
+    // apply all fillters in the filters array
+    const applyFilters = () => {
+        let counter = 0;
+        // for each billboard check if it meets the filters 
+        billboardMarkers.getMarkers().forEach(bm => {
+
+            const viable = filters.reduce((acc, { name, value }) => {
+                return acc && bm.data[`${name}`]?.toLowerCase() === value
+            }, true);
+
+            const greyedIcon = {
+                url: `./images/billboardGreyed2.png`,
+                scaledSize: new google.maps.Size(30, 30)
+            };
+
+            const coloredIcon = {
+                url: `./images/billboardColored.png`,
+                scaledSize: new google.maps.Size(30, 30)
+            }
+
+            if (viable) {
+                counter++
+                bm.setIcon(coloredIcon);
+                bm.setAnimation(google.maps.Animation.BOUNCE)
+                stopAnimation(bm);
+                return;
+            }
+            bm.setIcon(greyedIcon);
+
+        })
+        infoTab.querySelector("#bbCount").innerHTML = counter;
+    }
+
+    function stopAnimation(marker) {
+        setTimeout(function () {
+            marker.setAnimation(null);
+        }, 3000);
+    }
+
+    const filterScores = {
+        site_lighting_illumination: {
+            backlit: { score: 3, icon: 'bbBacklit1' },
+            frontlit: { score: 2, icon: "bbFrontlit1" },
+            unlit: { score: 1, icon: "bbNolit" },
+        },
+        condition: {
+            excellent: { score: 4, icon: "bbDgreen" },
+            good: { score: 3, icon: "bbLgreen" },
+            average: { score: 2, icon: "bbAmber" },
+            poor: { score: 1, icon: "bbRed" },
+        },
+        visibility: {
+            excellent: { score: 3, icon: "bbDgreen" },
+            good: { score: 2, icon: "bbAmber" },
+            poor: { score: 1, icon: "bbRed" },
+        },
+        height: {
+            "eye level": { score: 3, icon: "bbDgreen" },
+            moderate: { score: 2, icon: "bbAmber" },
+            "too high": { score: 1, icon: "bbRed" },
+        },
+        traffic: {
+            slow: { score: 3, icon: 'bbDgreen' },
+            average: { score: 2, icon: 'bbAmber' },
+            fast: { score: 1, icon: 'bbRed' },
+        },
+        traffic_q: {
+            heavy: { score: 3, icon: 'bbDgreen' },
+            medium: { score: 2, icon: 'bbAmber' },
+            light: { score: 1, icon: 'bbRed' }
+        },
+        clutter: {
+            solus: { score: 3, icon: "bbBlue" },
+            average: { score: 2, icon: "bbNolit" },
+            cluttered: { score: 1, icon: "billboardGreyed1" },
+        },
+    };
+
+    function categorizeBB(category) {
+        const defaultIcon = {
+            url: `./images/billboardColored.png`,
+            scaledSize: new google.maps.Size(30, 30)
+        }
+        billboardMarkers.getMarkers().forEach(bm => {
+            for (let [billboardProp, value] of Object.entries(bm.data)) {
+                if (billboardProp.toLowerCase() === category.toLowerCase()) {
+                    if (
+                        value == null ||
+                        value == "null" ||
+                        value == undefined ||
+                        value == "undefined"
+                    ) {
+                        // condition: null/undefined
+                        bm.setIcon(defaultIcon);
+                    } else {
+                        // condition:poor
+                        if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
+                            const newIcon = {
+                                url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
+                                scaledSize: new google.maps.Size(30, 30)
+                            }
+
+                            bm.setIcon(newIcon);
+                            bm.setAnimation(google.maps.Animation.BOUNCE)
+                            stopAnimation(bm);
+                        } else {
+                            bm.setIcon(defaultIcon);
+                        }
+                    }
+                }
+            }
+        })
+        drawCatIcons(category);
+    }
+
+    function drawCatIcons(category) {
+        let html = "";
+        for (const [k, v] of Object.entries(filterScores[category])) {
+            html +=
+                `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+        }
+
+        infoTab.querySelector(".billboardCatInfo").innerHTML =
+            `<h4 class="info-header">Categories Key</h4>
+    ${html}
+    <div>
+      <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+    </div>`
+
+    }
+
+    function capitalize(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function drawBBLegend() {
+        const html = `
+      <h4 class="info-header">Filter Key</h4>
+      <div><h4>Score:</h4><span id="score">0</span> </div>
+      <hr class="hr">
+      <div><span id="bbCount">${totalBB}</span> Billboards</div>
+      <hr class="hr">
+      <div style="text-align:centre;"> Filters </div>
+      <div id="filters"></div>
+      <hr class="hr">
+      <div id="filterIcons"> </div>`
+
+        infoTab.querySelector(".billboardFilInfo").innerHTML = html
+    }
+
+
+    function updateFilterHtml() {
+        // filters :[...filter]
+        // filter: {name: value}
+        let html = ''
+        filters.forEach(({ name, value }) => {
+            html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`
+        });
+        infoTab.querySelector('#filters').innerHTML = html
+    }
+
+    function drawFilterIcon() {
+        infoTab.querySelector('#filterIcons').innerHTML = `
+            <div>
+            Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+            </div>
+            <div>
+            Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
+            </div>
+            `;
+    }
 
 </script>

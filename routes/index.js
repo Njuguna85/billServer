@@ -87,8 +87,8 @@ router.get('/aq', ensureAuthLocal, (req, res) => {
     })
 });
 
-router.get('/abonteeh', (req, res) => {
-    res.render('abonteh', {
+router.get('/abonten', (req, res) => {
+    res.render('abonten', {
         apiKey: process.env.googleMapsAPIKey,
         layout: 'eabl',
     })

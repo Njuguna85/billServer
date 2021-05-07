@@ -41,8 +41,7 @@ infoTab.innerHTML =
   `<h3>More Info</h3>
   <div class="info"></div>
   <div class="billboardFilInfo"></div>
-  <div class="billboardCatInfo"></div>
-  `;
+  <div class="billboardCatInfo"></div>`;
 
 const directionsPanel = document.createElement("div");
 directionsPanel.className = "directionsPanel";
@@ -1147,7 +1146,7 @@ function drawCatIcons(category) {
 function capitalize(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-drawCatIcons
+
 function drawBBLegend() {
   const html = `
       <h4 class="info-header">Filter Key</h4>
