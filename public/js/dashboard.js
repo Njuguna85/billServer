@@ -5,6 +5,11 @@ var directionsRenderer;
 var mapContainer = document.getElementById("map");
 var markerCluster, gmarkers = {};
 var dataExisting;
+const filters = [];
+let billboardMarkers = [];
+let overallScore = 0, totalBB = 0;
+const billboardTable = document.getElementById('billboardTable');
+
 
 let legend = document.createElement('div');
 legend.setAttribute('id', 'legend');
@@ -33,7 +38,11 @@ poiLayers.appendChild(poiLayersAccordion);
 
 const infoTab = document.createElement('div');
 infoTab.setAttribute('id', 'infoTab');
-infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
+infoTab.innerHTML =
+    `<h3>More Info</h3>
+    <div class="info"></div>
+    <div class="billboardFilInfo"></div>
+    <div class="billboardCatInfo"></div>`;
 
 const directionsPanel = document.createElement('div');
 directionsPanel.className = 'directionsPanel';
@@ -175,7 +184,6 @@ function addOverlays(data) {
     addGhanaPopulation();
     addPOIs(data.pois);
     addNssf(data.nssf);
-
 }
 
 const getTiles = (lyr) => {
@@ -410,9 +418,8 @@ function checkJSON(json) {
     return JSON.parse(json);
 }
 
-
 function add(key, value) {
-    
+
     // create a markers array 
     const markers = value.map(el => {
         el.geojson = checkJSON(el.geojson);
@@ -420,7 +427,7 @@ function add(key, value) {
         latitude = el.geojson.coordinates[1];
         longitude = el.geojson.coordinates[0];
         let latlng = new google.maps.LatLng(latitude, longitude);
-        
+
         iconUrl = `./images/${key}.png`
         let contentString = '<p><strong>' + parseData(el.name) + '<strong></p>' +
             '<button class="btn end" data-lat=' + latitude + ' data-long=' + longitude + ' >Go Here</button>' +
@@ -441,19 +448,17 @@ function add(key, value) {
         return marker
     });
     gmarkers[key] = markers;
-    
+
     div = document.createElement('div');
     div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" data-id="${key}" class='poi' type="checkbox" />`;
     poiLayersAccordion.appendChild(div);
-    
-}
 
+}
 
 function setOnMap(key) {
     markers = gmarkers[key];
     markerCluster.addMarkers(markers);
 }
-
 
 function clearMarkers(key) {
     markers = gmarkers[key];
@@ -470,55 +475,139 @@ function deleteMarkers() {
     gmarkers = {};
 }
 
-async function addBillboards(data) {
+function parseBBProps(filterScoreProp, bbProp) {
+    if (filterScores[filterScoreProp].hasOwnProperty(bbProp?.toLowerCase())) {
+        return filterScores[filterScoreProp][bbProp.toLowerCase()].score
+    } else {
+        return 0;
+    }
+}
 
-    const markers = data.map(el => {
+function addBillboards(data) {
+    const bounds = new google.maps.LatLngBounds();
+
+    const markers = data.map((el) => {
+        totalBB++
+        const iconUrl = `images/billboardColored.png`;
+        let score;
+
         let latlng = new google.maps.LatLng(el.lat, el.long);
+        bounds.extend(latlng);
+
+        score = parseBBProps('site_lighting_illumination', el.site_lighting_illumination) + parseBBProps('condition', el.condition) +
+            parseBBProps('visibility', el.visibility) + parseBBProps('height', el.height) + parseBBProps('traffic', el.traffic)
+            + parseBBProps('traffic_q', el.traffic_q) + parseBBProps('clutter', el.clutter)
+
+        el['score'] = score;
+
         let contentString =
             '<div class ="infoWindow">' +
-            '<div>' + 'Name: <b>' + parseData(el.billboard_id) + '</b></div>' +
-            '<div>' + 'Route: <b>' + parseData(el.route_name) + '</b></div>' +
-            '<div>' + 'Size: <b>' + parseData(el.size) + '</b></div>' +
-            '<div>' + 'Visibility: <b>' + parseData(el.visibility) + '</b> </div>' +
-            '<div>' + 'Medium: <b>' + parseData(el.select_medium) + '</b> </div>' +
-            '<div>' + 'Traffic: <b>' + parseData(el.traffic) + '</b> </div>' +
-            '</div>' +
-            '<img class="billboardImage" alt="billboard photo" src=' + el.photo + '>' +
-            '<button class="btn end" data-lat=' + el.lat + ' data-long=' + el.long + ' >Go Here</button>' +
-            '<button class="btn stop" data-lat=' + el.lat + ' data-long=' + el.long + ' >Add Stop</button>' +
-            '<button class="btn start" data-lat=' + el.lat + ' data-long=' + el.long + ' >Start Here</button>';
+            "<div>" +
+            "Lighting: <b>" +
+            parseData(el.site_lighting_illumination) +
+            "</b></div>" +
+            "<div>" +
+            "Route: <b>" +
+            parseData(el.routename) +
+            "</b></div>" +
+            "<div>" +
+            "Size: <b>" +
+            parseData(el.size) +
+            "</b></div>" +
+            "<div>" +
+            "Visibility: <b>" +
+            parseData(el.visibility) +
+            "</b> </div>" +
+            "<div>" +
+            "Height: <b>" +
+            parseData(el.height) +
+            "</b> </div>" +
+            "<div>" +
+            "Condition: <b>" +
+            parseData(el.condition) +
+            "</b> </div>" +
+            "<div>" +
+            "Medium: <b>" +
+            parseData(el.selectmedium) +
+            "</b> </div>" +
+            "<div>" +
+            "Traffic: <b>" +
+            parseData(el.traffic) +
+            "</b> </div>" +
+            "<div>" +
+            "Score: <b>" +
+            el.score +
+            "</b> </div>" +
+            "</div>" +
+            '<img class="billboardImage" alt="billboard photo" src=' +
+            el.photo +
+            ">" +
+            '<button class="btn end" data-lat=' +
+            el.latitude +
+            " data-long=" +
+            el.longitude +
+            " >Go Here</button>" +
+            '<button class="btn stop" data-lat=' +
+            el.latitude +
+            " data-long=" +
+            el.longitude +
+            " >Add Stop</button>" +
+            '<button class="btn start" data -lat=' +
+            el.latitude +
+            " data-long=" +
+            el.longitude +
+            " >Start Here</button>";
+
         let marker = new google.maps.Marker({
             position: latlng,
-            icon: { url: `images/marker.png`, scaledSize: new google.maps.Size(20, 20) },
+            icon: {
+                url: iconUrl,
+                scaledSize: new google.maps.Size(30, 30),
+            },
             optimized: false,
+            data: el
         });
-        google.maps.event.addListener(marker, 'click', ((marker, el) => {
-            return () => {
-                infoWindow.setContent(contentString);
-                infoWindow.open(map, marker);
-            }
-        })(marker, el));
-        return marker
+        google.maps.event.addListener(
+            marker,
+            "click",
+            ((marker, el) => {
+                return () => {
+                    infoWindow.setContent(contentString);
+                    infoWindow.open(map, marker);
+                };
+            })(marker, el)
+        );
+        return marker;
     });
-    const mC = new MarkerClusterer(map, markers, { imagePath: "images/m" });
-    // markerCluster.addMarkers(markers)
 
-    div = document.createElement('div');
-    div.innerHTML = `<img src='images/marker.png' alt='billboard'/>Billboards<input id="billboardChecked" checked type="checkbox" />`;
+    billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+    billboardTable.style.display = 'block';
+    drawBBLegend()
+
+    div = document.createElement("div");
+    div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
     essentialLayers.appendChild(div);
-    legend.addEventListener('change', e => {
-        if (e.target.matches('#billboardChecked')) {
-            cb = document.getElementById('billboardChecked')
+    legend.addEventListener("change", (e) => {
+        if (e.target.matches("#billboardChecked")) {
+            cb = document.getElementById("billboardChecked");
             // if on
             if (cb.checked) {
-                mC.addMarkers(markers)
+                billboardMarkers.addMarkers(markers);
+                map.fitBounds(bounds);
+                map.panToBounds(bounds);
+
+                billboardTable.style.display = 'block';
             }
             if (!cb.checked) {
                 // if off
-                mC.removeMarkers(markers)
+                billboardMarkers.removeMarkers(markers);
+
+                billboardTable.style.display = 'none';
+                drawBBLegend()
             }
         }
-    })
+    });
+
 }
 
 function addNssf(data) {
@@ -739,7 +828,7 @@ function addGhanaPopulation() {
 
 function parseData(val) {
     if (val == null || val == undefined) {
-        return ''
+        return "Not Available";
     }
     return val;
 }
@@ -750,6 +839,7 @@ function parseValues(val) {
     }
     return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 //
 // create routes
 const tracker = new Object();
@@ -801,17 +891,17 @@ mapContainer.addEventListener('click', e => {
 
 poiLayersAccordion.addEventListener('change', (e) => {
     if (e.target.matches(".poi")) {
-      targetPoi = e.target.dataset.id;
-      cb = document.getElementById(`${targetPoi}Checked`);
-      if (cb.checked) {
-        markerCluster.addMarkers(gmarkers[targetPoi]);
-       
-      }
-      if (!cb.checked) {
-        markerCluster.removeMarkers(gmarkers[targetPoi]);
-      }
+        targetPoi = e.target.dataset.id;
+        cb = document.getElementById(`${targetPoi}Checked`);
+        if (cb.checked) {
+            markerCluster.addMarkers(gmarkers[targetPoi]);
+
+        }
+        if (!cb.checked) {
+            markerCluster.removeMarkers(gmarkers[targetPoi]);
+        }
     }
-  }) 
+})
 
 source.addEventListener('change', async (e) => {
     selected = document.querySelector('#dataSourceSelect').value;
@@ -914,4 +1004,245 @@ function getData(dataName) {
         return JSON.parse(data);
     }
     return;
+}
+
+
+billboardTable.addEventListener('click', e => {
+    if (e.target.matches('.category')) {
+        // get the id/name of category
+        const category = e.target.value
+        categorizeBB(category)
+    }
+
+    if (e.target.matches('.filter_selector')) {
+        const value = e.target.value.trim()
+        if (value == "") {
+            accumulateFilters(e.target.name.toLowerCase(), "", true)
+        } else {
+            accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase())
+        }
+    }
+})
+
+
+function accumulateFilters(name, value, remove = false) {
+    const index = filters.findIndex(f => f.name === name);
+    drawFilterIcon()
+    const scoreBoard = infoTab.querySelector('#score')
+
+    // remove a filter
+    if (remove) {
+        // user wants to remove a whole filter category
+        // thus get the category from the accumulated filters
+        // and also get the score of the value previously added 
+        // then remove it from the overall score
+        if (filters.length > 0) {
+            const prevFilterVal = filters[index]['value']
+            const prevScore = filterScores[name][prevFilterVal].score
+            overallScore -= prevScore
+            scoreBoard.innerHTML = overallScore
+        }
+
+        filters.splice(index, 1);
+        applyFilters()
+        updateFilterHtml()
+        return;
+    }
+
+    // add a filter
+    // if name was not found in filters, push.
+    if (index < 0) {
+        const score = filterScores[name][value].score
+        overallScore += score;
+        scoreBoard.innerHTML = overallScore
+
+        filters.push({ name: name, value: value });
+        applyFilters()
+        updateFilterHtml()
+        return;
+    }
+
+    // update a filter
+    // if name was found, update with new value
+    const prevScore = filterScores[name][filters[index].value].score
+    overallScore -= prevScore;
+    const newScore = filterScores[name][value].score
+    overallScore += newScore;
+    scoreBoard.innerHTML = overallScore
+
+    filters[index].value = value;
+    applyFilters()
+    updateFilterHtml()
+}
+
+// apply all fillters in the filters array
+const applyFilters = () => {
+    let counter = 0;
+    // for each billboard check if it meets the filters 
+    billboardMarkers.getMarkers().forEach(bm => {
+
+        const viable = filters.reduce((acc, { name, value }) => {
+            return acc && bm.data[`${name}`]?.toLowerCase() === value
+        }, true);
+
+        const greyedIcon = {
+            url: `./images/billboardGreyed2.png`,
+            scaledSize: new google.maps.Size(30, 30)
+        };
+
+        const coloredIcon = {
+            url: `./images/billboardColored.png`,
+            scaledSize: new google.maps.Size(30, 30)
+        }
+
+        if (viable) {
+            counter++
+            bm.setIcon(coloredIcon);
+            bm.setAnimation(google.maps.Animation.BOUNCE)
+            stopAnimation(bm);
+            return;
+        }
+        bm.setIcon(greyedIcon);
+
+    })
+    infoTab.querySelector("#bbCount").innerHTML = counter;
+}
+
+function stopAnimation(marker) {
+    setTimeout(function () {
+        marker.setAnimation(null);
+    }, 3000);
+}
+
+const filterScores = {
+    site_lighting_illumination: {
+        backlit: { score: 3, icon: 'bbBacklit1' },
+        frontlit: { score: 2, icon: "bbFrontlit1" },
+        unlit: { score: 1, icon: "bbNolit" },
+    },
+    condition: {
+        excellent: { score: 4, icon: "bbDgreen" },
+        good: { score: 3, icon: "bbLgreen" },
+        average: { score: 2, icon: "bbAmber" },
+        poor: { score: 1, icon: "bbRed" },
+    },
+    visibility: {
+        excellent: { score: 3, icon: "bbDgreen" },
+        good: { score: 2, icon: "bbAmber" },
+        poor: { score: 1, icon: "bbRed" },
+    },
+    height: {
+        "eye level": { score: 3, icon: "bbDgreen" },
+        moderate: { score: 2, icon: "bbAmber" },
+        "too high": { score: 1, icon: "bbRed" },
+    },
+    traffic: {
+        slow: { score: 3, icon: 'bbDgreen' },
+        average: { score: 2, icon: 'bbAmber' },
+        fast: { score: 1, icon: 'bbRed' },
+    },
+    traffic_q: {
+        heavy: { score: 3, icon: 'bbDgreen' },
+        medium: { score: 2, icon: 'bbAmber' },
+        light: { score: 1, icon: 'bbRed' }
+    },
+    clutter: {
+        solus: { score: 3, icon: "bbBlue" },
+        average: { score: 2, icon: "bbNolit" },
+        cluttered: { score: 1, icon: "billboardGreyed1" },
+    },
+};
+
+function categorizeBB(category) {
+    const defaultIcon = {
+        url: `./images/billboardColored.png`,
+        scaledSize: new google.maps.Size(30, 30)
+    }
+    billboardMarkers.getMarkers().forEach(bm => {
+        for (let [billboardProp, value] of Object.entries(bm.data)) {
+            if (billboardProp.toLowerCase() === category.toLowerCase()) {
+                if (
+                    value == null ||
+                    value == "null" ||
+                    value == undefined ||
+                    value == "undefined"
+                ) {
+                    // condition: null/undefined
+                    bm.setIcon(defaultIcon);
+                } else {
+                    // condition:poor
+                    if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
+                        const newIcon = {
+                            url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
+                            scaledSize: new google.maps.Size(30, 30)
+                        }
+
+                        bm.setIcon(newIcon);
+                        bm.setAnimation(google.maps.Animation.BOUNCE)
+                        stopAnimation(bm);
+                    } else {
+                        bm.setIcon(defaultIcon);
+                    }
+                }
+            }
+        }
+    })
+    drawCatIcons(category);
+}
+
+function drawCatIcons(category) {
+    let html = "";
+    for (const [k, v] of Object.entries(filterScores[category])) {
+        html +=
+            `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+    }
+
+    infoTab.querySelector(".billboardCatInfo").innerHTML =
+        `<h4 class="info-header">Categories Key</h4>
+    ${html}
+    <div>
+      <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+    </div>`
+
+}
+
+function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+drawCatIcons
+function drawBBLegend() {
+    const html = `
+      <h4 class="info-header">Filter Key</h4>
+      <div><h4>Score:</h4><span id="score">0</span> </div>
+      <hr class="hr">
+      <div><span id="bbCount">${totalBB}</span> Billboards</div>
+      <hr class="hr">
+      <div style="text-align:centre;"> Filters </div>
+      <div id="filters"></div>
+      <hr class="hr">
+      <div id="filterIcons"> </div>`
+
+    infoTab.querySelector(".billboardFilInfo").innerHTML = html
+}
+
+
+function updateFilterHtml() {
+    // filters :[...filter]
+    // filter: {name: value}
+    let html = ''
+    filters.forEach(({ name, value }) => {
+        html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`
+    });
+    infoTab.querySelector('#filters').innerHTML = html
+}
+
+function drawFilterIcon() {
+    infoTab.querySelector('#filterIcons').innerHTML = `
+  <div>
+  Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+  </div>
+  <div>
+  Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
+  </div>
+  `;
 }

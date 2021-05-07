@@ -1,2 +1,136 @@
 <div id="loader"></div>
+<div id="billboardTable" class="active">
+    <table>
+
+        <tr class="filter_row">
+            <th>Filter By:</th>
+            <td>
+
+                <select class="filter_selector" title="Lighting Filter" name="site_lighting_illumination"
+                    id="site_lighting_illumination_filter">
+                    <option selected value="">Choose one</option>
+                    <option class="backlit" value="backlit">Backlit (3)</option>
+                    <option class="frontlit" value="frontlit">Frontlit (2)</option>
+                    <option class="unlit" value="unlit">Unlit (1)</option>
+                </select>
+
+            </td>
+
+            <td>
+
+                <select class="filter_selector" title="Condition Filter" name="condition" id="condition_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="excellent">Excelent (4)</option>
+                    <option value="good">Good (3)</option>
+                    <option value="average">Average (2)</option>
+                    <option value="poor">Poor (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Visibility filter" name="visibility" id="visibility_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="excellent">Excellent (3)</option>
+                    <option value="good">Good (2)</option>
+                    <option value="Poor">Poor (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Heigt Filter" name="height" id="height_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="eye level">Eye Level (3)</option>
+                    <option value="moderate">Moderate (2)</option>
+                    <option value="too high">Too High (1)</option>
+                </select>
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Traffic Filter" name="traffic" id="traffic_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="Slow">Slow (3)</option>
+                    <option value="average">Average (2)</option>
+                    <option value="Fast">Fast (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title=" Traffic Quality Filter" name="traffic_q" id="trafficq_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="heavy">Heavy (3)</option>
+                    <option value="medium">Medium (2)</option>
+                    <option value="light">Light (1)</option>
+                </select>
+
+            </td>
+            <td>
+
+                <select class="filter_selector" title="Clutter Filter" name="clutter" id="clutter_filter">
+                    <option selected value="">Choose one</option>
+                    <option value="solus">Solus (3)</option>
+                    <option value="average">Average (2)</option>
+                    <option value="cluttered">Cluttered (1)</option>
+                </select>
+
+            </td>
+
+        </tr>
+
+        <tr class="categorize_row">
+            <th>Categorize By:</th>
+            <td>
+                <div class="cell">
+                    <label for="lighting">Lighting</label><br />
+                    <input type="radio" id="lighting" name="category" class="category"
+                        value="site_lighting_illumination" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="condition">Condition</label><br />
+                    <input type="radio" id="condition" name="category" class="category" value="condition" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="visibility">Visibility</label><br />
+                    <input type="radio" id="visibility" name="category" class="category" value="visibility" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="height">Height</label><br />
+                    <input type="radio" id="height" name="category" class="category" value="height" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="traffic">Traffic</label><br />
+                    <input type="radio" id="traffic" name="category" class="category" value="traffic" />
+                </div>
+            </td>
+
+            <td>
+                <div class="cell">
+                    <label for="traffic_q">Traffic Quality</label><br />
+                    <input type="radio" id="traffic_q" name="category" class="category" value="traffic_q" />
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <label for="clutter">Clutter</label><br />
+                    <input type="radio" id="clutter" name="category" class="category" value="clutter" />
+                </div>
+            </td>
+
+        </tr>
+    </table>
+</div>
 <div id="map" style="display: none;"></div>
