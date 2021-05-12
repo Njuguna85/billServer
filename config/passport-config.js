@@ -11,7 +11,7 @@ function initialize(passport) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         proxy: true,
-        callbackURL: '/auth/google/callback',
+        callbackURL: process.env.GOOGLE_CALLACK,
 
     },
         // access the user details from the profile
