@@ -5,7 +5,7 @@ const passport = require("passport");
 const session = require("express-session");
 const dotenv = require("dotenv");
 // set the path of config file
-dotenv.config({ path: "./config/config.env" });
+const x = dotenv.config({ path: __dirname + "/config/config.env" });
 const pois = require('./routes/pois')
 const exhbs = require("express-handlebars");
 const morgan = require("morgan");
@@ -16,6 +16,7 @@ const cors = require('cors')
 
 // use the json payload for body requests
 app.use(express.json());
+
 
 app.use(express.urlencoded({ extended: true }));
 // use morgan to log request

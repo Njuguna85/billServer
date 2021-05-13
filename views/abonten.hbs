@@ -299,7 +299,7 @@
     }
 
     async function fetchData() {
-        let response = await fetch("/api/pois/abonteh");
+        let response = await fetch("/api/pois/abonten");
         if (response.ok) {
             data = await response.json();
             addOverlays(data);

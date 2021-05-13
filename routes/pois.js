@@ -345,14 +345,13 @@ router.get('/eabl', async (req, res) => {
                 return res.status(200).send(JSON.parse(data))
             } else {
                 let results = await sequelize.query(
-                    `SELECT 
-                        billboard as "billboard sites" , "brand name", "company na" as "company name", 
-                        industry, "sub indust" as "sub industry", billboar_1 as "billboard size", lattitude, longitude, 
-                        "county reg" as "county region", billboar_2 as "billboard type", billboar_3 as "billboard company", rate, "map link", 
-                        "image link", date, "site run_u" as "site run-up", "site light" as "site lighting", "site obstr" as "site obstruction",
-                        "site clust" as "site clustering", "traffic de" as "traffic density", "road name", oct_20, wkb_geometry as geom
+                    `SELECT
+                        road_name, month, company, type ,
+                        brand_name, availabili, co_name, industry, sub_indust,
+                        site_run_u, site_light, site_obstr, site_clust, traffic_de,
+                        size, latitude, longitude, country_re, map_link, image_link
                     FROM 
-                        public."EABL";`,
+                        public.eabl;`,
                     { type: sequelize.QueryTypes.SELECT });
 
                 client.set(eabl, JSON.stringify(results));
@@ -423,10 +422,10 @@ router.get('/aq', async (req, res) => {
     }
 });
 
-router.get('/abonteh', async (req, res) => {
+router.get('/abonten', async (req, res) => {
     const pois = {};
 
-    let billboards, abonteehData;
+    let billboards, abontenData;
     try {
         const responseToken = await axios.post('https://bi.predictiveanalytics.co.ke/oauth/token', {
             "grant_type": "client_credentials",
@@ -444,8 +443,8 @@ router.get('/abonteh', async (req, res) => {
         });
 
         billboards = responseBillboards.data;
-        
-        // client.del('abonteh', async (err, reply) => {
+
+        // client.del('abonten', async (err, reply) => {
         //     if (!err) {
         //         if (reply === 1) {
         //             console.log("Key is deleted");
@@ -455,7 +454,7 @@ router.get('/abonteh', async (req, res) => {
         //     }
         // })
 
-        client.get('abonteh', async (err, data) => {
+        client.get('abonten', async (err, data) => {
             if (err) {
                 logger.error(`${req}-${err}`)
                 console.log('Error Fetching gh redis Cache', err)
@@ -465,16 +464,16 @@ router.get('/abonteh', async (req, res) => {
                 })
             }
             if (data) {
-                abonteehData = JSON.parse(data)
+                abontenData = JSON.parse(data)
                 return res.status(200).json({
-                    ...abonteehData, billboards
+                    ...abontenData, billboards
                 })
             } else {
 
                 for (const i of poiCategories) {
                     pois[i] = await fetchPoi('gh', i)
                 }
-                client.set('abonteh', JSON.stringify({ pois }));
+                client.set('abonten', JSON.stringify({ pois }));
 
                 return res.status(200).json({
                     pois, billboards,
