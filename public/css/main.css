@@ -2,7 +2,7 @@
 html,
 body {
   padding: 0;
-  margin: 0 auto;
+  margin: 0;
 }
 * {
   box-sizing: border-box;
@@ -10,7 +10,7 @@ body {
 
 body {
   height: 100vh;
-  width: 98vw;
+  width: 100vw;
   background-color: #eeeeee;
   box-sizing: border-box;
   position: relative;
@@ -705,6 +705,8 @@ tr:nth-child(even) {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px;
+  margin-bottom: 4px;
 }
 .billboardFilInfo {
   border-bottom: 2px dashed #3949ab;

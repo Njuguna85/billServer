@@ -5,8 +5,7 @@ const passport = require("passport");
 const session = require("express-session");
 const dotenv = require("dotenv");
 // set the path of config file
-const x = dotenv.config({ path: __dirname + "/config/config.env" });
-const pois = require('./routes/pois')
+dotenv.config({ path: __dirname + "/config/config.env" });
 const exhbs = require("express-handlebars");
 const morgan = require("morgan");
 const index = require("./routes/index");
@@ -58,8 +57,6 @@ app.use("/", index);
 app.use("/roles", require("./routes/roles"));
 
 app.use("/api/pois", require("./routes/pois"));
-
-app.use("/api/businesses", require("./routes/business"));
 
 const port = process.env.PORT || 5000;
 

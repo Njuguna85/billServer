@@ -1,9 +1,9 @@
 let map;
 let infoWindow;
-let directionsService;
-let directionsRenderer;
+var directionsService;
+var directionsRenderer;
 const mapContainer = document.getElementById("map");
-let bounds, markerCluster, gmarkers = {};
+var bounds, markerCluster, gmarkers = {};
 const filters = [];
 let billboardMarkers = [];
 let overallScore = 0, totalBB = 0;
@@ -39,9 +39,9 @@ const infoTab = document.createElement("div");
 infoTab.setAttribute("id", "infoTab");
 infoTab.innerHTML =
   `<h3>More Info</h3>
-  <div class="info"></div>
-  <div class="billboardFilInfo"></div>
-  <div class="billboardCatInfo"></div>`;
+        <div class="info"></div>
+        <div class="billboardFilInfo"></div>
+        <div class="billboardCatInfo"></div>`;
 
 const directionsPanel = document.createElement("div");
 directionsPanel.className = "directionsPanel";
@@ -61,16 +61,15 @@ const commD = [
   "kiosk",
   "pharmacy",
   "restaurant",
-  "saloon",
   "supermarket",
 ];
 
 function initMap() {
-  // set the zoom, scale, street view and full screen controls
-  // also create a custom map style
+  const mapCentre = { lat: 5.970731, lng: -0.344567 }
+
   const mapOptions = {
-    zoom: 12,
-    center: { lat: -1.28333, lng: 36.816667 },
+    zoom: 9,
+    center: mapCentre,
     mapTypeControl: true,
     mapTypeControlOptions: {
       style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
@@ -135,9 +134,21 @@ function initMap() {
   map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
 
+
+  const content =
+    `<div class="businessesSuggestion">
+        <h4><bold>Welcome to the landing page. To activate layers:  </h4></bold>
+        <p>Pan to the yellow pane on the right</p>
+        <p>Click the plus sign (+) to expand</p>
+        <p>Check the boxes to activate the layers to be viewed </p>
+        </div>`;
+
+  infoWindow.setContent(content);
+  infoWindow.setPosition(mapCentre);
+  infoWindow.open(map);
+
   markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
 
-  fetchMobileUploads();
   fetchData();
 
   // initialize directions service
@@ -150,11 +161,11 @@ function initMap() {
 }
 
 async function fetchData() {
-  let response = await fetch("/api/pois/nairobi");
+  let response = await fetch("/api/pois/abonten");
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
-    saveData(data)
+
   } else {
     alert(
       "Something went wrong while fetching data. Error: " + response.status
@@ -162,44 +173,11 @@ async function fetchData() {
   }
 }
 
-async function fetchMobileUploads() {
-  // we need to make a request for mobile uploads within
-  // the past one week from today(2 dates)
-  // format is yyyy-mm-dd hh:mm
-  const today = new Date();
-  let lastHr = today.getHours() - 1 + ":00";
-  let thisHr = `${today.getHours()}:${today.getMinutes()}`;
-
-  var todayDate = today.toISOString().slice(0, 10);
-
-  const url = `https://bi.predictiveanalytics.co.ke/api/all-deliveries?start=${todayDate} ${lastHr}&end=${todayDate} ${thisHr}`;
-  let response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Access-Control-Allow-Methods": "GET",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "X-Requested-With",
-    },
-  });
-  if (response.ok) {
-    mobileData = await response.json();
-    getmobileMarkers(mobileData.data);
-
-  } else {
-    alert(
-      "Something went wrong while fetching Mobile Uploads. Error: " +
-      response.status
-    );
-  }
-}
 
 function addOverlays(data) {
-  addBillboards(data.billboard);
   addTrafficLayer();
-  nairobiSublWMS();
-  addNairobiUberSpeeds();
-  addugPopProj();
   addGhanaPopulation();
+  addBillboards(data.billboards);
   for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {
       add(key, value);
@@ -325,112 +303,6 @@ const latLonToTileXYOffset = (lat, lon, zoom) => {
   return tileOffset;
 };
 
-function nairobiSublWMS() {
-  const wmsLayer = "Predictive:nairobisublocations";
-  const key = () => {
-    info = infoTab.querySelector(".info");
-    info.innerHTML = `
-        <div class="sublocLegend">
-            <div>Census Population 2019</div>
-            <div><span class="subColor" style="background-color:#fcfbfd;"></span>743 - 6783</div>
-            <div><span class="subColor" style="background-color:#f1eff7;"></span>6783 - 9882</div>
-            <div><span class="subColor" style="background-color:#e0e0ee;"></span>9882 - 13901</div>
-            <div><span class="subColor" style="background-color:#c9cae3;"></span>13901 - 19082</div>
-            <div><span class="subColor" style="background-color:#b0afd4;"></span>19082 - 23712</div>
-            <div><span class="subColor" style="background-color:#9692c4;"></span>23712 - 28932</div>
-            <div><span class="subColor" style="background-color:#7c76b6;"></span>28932 - 31603</div>
-            <div><span class="subColor" style="background-color:#66499f;"></span>31603 - 40523</div>
-            <div><span class="subColor" style="background-color:#552a91;"></span>40523 - 60613</div>
-            <div><span class="subColor" style="background-color:#3f007d;"></span>60613 - 88039</div>
-        </div>
-        `;
-  };
-  const nrbtile = getTiles(wmsLayer);
-
-  const nairobisublocations = new google.maps.ImageMapType({
-    getTileUrl: nrbtile,
-    minZoom: 0,
-    maxZoom: 19,
-    opacity: 1.0,
-    alt: "Nairobi County Sublocations Population 2019",
-    name: "nrbtile",
-    isPng: true,
-    tileSize: new google.maps.Size(256, 256),
-  });
-
-  div = document.createElement("div");
-  div.innerHTML = `Nairobi Sublocations<input id="sublCheck" type="checkbox" />`;
-  mapLayersAccordion.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#sublCheck")) {
-      cb = document.getElementById("sublCheck");
-      // if on
-      if (cb.checked) {
-        map.overlayMapTypes.setAt(0, nairobisublocations);
-        key();
-      }
-      if (!cb.checked) {
-        // if off
-        map.overlayMapTypes.removeAt(0);
-        infoTab.querySelector(".info").innerHTML = "";
-      }
-    }
-  });
-}
-
-function addNairobiUberSpeeds() {
-  const wmsLayer = "	Predictive:nairobi roads travel speeds February";
-  const key = () => {
-    info = infoTab.querySelector(".info");
-    info.innerHTML = `
-        <div class="sublocLegend">
-            <div>February 2020 Speeds in Kph</div>
-            <div><span class="rdspeed" style="background-color:#9e0142;"></span>2 - 11.8</div>
-            <div><span class="rdspeed" style="background-color:#d53e4f;"></span>11.8 - 21.6</div>
-            <div><span class="rdspeed" style="background-color:#f46d43;"></span>21.6 - 31.4</div>
-            <div><span class="rdspeed" style="background-color:#fdae61;"></span>31.4 - 41.2</div>
-            <div><span class="rdspeed" style="background-color:#fee08b;"></span>41.2 - 51</div>
-            <div><span class="rdspeed" style="background-color:#e6f598;"></span>51 - 60.8</div>
-            <div><span class="rdspeed" style="background-color:#abdda4;"></span>60.8 - 70.6</div>
-            <div><span class="rdspeed" style="background-color:#66c2a5;"></span>70.6 - 80.4</div>
-            <div><span class="rdspeed" style="background-color:#3288bd;"></span>80.4 - 90.2</div>
-            <div><span class="rdspeed" style="background-color:#5e4fa2;"></span>90.2 - 100</div>
-        </div>
-        `;
-  };
-  const uberspeedstile = getTiles(wmsLayer);
-
-  const uberspeeds = new google.maps.ImageMapType({
-    getTileUrl: uberspeedstile,
-    minZoom: 0,
-    maxZoom: 19,
-    opacity: 1.0,
-    alt: "Nairobi roads travel speeds February",
-    name: "uberspeedstile",
-    isPng: true,
-    tileSize: new google.maps.Size(256, 256),
-  });
-
-  div = document.createElement("div");
-  div.innerHTML = `Nairobi Travel Speeds<input id="uberCheck" type="checkbox" />`;
-  mapLayersAccordion.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#uberCheck")) {
-      cb = document.getElementById("uberCheck");
-      // if on
-      if (cb.checked) {
-        map.overlayMapTypes.setAt(3, uberspeeds);
-        key();
-      }
-      if (!cb.checked) {
-        // if off
-        map.overlayMapTypes.removeAt(3);
-        infoTab.querySelector(".info").innerHTML = "";
-      }
-    }
-  });
-}
-
 function addTrafficLayer() {
   const trafficLayer = new google.maps.TrafficLayer();
 
@@ -521,53 +393,115 @@ function parseBBProps(filterScoreProp, bbProp) {
 function addBillboards(data) {
   const bounds = new google.maps.LatLngBounds();
 
+  var spiderConfig = {
+    keepSpiderfied: true,
+    event: 'mouseover'
+  };
+  var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
+
   const markers = data.map((el) => {
-    totalBB++
+    totalBB++;
     const iconUrl = `images/billboardColored.png`;
     let score;
 
-    let latlng = new google.maps.LatLng(el.lat, el.long);
-    bounds.extend(latlng);
+    let address = el && parseData(el.address);
+    let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
+    let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
+    let direction =
+      el && el.direction && parseData(el.direction["characteristic_value"]);
+    let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
+    let clutter =
+      el && el.clutter && parseData(el.clutter["characteristic_value"]);
+    let size = el && el.size && parseData(el.size["characteristic_value"]);
+    let orientation =
+      el && el.orientation && parseData(el.orientation["characteristic_value"]);
+    let height = el && el.height && parseData(el.height["characteristic_value"]);
+    let side_of_road =
+      el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
+    let condition =
+      el && el.condition && parseData(el.condition["characteristic_value"]);
+    let visibility =
+      el && el.visibility && parseData(el.visibility["characteristic_value"]);
+    let traffic =
+      el && el.traffic && parseData(el.traffic["characteristic_value"]);
+    let traffic_q =
+      el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
 
-    score = parseBBProps('site_lighting_illumination', el.site_lighting_illumination) + parseBBProps('condition', el.condition) +
-      parseBBProps('visibility', el.visibility) + parseBBProps('height', el.height) + parseBBProps('traffic', el.traffic)
-      + parseBBProps('traffic_q', el.traffic_q) + parseBBProps('clutter', el.clutter)
+    let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
+    let image = el && parseData(el.image);
+    let latitude = el && parseData(el.latitude);
+    let longitude = el && parseData(el.longitude);
+
+    score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('condition', condition) +
+      parseBBProps('visibility', visibility) + parseBBProps('height', height) + parseBBProps('traffic', traffic)
+      + parseBBProps('traffic_q', traffic_q) + parseBBProps('clutter', clutter)
 
     el['score'] = score;
 
+    data = {
+      site_lighting_illumination, condition, visibility, height, traffic, traffic_q, clutter
+    }
+
+    let latlng = new google.maps.LatLng(el.latitude, el.longitude);
+
+    bounds.extend(latlng);
     let contentString =
       '<div class ="infoWindow">' +
       "<div>" +
+      "Address: <b>" +
+      address +
+      "</b></div>" +
+      "<div>" +
+      "Medium Type: <b>" +
+      medium +
+      "</b></div>" +
+      "<div>" +
       "Lighting: <b>" +
-      parseData(el.site_lighting_illumination) +
+      site_lighting_illumination +
       "</b></div>" +
       "<div>" +
-      "Route: <b>" +
-      parseData(el.routename) +
+      "Direction: <b>" +
+      direction +
       "</b></div>" +
       "<div>" +
-      "Size: <b>" +
-      parseData(el.size) +
-      "</b></div>" +
-      "<div>" +
-      "Visibility: <b>" +
-      parseData(el.visibility) +
+      "Faces: <b>" +
+      faces +
       "</b> </div>" +
       "<div>" +
-      "Height: <b>" +
-      parseData(el.height) +
+      "Clutter: <b>" +
+      clutter +
+      "</b> </div>" +
+      "<div>" +
+      "Visibility: <b>" +
+      parseData(visibility) +
       "</b> </div>" +
       "<div>" +
       "Condition: <b>" +
-      parseData(el.condition) +
-      "</b> </div>" +
-      "<div>" +
-      "Medium: <b>" +
-      parseData(el.selectmedium) +
+      parseData(condition) +
       "</b> </div>" +
       "<div>" +
       "Traffic: <b>" +
-      parseData(el.traffic) +
+      parseData(traffic) +
+      "</b> </div>" +
+      "<div>" +
+      "Size: <b>" +
+      size +
+      "</b> </div>" +
+      "<div>" +
+      "Orientation: <b>" +
+      orientation +
+      "</b> </div>" +
+      "<div>" +
+      "Height: <b>" +
+      height +
+      "</b> </div>" +
+      "<div>" +
+      "Road Side: <b>" +
+      parseData(side_of_road) +
+      "</b> </div>" +
+      "<div>" +
+      "Angle: <b>" +
+      parseData(angle) +
       "</b> </div>" +
       "<div>" +
       "Score: <b>" +
@@ -575,7 +509,7 @@ function addBillboards(data) {
       "</b> </div>" +
       "</div>" +
       '<img class="billboardImage" alt="billboard photo" src=' +
-      el.photo +
+      el.image +
       ">" +
       '<button class="btn end" data-lat=' +
       el.latitude +
@@ -587,7 +521,7 @@ function addBillboards(data) {
       " data-long=" +
       el.longitude +
       " >Add Stop</button>" +
-      '<button class="btn start" data -lat=' +
+      '<button class="btn start" data-lat=' +
       el.latitude +
       " data-long=" +
       el.longitude +
@@ -600,7 +534,7 @@ function addBillboards(data) {
         scaledSize: new google.maps.Size(30, 30),
       },
       optimized: false,
-      data: el
+      data
     });
     google.maps.event.addListener(
       marker,
@@ -612,10 +546,27 @@ function addBillboards(data) {
         };
       })(marker, el)
     );
+
+    // Adds the Marker to OverlappingMarkerSpiderfier
+    markerSpiderfier.addMarker(marker);
     return marker;
+
+  });
+
+
+  markerSpiderfier.addListener('click', function (marker, e) {
+    //infoWindow.setContent(marker.title);
+    infoWindow.open(map, marker);
+  });
+
+  markerSpiderfier.addListener('spiderfy', function (markers) {
+    infoWindow.close();
   });
 
   billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+
+  billboardMarkers.setMaxZoom(15);
+
   billboardTable.style.display = 'block';
   drawBBLegend()
 
@@ -632,6 +583,7 @@ function addBillboards(data) {
         map.panToBounds(bounds);
 
         billboardTable.style.display = 'block';
+
       }
       if (!cb.checked) {
         // if off
@@ -643,132 +595,7 @@ function addBillboards(data) {
     }
   });
 
-}
 
-function getmobileMarkers(deliveriesData) {
-  mobileMarkersDates = new Object();
-  const uploadDates = [];
-  const markers = deliveriesData.map((el) => {
-    let latlng = new google.maps.LatLng(el.latitude, el.longitude);
-    let contentString =
-      "Product Name: <b>" +
-      parseData(el.product_name) +
-      "</b><br/>" +
-      "Delivered By: <b>" +
-      parseData(el.delivered_by) +
-      "</b> <br/>" +
-      "Description: <b>" +
-      parseData(el.product_description) +
-      "</b> <br/>" +
-      "Quantity: <b>" +
-      parseData(el.quantity) +
-      "</b> <br/>" +
-      '<img class="billboardImage" alt="delivery photo" src=' +
-      el.photo +
-      "></img>";
-    let marker = new google.maps.Marker({
-      position: latlng,
-      icon: {
-        url: `images/place.png`,
-        scaledSize: new google.maps.Size(20, 20),
-      },
-      optimized: false,
-    });
-    google.maps.event.addListener(
-      marker,
-      "click",
-      ((marker, el) => {
-        return () => {
-          infoWindow.setContent(contentString);
-          infoWindow.open(map, marker);
-        };
-      })(marker, el)
-    );
-    // add list of dates
-    if (el.created_at) {
-      let date = el.created_at.slice(0, 10);
-      if (uploadDates.length == 0) {
-        uploadDates.push(date);
-      } else {
-        if (uploadDates.includes(date) == false) {
-          uploadDates.push(date);
-        }
-      }
-    }
-    return marker;
-  });
-  mobileMarkersDates.dates = uploadDates;
-  const markerCluster = new MarkerClusterer(map, [], { imagePath: 'images/m' });
-  div = document.createElement("div");
-  div.innerHTML = `<img src='images/place.png'/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
-  essentialLayers.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#mobileCheck")) {
-      cb = document.getElementById("mobileCheck");
-      // if on
-      if (cb.checked) {
-        markerCluster.addMarkers(markers);
-      }
-      if (!cb.checked) {
-        // if off
-        markerCluster.removeMarkers(markers);
-      }
-    }
-  });
-}
-
-function addugPopProj() {
-  const key = () => {
-    info = infoTab.querySelector(".info");
-    info.innerHTML = `
-        <div class="sublocLegend">
-            <div>SubCounty Population Projection 2020</div>
-            <div><span class="subColor" style="background-color:#f7fbff;"></span>1600 - 9200</div>
-            <div><span class="subColor" style="background-color:#e2eef9;"></span>9200 - 12600</div>
-            <div><span class="subColor" style="background-color:#cde0f2;"></span>12600 - 15530</div>
-            <div><span class="subColor" style="background-color:#b0d2e8;"></span>15530 - 18640</div>
-            <div><span class="subColor" style="background-color:#89bfdd;"></span>18640 - 21900</div>
-            <div><span class="subColor" style="background-color:#60a6d2;"></span>21900 - 25200</div>
-            <div><span class="subColor" style="background-color:#3e8ec4;"></span>25200 - 30400</div>
-            <div><span class="subColor" style="background-color:#2172b6;"></span>30400 - 36400</div>
-            <div><span class="subColor" style="background-color:#0a549e;"></span>36400 - 47880</div>
-            <div><span class="subColor" style="background-color:#08306b;"></span>47880 - 445900</div>
-        </div>`;
-  };
-
-  const ugtile = getTiles("Predictive:ugsubcountiesprojection");
-
-  const ugPopProj = new google.maps.ImageMapType({
-    getTileUrl: ugtile,
-    minZoom: 0,
-    maxZoom: 19,
-    opacity: 1.0,
-    alt: "Uganda Population Projection 2020",
-    name: "ugPopProj",
-    isPng: true,
-    tileSize: new google.maps.Size(256, 256),
-  });
-
-  div = document.createElement("div");
-  div.innerHTML = `Uganda Population Projection 2020 <input id="ugPopProjCheck" type="checkbox" />`;
-  mapLayersAccordion.appendChild(div);
-
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#ugPopProjCheck")) {
-      cb = document.getElementById("ugPopProjCheck");
-      // if on
-      if (cb.checked) {
-        map.overlayMapTypes.setAt(1, ugPopProj);
-        key();
-      }
-      if (!cb.checked) {
-        // if off
-        map.overlayMapTypes.removeAt(1);
-        //
-        infoTab.querySelector(".info").innerHTML = "";
-      }
-    }
-  });
 }
 
 function addGhanaPopulation() {
@@ -823,8 +650,8 @@ function addGhanaPopulation() {
 }
 
 function parseData(val) {
-  if (val == null || val == undefined) {
-    return "Not Available";
+  if (val === null || val === undefined) {
+    return "Not captured";
   }
   return val;
 }
@@ -835,6 +662,7 @@ function parseValues(val) {
   }
   return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
+
 //
 // create routes
 const tracker = new Object();
@@ -896,6 +724,7 @@ poiLayersAccordion.addEventListener('change', (e) => {
   }
 })
 
+
 billboardTable.addEventListener('click', e => {
   if (e.target.matches('.category')) {
     // get the id/name of category
@@ -954,12 +783,6 @@ function calcRoute(tracker) {
 function loader() {
   document.getElementById("loader").style.display = "none";
   document.getElementById("billboardDetails").style.display = "block";
-}
-
-function saveData(data) {
-  //clear 
-  localStorage.clear();
-  localStorage.setItem('nairobi', JSON.stringify(data));
 }
 
 function accumulateFilters(name, value, remove = false) {
@@ -1162,7 +985,6 @@ function drawBBLegend() {
   infoTab.querySelector(".billboardFilInfo").innerHTML = html
 }
 
-
 function updateFilterHtml() {
   // filters :[...filter]
   // filter: {name: value}
@@ -1175,11 +997,11 @@ function updateFilterHtml() {
 
 function drawFilterIcon() {
   infoTab.querySelector('#filterIcons').innerHTML = `
-  <div>
-  Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
-  </div>
-  <div>
-  Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
-  </div>
-  `;
+            <div>
+            Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+            </div>
+            <div>
+            Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
+            </div>
+            `;
 }
