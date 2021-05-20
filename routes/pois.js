@@ -38,13 +38,13 @@ router.get('/abonten', async (req, res) => {
 
     let billboards, abontenData;
     try {
-        const responseToken = await axios.post('https://bi.predictiveanalytics.co.ke/oauth/token', {
+        const responseToken = await axios.post('https://bi.abonten.com/oauth/token', {
             "grant_type": "client_credentials",
-            "client_id": 5,
-            "client_secret": "yTwrMoZTsKuqkPsDSJAq3w4X1JcvLt1YKhYMayZV"
+            "client_id": 3,
+            "client_secret": "69PInxj9q5sFDGAL9uBCIfG1IN5R6X1iKCSPLlrs"
         });
 
-        const responseBillboards = await axios.get('https://bi.predictiveanalytics.africa/api/billboard/', {
+        const responseBillboards = await axios.get('https://bi.abonten.com/api/billboard/', {
             headers: {
                 'Authorization': `Bearer ${responseToken.data.access_token}`,
                 'Access-Control-Allow-Methods': 'GET',
@@ -52,6 +52,7 @@ router.get('/abonten', async (req, res) => {
                 "Access-Control-Allow-Headers": "X-Requested-With"
             }
         });
+        // arts
 
         billboards = responseBillboards.data;
 

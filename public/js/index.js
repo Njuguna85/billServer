@@ -472,18 +472,6 @@ function addBillboards(data) {
       clutter +
       "</b> </div>" +
       "<div>" +
-      "Visibility: <b>" +
-      parseData(visibility) +
-      "</b> </div>" +
-      "<div>" +
-      "Condition: <b>" +
-      parseData(condition) +
-      "</b> </div>" +
-      "<div>" +
-      "Traffic: <b>" +
-      parseData(traffic) +
-      "</b> </div>" +
-      "<div>" +
       "Size: <b>" +
       size +
       "</b> </div>" +
@@ -512,19 +500,19 @@ function addBillboards(data) {
       el.image +
       ">" +
       '<button class="btn end" data-lat=' +
-      el.latitude +
+      latitude +
       " data-long=" +
-      el.longitude +
+      longitude +
       " >Go Here</button>" +
       '<button class="btn stop" data-lat=' +
-      el.latitude +
+      latitude +
       " data-long=" +
-      el.longitude +
+      longitude +
       " >Add Stop</button>" +
       '<button class="btn start" data-lat=' +
-      el.latitude +
+      latitude +
       " data-long=" +
-      el.longitude +
+      longitude +
       " >Start Here</button>";
 
     let marker = new google.maps.Marker({
