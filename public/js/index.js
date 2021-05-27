@@ -173,11 +173,12 @@ async function fetchData() {
   }
 }
 
-
 function addOverlays(data) {
   addTrafficLayer();
   addGhanaPopulation();
   addBillboards(data.billboards);
+  addDeliveries(data.deliveries);
+
   for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {
       add(key, value);
@@ -583,6 +584,110 @@ function addBillboards(data) {
     }
   });
 
+
+}
+
+function addDeliveries(data) {
+  const bounds = new google.maps.LatLngBounds();
+
+  var spiderConfig = {
+    keepSpiderfied: true,
+    event: 'mouseover'
+  };
+  var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
+
+  const markers = data.map(el => {
+    let product_name = el && parseData(el.product_name)
+    let product_description = el && parseData(el.product_description)
+    let total_price = el && parseData(el.total_price)
+    let quantity = el && parseData(el.quantity)
+
+    let latlng = new google.maps.LatLng(el.latitude, el.longitude);
+    bounds.extend(latlng);
+
+    let contentString =
+      '<div class ="infoWindow">' +
+      "<div>" +
+      "Product Name: <b>" +
+      product_name +
+      "</b></div>" +
+      "<div>" +
+      "Product Price: <b>" +
+      total_price +
+      "</b></div>" +
+      "<div>" +
+      "Quantity: <b>" +
+      quantity +
+      "</b></div>" +
+      "<div>" +
+      "Product Description: <b>" +
+      product_description +
+      "</b></div>" +
+      "</div>" +
+      '<img class="billboardImage" alt="Delivery photo" src=' + el.photo + ">" +
+      '<button class="btn end" data-lat=' + el.latitude +
+      " data-long=" + el.longitude + " >Go Here</button>" +
+      '<button class="btn stop" data-lat=' + el.latitude +
+      " data-long=" + el.longitude + " >Add Stop</button>" +
+      '<button class="btn start" data-lat=' + el.latitude +
+      " data-long=" + el.longitude + " >Start Here</button>";
+
+    let marker = new google.maps.Marker({
+      position: latlng,
+      icon: {
+        url: `images/bbAmber.png`,
+        scaledSize: new google.maps.Size(30, 30),
+      },
+      optimized: false,
+    });
+
+    google.maps.event.addListener(
+      marker, "click", ((marker, el) => {
+        return () => {
+          infoWindow.setContent(contentString);
+          infoWindow.open(map, marker);
+        };
+      })(marker, el)
+    );
+
+    markerSpiderfier.addMarker(marker);
+    return marker;
+  });
+
+  markerSpiderfier.addListener('click', function (marker, e) {
+    //infoWindow.setContent(marker.title);
+    infoWindow.open(map, marker);
+  });
+
+  markerSpiderfier.addListener('spiderfy', function (markers) {
+    infoWindow.close();
+  });
+
+
+  deliveryMarkers = new MarkerClusterer(map, [], { imagePath: "images/m" });
+  deliveryMarkers.setMaxZoom(15);
+
+
+  div = document.createElement("div");
+  div.innerHTML = `<img src='images/bbAmber.png' alt='Delivery' /> Deliveries <input id="deliveryChecked" type="checkbox" />`;
+  essentialLayers.appendChild(div);
+
+
+  legend.addEventListener("change", (e) => {
+    if (e.target.matches("#deliveryChecked")) {
+      cb = document.getElementById("deliveryChecked");
+      // if on
+      if (cb.checked) {
+        deliveryMarkers.addMarkers(markers);
+        map.fitBounds(bounds);
+        map.panToBounds(bounds);
+      }
+      if (!cb.checked) {
+        // if off
+        deliveryMarkers.removeMarkers(markers);
+      }
+    }
+  });
 
 }
 
