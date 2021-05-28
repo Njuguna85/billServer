@@ -237,7 +237,7 @@
         "," +
         (top.lat() + deltaY);
       const url =
-        "http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?" +
+        "https://play.predictiveanalytics.co.ke/geoserver/Predictive/wms?" +
         "&service=WMS" +
         "&version=1.1.0" +
         "&request=GetMap" +
@@ -533,13 +533,13 @@
           "<tr><td>" + "Company Name: <b>" + parseData(bb["co_name"]) + "</td></b></tr>" +
           "<tr><td>" + "County Region: <b>" + parseData(bb["country_re"]) + "</td></b></tr>" +
           "<tr><td>" + "Industry: <b>" + parseData(bb.industry) + "</td></b></tr>" +
-           "<tr><td>" + "Sub industry: <b>" + parseData(bb["sub_indust"]) + "</td></b></tr>" +
+          "<tr><td>" + "Sub industry: <b>" + parseData(bb["sub_indust"]) + "</td></b></tr>" +
           "<tr><td>" + "Road Name: <b>" + parseData(bb["road_name"]) + "</td></b></tr>" +
-           "<tr><td>" + "Site Run Up: <b>" + parseData(bb["site_run_u"]) + "</td></b></tr>" +
+          "<tr><td>" + "Site Run Up: <b>" + parseData(bb["site_run_u"]) + "</td></b></tr>" +
           "<tr><td>" + "Site Obstruction: <b>" + parseData(bb["site_obstr"]) + "</td></b></tr>" +
           "<tr><td>" + "Clustering: <b>" + parseData(bb["site_clust"]) + "</td></b></tr>" +
           "<tr><td>" + "Lighting: <b>" + parseData(bb.site_light) + "</td></b></tr>" +
-           "<tr><td>" + "Available: <b>" + parseData(bb.availabili) + "</td></b></tr>" +
+          "<tr><td>" + "Available: <b>" + parseData(bb.availabili) + "</td></b></tr>" +
           "<tr><td>" + "Traffic: <b>" + parseData(bb["traffic_de"]) + "</td></b></tr>" +
           "<tr><td>" + "Industry: <b>" + parseData(bb.industry) + "</td></b></tr>" +
           "<tr><td>" + "Month: <b>" + parseData(bb.month) + "</td></b></tr>" + '</table>' +
@@ -566,7 +566,7 @@
           };
         })(bbMarker, bb));
 
-         // Adds the Marker to OverlappingMarkerSpiderfier
+        // Adds the Marker to OverlappingMarkerSpiderfier
         markerSpiderfier.addMarker(bbMarker);
         return bbMarker;
 

@@ -142,13 +142,13 @@
 
 
         const content =
-        `<div class="businessesSuggestion">
+            `<div class="businessesSuggestion">
         <h4><bold>Welcome to the landing page. To activate layers:  </h4></bold>
         <p>Pan to the yellow pane on the right</p>
         <p>Click the plus sign (+) to expand</p>
         <p>Check the boxes to activate the layers to be viewed </p>
         </div>`;
-        
+
         infoWindow.setContent(content);
         infoWindow.setPosition(mapCentre);
         infoWindow.open(map);
@@ -261,7 +261,7 @@
                 "," +
                 (top.lat() + deltaY);
             const url =
-                "http://play.predictiveanalytics.co.ke:8080/geoserver/Predictive/wms?" +
+                "https://play.predictiveanalytics.co.ke/geoserver/Predictive/wms?" +
                 "&service=WMS" +
                 "&version=1.1.0" +
                 "&request=GetMap" +
