@@ -49,6 +49,7 @@ body {
   }
 }
 .dataSource {
+  font-size: 1.5em;
   margin-top: 10px;
   height: 40px;
   width: 200px;

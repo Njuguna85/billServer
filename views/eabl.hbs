@@ -8,6 +8,7 @@
   var directionsRenderer;
   const mapContainer = document.getElementById("map");
   var bounds, markerCluster, gmarkers = {};
+  let billboardMarkers = [], billboardMarkerCluster;
 
   let legend = document.createElement("div");
   legend.setAttribute("id", "legend");
@@ -30,6 +31,7 @@
   poiLayers.innerHTML = '<h5 class="accordion">POIs</h5>';
   poiLayers.className = "poiLayers";
   legend.appendChild(poiLayers);
+
   const poiLayersAccordion = document.createElement("div");
   poiLayersAccordion.className = "accordion-content";
   poiLayers.appendChild(poiLayersAccordion);
@@ -59,6 +61,9 @@
     "saloon",
     "supermarket",
   ];
+
+  const monthPanel = document.createElement('div');
+  monthPanel.className = 'monthPanel';
 
   function initMap() {
     // set the zoom, scale, street view and full screen controls
@@ -129,6 +134,7 @@
     infoWindow = new google.maps.InfoWindow();
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(monthPanel);
 
     markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
 
@@ -520,7 +526,13 @@
 
       var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
 
-      const markers = data.map((bb) => {
+      // gather all months of a bb
+      let uniqueMonths = new Set();
+
+      billboardMarkers = data.map((bb) => {
+
+        uniqueMonths.add(parseData(bb.month));
+
         let latlng = new google.maps.LatLng(bb.latitude, bb.longitude);
         bounds.extend(latlng);
 
@@ -557,6 +569,7 @@
             scaledSize: new google.maps.Size(25, 25),
           },
           optimized: false,
+          data: bb
         });
 
         google.maps.event.addListener(bbMarker, "click", ((marker, bb) => {
@@ -580,26 +593,28 @@
         infoWindow.close();
       });
 
-      const markerCluster = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+      billboardMarkerCluster = new MarkerClusterer(map, billboardMarkers, { imagePath: "images/m" });
 
-      markerCluster.setMaxZoom(15);
+      billboardMarkerCluster.setMaxZoom(15);
 
       div = document.createElement("div");
       div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
       essentialLayers.appendChild(div);
+
+      displayMonths(uniqueMonths)
 
       legend.addEventListener("change", (e) => {
         if (e.target.matches("#billboardChecked")) {
           cb = document.getElementById("billboardChecked");
           // if on
           if (cb.checked) {
-            markerCluster.addMarkers(markers);
+            billboardMarkerCluster.addMarkers(billboardMarkers);
             map.fitBounds(bounds);
             map.panToBounds(bounds);
           }
           if (!cb.checked) {
             // if off
-            markerCluster.removeMarkers(markers);
+            billboardMarkerCluster.removeMarkers(billboardMarkers);
           }
         }
       });
@@ -608,6 +623,28 @@
         "Something went wrong while eabl data. Error: " + response.status
       );
     }
+
+  }
+
+  // add the unique values to the months pannel
+  function displayMonths(uniqueMonths) {
+    let uniqueMonthsHTML = "";
+    for (let month of uniqueMonths) {
+      uniqueMonthsHTML +=
+        ` <option value="${month}">${month}</option>`
+      //let opt = document.createElement('option')
+      //opt.value = month;
+      //opt.innerHTML = month;
+      //console.log(opt)
+      //monthList.appendChild(opt)
+    }
+
+    monthPanel.innerHTML =
+      `<select class="dataSource" id="monthList">
+      <option value="">Select Month</option>
+      <option value="all">All</option>
+      ${uniqueMonthsHTML}
+    </select>`;
   }
 
   function getmobileMarkers(deliveriesData) {
@@ -859,6 +896,29 @@
         markerCluster.removeMarkers(gmarkers[targetPoi]);
       }
     }
+  })
+
+  monthPanel.addEventListener('change', e => {
+    //let allBBMarkers = billboardMarkers.getMarkers();
+
+    let mthSelected = document.querySelector('#monthList').value;
+    if (!mthSelected) {
+      return;
+    }
+
+    if (mthSelected === 'all') {
+      billboardMarkerCluster.clearMarkers();
+      billboardMarkerCluster.addMarkers(billboardMarkers)
+      return;
+    } else {
+      // remove all markers 
+      billboardMarkerCluster.clearMarkers();
+      const bmAtSelectMnth = billboardMarkers.filter(bm => bm.data['month'].toLowerCase() === mthSelected.toLowerCase());
+      billboardMarkerCluster.addMarkers(bmAtSelectMnth)
+      return;
+
+    }
+
   })
 
   function calcRoute(tracker) {
