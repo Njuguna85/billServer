@@ -716,19 +716,11 @@ tr:nth-child(even) {
   body {
     font-size: 16px;
   }
-  .header {
-    display: flex;
-    flex-direction: column;
-    padding: 0;
+
+  header h2 {
+    font-size: 16px;
   }
-  .header h2 {
-    font-size: 15px;
-  }
-  .header .btn {
-    margin: 5px 0;
-    padding: 2px;
-    align-self: flex-end;
-  }
+
   #billboardTable {
     margin: 20px 0 20px 10px;
   }
@@ -804,6 +796,15 @@ tr:nth-child(even) {
   #infoTab {
     width: 43%;
     font-size: 0.8em;
+  }
+
+  #infoTab img {
+    height: 20px;
+    width: auto;
+  }
+  .billboardCatInfo div,
+  .billboardFilInfo div {
+    padding-top: 5px;
   }
 
   .info-header {
