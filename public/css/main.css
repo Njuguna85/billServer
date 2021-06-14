@@ -575,7 +575,7 @@ tr:nth-child(even) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  line-height: 1em;
+  line-height: 1.7em;
 }
 .billboardFilInfo {
   border-bottom: 2px dashed #3949ab;
