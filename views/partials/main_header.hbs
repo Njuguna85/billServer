@@ -1,13 +1,6 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Linden+Hill&display=swap&family=Hind:wght@300');
 
-    *,
-    body {
-        margin: 0;
-        padding: 0;
-        line-height: 1.5em;
-    }
-
     a,
     a:active,
     a:hover,
@@ -44,12 +37,10 @@
         height: 3em;
         margin: 0 auto;
         text-align: center;
-        /*background-color: #fe346e;*/
-        z-index: 100;
     }
 
     .nav-link {
-        height: 95%;
+        height: 30px;
         display: inline-flex;
         align-items: center;
         background: #111d5e;
@@ -60,6 +51,7 @@
         color: white;
         font-weight: bolder;
         margin-right: auto;
+        margin-top: 5px;
     }
 
     .nav-link:hover,
@@ -100,10 +92,13 @@
 
         .top_header h2 {
             font-size: 1em;
+            margin: 0 auto;
+            padding-top: 5px;
         }
 
         .top_header a {
             font-size: .7em;
+            display: none;
         }
 
         .nav {
@@ -111,7 +106,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 90%;
+            max-width: 100%;
+            font-size: .8em;
         }
 
         .nav-link {

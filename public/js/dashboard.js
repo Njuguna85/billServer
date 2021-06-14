@@ -1026,55 +1026,59 @@ billboardTable.addEventListener('click', e => {
 
 
 function accumulateFilters(name, value, remove = false) {
-    const index = filters.findIndex(f => f.name === name);
-    drawFilterIcon()
-    const scoreBoard = infoTab.querySelector('#score')
+  const index = filters.findIndex(f => f.name === name);
+  drawFilterIcon()
+  const scoreBoard = infoTab.querySelector('#score')
 
-    // remove a filter
-    if (remove) {
-        // user wants to remove a whole filter category
-        // thus get the category from the accumulated filters
-        // and also get the score of the value previously added 
-        // then remove it from the overall score
-        if (filters.length > 0) {
-            const prevFilterVal = filters[index]['value']
-            const prevScore = filterScores[name][prevFilterVal].score
-            overallScore -= prevScore
-            scoreBoard.innerHTML = overallScore
-        }
-
-        filters.splice(index, 1);
-        applyFilters()
-        updateFilterHtml()
-        return;
+  // remove a filter
+  if (remove) {
+    // user wants to remove a whole filter category
+    // thus get the category from the accumulated filters
+    // and also get the score of the value previously added 
+    // then remove it from the overall score
+    if (filters.length > 0) {
+      const prevFilterVal = filters[index]['value']
+      const prevScore = filterScores[name][prevFilterVal].score
+      overallScore -= prevScore
+      scoreBoard.innerHTML = vAdj(overallScore)
     }
 
-    // add a filter
-    // if name was not found in filters, push.
-    if (index < 0) {
-        const score = filterScores[name][value].score
-        overallScore += score;
-        scoreBoard.innerHTML = overallScore
-
-        filters.push({ name: name, value: value });
-        applyFilters()
-        updateFilterHtml()
-        return;
-    }
-
-    // update a filter
-    // if name was found, update with new value
-    const prevScore = filterScores[name][filters[index].value].score
-    overallScore -= prevScore;
-    const newScore = filterScores[name][value].score
-    overallScore += newScore;
-    scoreBoard.innerHTML = overallScore
-
-    filters[index].value = value;
+    filters.splice(index, 1);
     applyFilters()
     updateFilterHtml()
+    return;
+  }
+
+  // add a filter
+  // if name was not found in filters, push.
+  if (index < 0) {
+    const score = filterScores[name][value].score
+    overallScore += score;
+    scoreBoard.innerHTML = vAdj(overallScore)
+
+    filters.push({ name: name, value: value });
+    applyFilters()
+    updateFilterHtml()
+    return;
+  }
+
+  // update a filter
+  // if name was found, update with new value
+  const prevScore = filterScores[name][filters[index].value].score
+  overallScore -= prevScore;
+  const newScore = filterScores[name][value].score
+  overallScore += newScore;
+  scoreBoard.innerHTML = vAdj(overallScore)
+
+  filters[index].value = value;
+  applyFilters()
+  updateFilterHtml()
 }
 
+function vAdj(score) {
+  const per = Math.round((100 * score) / 22)
+  return `${per}%`;
+}
 // apply all fillters in the filters array
 const applyFilters = () => {
     let counter = 0;
@@ -1213,7 +1217,7 @@ drawCatIcons
 function drawBBLegend() {
     const html = `
       <h4 class="info-header">Filter Key</h4>
-      <div><h4>Score:</h4><span id="score">0</span> </div>
+      <div><h4>Visibility Adjustment:</h4><span id="score">0</span> </div>
       <hr class="hr">
       <div><span id="bbCount">${totalBB}</span> Billboards</div>
       <hr class="hr">

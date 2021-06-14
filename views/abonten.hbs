@@ -939,7 +939,7 @@
                 const prevFilterVal = filters[index]['value']
                 const prevScore = filterScores[name][prevFilterVal].score
                 overallScore -= prevScore
-                scoreBoard.innerHTML = overallScore
+                scoreBoard.innerHTML = vAdj(overallScore)
             }
 
             filters.splice(index, 1);
@@ -953,7 +953,7 @@
         if (index < 0) {
             const score = filterScores[name][value].score
             overallScore += score;
-            scoreBoard.innerHTML = overallScore
+            scoreBoard.innerHTML = vAdj(overallScore)
 
             filters.push({ name: name, value: value });
             applyFilters()
@@ -967,13 +967,17 @@
         overallScore -= prevScore;
         const newScore = filterScores[name][value].score
         overallScore += newScore;
-        scoreBoard.innerHTML = overallScore
+        scoreBoard.innerHTML = vAdj(overallScore)
 
         filters[index].value = value;
         applyFilters()
         updateFilterHtml()
     }
 
+    function vAdj(score) {
+        const per = Math.round((100 * score) / 22)
+        return `${per}%`;
+    }
     // apply all fillters in the filters array
     const applyFilters = () => {
         let counter = 0;

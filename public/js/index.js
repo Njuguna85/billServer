@@ -977,7 +977,7 @@ function accumulateFilters(name, value, remove = false) {
       const prevFilterVal = filters[index]['value']
       const prevScore = filterScores[name][prevFilterVal].score
       overallScore -= prevScore
-      scoreBoard.innerHTML = overallScore
+      scoreBoard.innerHTML = vAdj(overallScore)
     }
 
     filters.splice(index, 1);
@@ -991,7 +991,7 @@ function accumulateFilters(name, value, remove = false) {
   if (index < 0) {
     const score = filterScores[name][value].score
     overallScore += score;
-    scoreBoard.innerHTML = overallScore
+    scoreBoard.innerHTML = vAdj(overallScore)
 
     filters.push({ name: name, value: value });
     applyFilters()
@@ -1005,11 +1005,16 @@ function accumulateFilters(name, value, remove = false) {
   overallScore -= prevScore;
   const newScore = filterScores[name][value].score
   overallScore += newScore;
-  scoreBoard.innerHTML = overallScore
+  scoreBoard.innerHTML = vAdj(overallScore)
 
   filters[index].value = value;
   applyFilters()
   updateFilterHtml()
+}
+
+function vAdj(score) {
+  const per = Math.round((100 * score) / 22)
+  return `${per}%`;
 }
 
 // apply all fillters in the filters array
@@ -1150,7 +1155,7 @@ function capitalize(string) {
 function drawBBLegend() {
   const html = `
       <h4 class="info-header">Filter Key</h4>
-      <div><h4>Score:</h4><span id="score">0</span> </div>
+      <div><h4>Visibility Adjustment:</h4><span id="score">0</span> </div>
       <hr class="hr">
       <div><span id="bbCount">${totalBB}</span> Billboards</div>
       <hr class="hr">
