@@ -372,7 +372,9 @@ h5.accordion.is-open {
   width: 280px;
   text-align: center;
 }
-
+.infoWindow {
+  width: max-content;
+}
 .infoWindow > div {
   display: flex;
   justify-content: space-between;
@@ -446,6 +448,7 @@ h5.accordion.is-open {
 table {
   border-collapse: collapse;
   margin: 0;
+  padding: 1.6em;
 }
 
 td {
@@ -610,6 +613,34 @@ tr:nth-child(even) {
   text-transform: uppercase;
 }
 
+.dataSource {
+  font-size: 1.5em;
+  margin-top: 10px;
+  height: 40px;
+  width: 200px;
+  overflow: hidden;
+  background-color: whitesmoke;
+}
+.dataSource select {
+  padding: 5px 8px;
+  width: 100%;
+  background: inherit;
+  height: 100%;
+  font-size: large;
+  height: 100%;
+  border: none;
+}
+.monthSelectList select:focus,
+.industrySelectList select:focus {
+  border: #ef5350 1px solid;
+  outline: none !important;
+  box-shadow: 0 0 10px #719ece;
+}
+.monthSelectList select:hover,
+.industrySelectList select:hover {
+  background-color: #3949ab;
+  color: whitesmoke;
+}
 /* 
   ##Device = Desktops
   ##Screen = 1281px to higher resolution desktops
@@ -804,6 +835,10 @@ tr:nth-child(even) {
   #infoTab {
     width: 43%;
     font-size: 0.8em;
+  }
+  #infoTab img {
+    height: 20px;
+    width: auto;
   }
 
   .info-header {

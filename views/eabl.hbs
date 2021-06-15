@@ -1,4 +1,5 @@
 <div id="loader"></div>
+
 <div id="map" style="display: none;"></div>
 
 <script>
@@ -8,6 +9,7 @@
   var directionsRenderer;
   const mapContainer = document.getElementById("map");
   var bounds, markerCluster, gmarkers = {};
+  const filters = [], totalBB = 0;
   let billboardMarkers = [], billboardMarkerCluster;
 
   let legend = document.createElement("div");
@@ -38,7 +40,11 @@
 
   const infoTab = document.createElement("div");
   infoTab.setAttribute("id", "infoTab");
-  infoTab.innerHTML = `<h3>More Info</h3><div class="info"></div>`;
+  infoTab.innerHTML =
+    `<h3>More Info</h3>
+  <div class="info"></div>
+  <div class="billboardFilInfo"></div>
+  <div class="billboardCatInfo"></div>`;
 
   const directionsPanel = document.createElement("div");
   directionsPanel.className = "directionsPanel";
@@ -62,8 +68,11 @@
     "supermarket",
   ];
 
-  const monthPanel = document.createElement('div');
-  monthPanel.className = 'monthPanel';
+  const monthSelectList = document.createElement('div');
+  monthSelectList.className = 'monthSelectList';
+
+  const subIndustrySelectList = document.createElement('div')
+  subIndustrySelectList.className = 'industrySelectList';
 
   function initMap() {
     // set the zoom, scale, street view and full screen controls
@@ -134,7 +143,8 @@
     infoWindow = new google.maps.InfoWindow();
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
-    map.controls[google.maps.ControlPosition.TOP_CENTER].push(monthPanel);
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(monthSelectList);
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(subIndustrySelectList);
 
     markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
 
@@ -528,10 +538,12 @@
 
       // gather all months of a bb
       let uniqueMonths = new Set();
+      let uniqueSubIndustries = new Set();
 
       billboardMarkers = data.map((bb) => {
 
         uniqueMonths.add(parseData(bb.month));
+        uniqueSubIndustries.add(parseData((bb["sub_indust"])))
 
         let latlng = new google.maps.LatLng(bb.latitude, bb.longitude);
         bounds.extend(latlng);
@@ -539,22 +551,21 @@
         let contentString =
           '<div class ="infoWindow">' +
           '<table>' +
-          "<tr><td>" + "Size: <b>" + parseData(bb["size"]) + "</td></b></tr>" +
-          "<tr><td>" + "Type: <b>" + parseData(bb["type"]) + "</td></b></tr>" +
-          "<tr><td>" + "Brand Name: <b>" + parseData(bb["brand_name"]) + "</td></b></tr>" +
-          "<tr><td>" + "Company Name: <b>" + parseData(bb["co_name"]) + "</td></b></tr>" +
-          "<tr><td>" + "County Region: <b>" + parseData(bb["country_re"]) + "</td></b></tr>" +
-          "<tr><td>" + "Industry: <b>" + parseData(bb.industry) + "</td></b></tr>" +
-          "<tr><td>" + "Sub industry: <b>" + parseData(bb["sub_indust"]) + "</td></b></tr>" +
-          "<tr><td>" + "Road Name: <b>" + parseData(bb["road_name"]) + "</td></b></tr>" +
-          "<tr><td>" + "Site Run Up: <b>" + parseData(bb["site_run_u"]) + "</td></b></tr>" +
-          "<tr><td>" + "Site Obstruction: <b>" + parseData(bb["site_obstr"]) + "</td></b></tr>" +
-          "<tr><td>" + "Clustering: <b>" + parseData(bb["site_clust"]) + "</td></b></tr>" +
-          "<tr><td>" + "Lighting: <b>" + parseData(bb.site_light) + "</td></b></tr>" +
-          "<tr><td>" + "Available: <b>" + parseData(bb.availabili) + "</td></b></tr>" +
-          "<tr><td>" + "Traffic: <b>" + parseData(bb["traffic_de"]) + "</td></b></tr>" +
-          "<tr><td>" + "Industry: <b>" + parseData(bb.industry) + "</td></b></tr>" +
-          "<tr><td>" + "Month: <b>" + parseData(bb.month) + "</td></b></tr>" + '</table>' +
+          "<tr><td>" + "Size: </td><td><b>" + parseData(bb["size"]) + "</td></b></tr>" +
+          "<tr><td>" + "Type: </td><td><b>" + parseData(bb["type"]) + "</td></b></tr>" +
+          "<tr><td>" + "Brand Name: </td><td><b>" + parseData(bb["brand_name"]) + "</td></b></tr>" +
+          "<tr><td>" + "Company Name: </td><td><b>" + parseData(bb["co_name"]) + "</td></b></tr>" +
+          "<tr><td>" + "County Region: </td><td><b>" + parseData(bb["country_re"]) + "</td></b></tr>" +
+          "<tr><td>" + "Industry: </td><td><b>" + parseData(bb.industry) + "</td></b></tr>" +
+          "<tr><td>" + "Sub industry: </td><td><b>" + parseData(bb["sub_indust"]) + "</td></b></tr>" +
+          "<tr><td>" + "Road Name: </td><td><b>" + parseData(bb["road_name"]) + "</td></b></tr>" +
+          "<tr><td>" + "Site Run Up: </td><td><b>" + parseData(bb["site_run_u"]) + "</td></b></tr>" +
+          "<tr><td>" + "Site Obstruction: </td><td><b>" + parseData(bb["site_obstr"]) + "</td></b></tr>" +
+          "<tr><td>" + "Clustering: </td><td><b>" + parseData(bb["site_clust"]) + "</td></b></tr>" +
+          "<tr><td>" + "Lighting: </td><td><b>" + parseData(bb.site_light) + "</td></b></tr>" +
+          "<tr><td>" + "Available: </td><td><b>" + parseData(bb.availabili) + "</td></b></tr>" +
+          "<tr><td>" + "Traffic: </td><td><b>" + parseData(bb["traffic_de"]) + "</td></b></tr>" +
+          "<tr><td>" + "Month: </td><td><b>" + parseData(bb.month) + "</td></b></tr>" + '</table>' +
           '<img class="billboardImage" alt="billboard photo" src=' + bb['image_link'] + '>' +
           '<button class="btn end" data-lat=' + bb.lattitude + " data-long=" + bb.longitude +
           " >Go Here</button>" + '<button class="btn stop" data-lat=' + bb.latitude +
@@ -601,7 +612,10 @@
       div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
       essentialLayers.appendChild(div);
 
-      displayMonths(uniqueMonths)
+      addMonthsList(uniqueMonths)
+      addSubIndustryList(uniqueSubIndustries)
+      drawBBLegend()
+
 
       legend.addEventListener("change", (e) => {
         if (e.target.matches("#billboardChecked")) {
@@ -627,24 +641,37 @@
   }
 
   // add the unique values to the months pannel
-  function displayMonths(uniqueMonths) {
+  function addMonthsList(uniqueMonths) {
     let uniqueMonthsHTML = "";
     for (let month of uniqueMonths) {
       uniqueMonthsHTML +=
         ` <option value="${month}">${month}</option>`
-      //let opt = document.createElement('option')
-      //opt.value = month;
-      //opt.innerHTML = month;
-      //console.log(opt)
-      //monthList.appendChild(opt)
     }
 
-    monthPanel.innerHTML =
+    monthSelectList.innerHTML =
       `<select class="dataSource" id="monthList">
       <option value="">Select Month</option>
       <option value="all">All</option>
       ${uniqueMonthsHTML}
     </select>`;
+  }
+
+  function addSubIndustryList(uniqueSubIndustries) {
+    let uniqueSubIndustryHTML = '';
+    for (let ind of uniqueSubIndustries) {
+      uniqueSubIndustryHTML +=
+        `<option value="${ind}">${capitalize(ind.toLowerCase())}</option>`;
+    }
+    subIndustrySelectList.innerHTML =
+      `<select class="industry dataSource" id="subIndustryList">
+       <option value="">Select Sub Industry</option>
+      <option value="all">All</option>
+      ${uniqueSubIndustryHTML}
+       </select>`;
+  }
+
+  function capitalize(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   function getmobileMarkers(deliveriesData) {
@@ -898,25 +925,38 @@
     }
   })
 
-  monthPanel.addEventListener('change', e => {
-    //let allBBMarkers = billboardMarkers.getMarkers();
+  monthSelectList.addEventListener('change', e => {
 
     let mthSelected = document.querySelector('#monthList').value;
+
     if (!mthSelected) {
+      accumulateFilters('month', '', true)
+      return;
+    }
+    if (mthSelected === 'all') {
+      accumulateFilters('month', '', true)
+      return;
+    } else {
+      accumulateFilters('month', mthSelected)
       return;
     }
 
-    if (mthSelected === 'all') {
-      billboardMarkerCluster.clearMarkers();
-      billboardMarkerCluster.addMarkers(billboardMarkers)
+  })
+
+  subIndustrySelectList.addEventListener('change', e => {
+    let subIndustrySelected = document.querySelector('#subIndustryList').value.trim();
+    // bear in mind subIndustrySelected can be all, spirits etc
+
+    if (!subIndustrySelected) {
+      accumulateFilters('sub_indust', '', true)
+      return;
+    }
+    if (subIndustrySelected === 'all') {
+      accumulateFilters('sub_indust', '', true)
       return;
     } else {
-      // remove all markers 
-      billboardMarkerCluster.clearMarkers();
-      const bmAtSelectMnth = billboardMarkers.filter(bm => bm.data['month'].toLowerCase() === mthSelected.toLowerCase());
-      billboardMarkerCluster.addMarkers(bmAtSelectMnth)
+      accumulateFilters('sub_indust', subIndustrySelected)
       return;
-
     }
 
   })
@@ -969,4 +1009,87 @@
     localStorage.clear();
     localStorage.setItem('nairobi', JSON.stringify(data));
   }
+
+
+  function accumulateFilters(name, value, remove = false) {
+    const index = filters.findIndex(f => f.name === name);
+
+    // remove a filter
+    if (remove) {
+      // user wants to remove a whole filter category
+      // thus get the category from the accumulated filters
+      // and also get the score of the value previously added 
+      // then remove it from the overall score
+      filters.splice(index, 1);
+      applyFilters()
+      updateFilterHtml()
+      return;
+    }
+
+    // add a filter
+    // if name was not found in filters, push.
+    if (index < 0) {
+      filters.push({ name: name, value: value });
+      applyFilters()
+      updateFilterHtml()
+      return;
+    }
+
+    // update a filter
+    // if name was found, update with new value
+    filters[index].value = value;
+    applyFilters()
+    updateFilterHtml()
+  }
+
+  // apply all fillters in the filters array
+  function applyFilters() {
+    // clear all markers first whether they meet our filter or not
+    billboardMarkerCluster.clearMarkers();
+    if (filters.length == 0) {
+      billboardMarkerCluster.addMarkers(billboardMarkers)
+      return;
+    } else {
+      let bbMarkers = []
+      // check if bbMarker matches our filter 
+      billboardMarkers.forEach(bm => {
+        const viable = filters.reduce((acc, { name, value }) => {
+          return acc && bm.data[`${name}`] === value
+        }, true);
+        if (viable) {
+          bbMarkers.push(bm)
+        }
+      });
+
+      // add them to the clusterer
+      billboardMarkerCluster.addMarkers(bbMarkers)
+      infoTab.querySelector("#bbCount").innerHTML = bbMarkers.length;
+    }
+  }
+
+  function drawBBLegend() {
+    const html = `
+      <h4 class="info-header">Filter Key</h4>
+      <div><span id="bbCount">${totalBB}</span> Billboards</div>
+      <hr class="hr">
+      <div style="text-align:centre;"> Filters </div>
+      <div id="filters"></div>
+      <hr class="hr">
+      <div id="filterIcons"> </div>`
+
+    infoTab.querySelector(".billboardFilInfo").innerHTML = html
+  }
+
+
+  function updateFilterHtml() {
+    // filters :[...filter]
+    // filter: {name: value}
+    let html = ''
+    filters.forEach(({ name, value }) => {
+      html += `<div>${capitalize(name)} --> ${capitalize(value)}</div>`
+    });
+    infoTab.querySelector('#filters').innerHTML = html
+  }
+
+
 </script>
