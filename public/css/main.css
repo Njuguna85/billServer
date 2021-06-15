@@ -873,4 +873,18 @@ tr:nth-child(even) {
   #score {
     font-size: 1.5em;
   }
+
+  .dataSource {
+    font-size: 0.8em !important;
+    width: 7.4em;
+    margin: 10px 2px 0;
+    height: 3em;
+  }
+  .dataSource select {
+    width: 100%;
+    background: inherit;
+    height: 100%;
+    height: 100%;
+    border: none;
+  }
 }
