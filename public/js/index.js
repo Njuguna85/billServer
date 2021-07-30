@@ -220,7 +220,7 @@ const getTiles = (lyr) => {
       "," +
       (top.lat() + deltaY);
     const url =
-      "https://play.predictiveanalytics.co.ke/geoserver/Predictive/wms?" +
+      "http://localhost:8090/geoserver/Predictive-Analytics/wms?" +
       "&service=WMS" +
       "&version=1.1.0" +
       "&request=GetMap" +
@@ -525,15 +525,12 @@ function addBillboards(data) {
       optimized: false,
       data
     });
-    google.maps.event.addListener(
-      marker,
-      "click",
-      ((marker, el) => {
-        return () => {
-          infoWindow.setContent(contentString);
-          infoWindow.open(map, marker);
-        };
-      })(marker, el)
+
+    google.maps.event.addListener(marker, "click", ((marker, el) => {
+      return async () => {
+        await getPopData(el.longitude, el.latitude)
+      };
+    })(marker, el)
     );
 
     // Adds the Marker to OverlappingMarkerSpiderfier
@@ -583,7 +580,6 @@ function addBillboards(data) {
       }
     }
   });
-
 
 }
 
@@ -709,7 +705,7 @@ function addGhanaPopulation() {
             </div>
             `;
   };
-  const ghtile = getTiles("Predictive:ghanapopulation");
+  const ghtile = getTiles("Pedictive-Analytics:ghanapopulation");
 
   const ghanaDist = new google.maps.ImageMapType({
     getTileUrl: ghtile,
@@ -816,7 +812,6 @@ poiLayersAccordion.addEventListener('change', (e) => {
     }
   }
 })
-
 
 billboardTable.addEventListener('click', e => {
   if (e.target.matches('.category')) {
@@ -932,9 +927,6 @@ function vAdj(score) {
   const per = Math.round((100 * score) / 22)
   return `${per}%`;
 }
-
-
-
 
 // apply all fillters in the filters array
 const applyFilters = () => {
@@ -1105,4 +1097,80 @@ function drawFilterIcon() {
             Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
             </div>
             `;
+}
+
+async function getPopData(long, lat) {
+  try {
+    const res = await fetch(`/api/pois/pop/${long}/${lat}`);
+    const data = await res.json()
+    // draw pyramid
+    console.log(data);
+
+    drawPyr(dta)
+  } catch (e) {
+
+  }
+}
+
+function drawPyr(data) {
+  const categories = [
+    '0-4', '5-9', '10-14', '15-19',
+    '20-24', '25-29', '30-34', '35-39', '40-44',
+    '45-49', '50-54', '55-59', '60-64', '65-69',
+    '70-74', '75-79', '80+'
+  ];
+  const chart = HighCharts.chart('chart', {
+    chart: {
+      type: 'bar'
+    },
+    title: {
+      text: "Population Estimate for Ghana 2020."
+    },
+    subtitle: {
+      text: "Source: Spatial Data Repository, The Demographic and Health Surveys Program. ICF International. Available from <a href='spatialdata.dhsprogram.com'>[Accessed 28 July 2021].</a>"
+    },
+    xAxis: [{
+      categories: categories,
+      reversed: false,
+      labels: {
+        step: 1
+      }
+    }, {
+      opposite: true,
+      reversed: false,
+      categories: categories,
+      linkedTo: 0,
+      labels: {
+        step: 1
+      }
+    }],
+    yAxis: {
+      title: {
+        text: null
+      },
+      labels: {
+        formatter: function () {
+          return Math.abs(this.value) + '%';
+        }
+      }
+    },
+    plotOptions: {
+      series: {
+        stacking: 'normalg'
+      }
+    },
+    tooltip: {
+      formatter: function () {
+        return '<b>' + this.series.name + ', age ' + this.point.category + '<b><br/>' + 'Population: ' + HighCharts.numberFormat(this.point.y)
+      }
+    },
+
+    series: [{
+      name: 'Male',
+      data: []
+    }, {
+      name: 'Female',
+      data: []
+    }]
+  })
 }
