@@ -405,116 +405,118 @@ function addBillboards(data) {
     const iconUrl = `images/billboardColored.png`;
     let score;
 
-    let address = el && parseData(el.address);
-    let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
-    let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
-    let direction =
-      el && el.direction && parseData(el.direction["characteristic_value"]);
-    let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
-    let clutter =
-      el && el.clutter && parseData(el.clutter["characteristic_value"]);
-    let size = el && el.size && parseData(el.size["characteristic_value"]);
-    let orientation =
-      el && el.orientation && parseData(el.orientation["characteristic_value"]);
-    let height = el && el.height && parseData(el.height["characteristic_value"]);
-    let side_of_road =
-      el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
-    let condition =
-      el && el.condition && parseData(el.condition["characteristic_value"]);
-    let visibility =
-      el && el.visibility && parseData(el.visibility["characteristic_value"]);
-    let traffic =
-      el && el.traffic && parseData(el.traffic["characteristic_value"]);
-    let traffic_q =
-      el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
+    // let address = el && parseData(el.address);
+    // let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
+    // let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
+    // let direction =
+    //   el && el.direction && parseData(el.direction["characteristic_value"]);
+    // let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
+    // let clutter =
+    //   el && el.clutter && parseData(el.clutter["characteristic_value"]);
+    // let size = el && el.size && parseData(el.size["characteristic_value"]);
+    // let orientation =
+    //   el && el.orientation && parseData(el.orientation["characteristic_value"]);
+    // let height = el && el.height && parseData(el.height["characteristic_value"]);
+    // let side_of_road =
+    //   el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
+    // let condition =
+    //   el && el.condition && parseData(el.condition["characteristic_value"]);
+    // let visibility =
+    //   el && el.visibility && parseData(el.visibility["characteristic_value"]);
+    // let traffic =
+    //   el && el.traffic && parseData(el.traffic["characteristic_value"]);
+    // let traffic_q =
+    //   el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
 
-    let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
-    let image = el && parseData(el.image);
-    let latitude = el && parseData(el.latitude);
-    let longitude = el && parseData(el.longitude);
+    // let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
+    // let image = el && parseData(el.image);
+    // let latitude = el && parseData(el.latitude);
+    // let longitude = el && parseData(el.longitude);
 
-    score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('condition', condition) +
-      parseBBProps('visibility', visibility) + parseBBProps('height', height) + parseBBProps('traffic', traffic)
-      + parseBBProps('traffic_q', traffic_q) + parseBBProps('clutter', clutter)
+    // score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('condition', condition) +
+    //   parseBBProps('visibility', visibility) + parseBBProps('height', height) + parseBBProps('traffic', traffic)
+    //   + parseBBProps('traffic_q', traffic_q) + parseBBProps('clutter', clutter)
 
-    el['score'] = score;
+    // el['score'] = score;
 
-    data = {
-      site_lighting_illumination, condition, visibility, height, traffic, traffic_q, clutter
-    }
+    // data = {
+    //   site_lighting_illumination, condition, visibility, height, traffic, traffic_q, clutter
+    // }
 
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
 
-    bounds.extend(latlng);
-    let contentString =
-      '<div class ="infoWindow">' +
-      "<div>" +
-      "Address: <b>" +
-      address +
-      "</b></div>" +
-      "<div>" +
-      "Medium Type: <b>" +
-      medium +
-      "</b></div>" +
-      "<div>" +
-      "Lighting: <b>" +
-      site_lighting_illumination +
-      "</b></div>" +
-      "<div>" +
-      "Direction: <b>" +
-      direction +
-      "</b></div>" +
-      "<div>" +
-      "Faces: <b>" +
-      faces +
-      "</b> </div>" +
-      "<div>" +
-      "Clutter: <b>" +
-      clutter +
-      "</b> </div>" +
-      "<div>" +
-      "Size: <b>" +
-      size +
-      "</b> </div>" +
-      "<div>" +
-      "Orientation: <b>" +
-      orientation +
-      "</b> </div>" +
-      "<div>" +
-      "Height: <b>" +
-      height +
-      "</b> </div>" +
-      "<div>" +
-      "Road Side: <b>" +
-      parseData(side_of_road) +
-      "</b> </div>" +
-      "<div>" +
-      "Angle: <b>" +
-      parseData(angle) +
-      "</b> </div>" +
-      "<div>" +
-      "Score: <b>" +
-      el.score +
-      "</b> </div>" +
-      "</div>" +
-      '<img class="billboardImage" alt="billboard photo" src=' +
-      el.image +
-      ">" +
-      '<button class="btn end" data-lat=' +
-      latitude +
-      " data-long=" +
-      longitude +
-      " >Go Here</button>" +
-      '<button class="btn stop" data-lat=' +
-      latitude +
-      " data-long=" +
-      longitude +
-      " >Add Stop</button>" +
-      '<button class="btn start" data-lat=' +
-      latitude +
-      " data-long=" +
-      longitude +
-      " >Start Here</button>";
+    // bounds.extend(latlng);
+    // let contentString =
+    //   '<div class ="infoWindow">' +
+    //   "<div>" +
+    //   "Address: <b>" +
+    //   address +
+    //   "</b></div>" +
+    //   "<div>" +
+    //   "Medium Type: <b>" +
+    //   medium +
+    //   "</b></div>" +
+    //   "<div>" +
+    //   "Lighting: <b>" +
+    //   site_lighting_illumination +
+    //   "</b></div>" +
+    //   "<div>" +
+    //   "Direction: <b>" +
+    //   direction +
+    //   "</b></div>" +
+    //   "<div>" +
+    //   "Faces: <b>" +
+    //   faces +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Clutter: <b>" +
+    //   clutter +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Size: <b>" +
+    //   size +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Orientation: <b>" +
+    //   orientation +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Height: <b>" +
+    //   height +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Road Side: <b>" +
+    //   parseData(side_of_road) +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Angle: <b>" +
+    //   parseData(angle) +
+    //   "</b> </div>" +
+    //   "<div>" +
+    //   "Score: <b>" +
+    //   el.score +
+    //   "</b> </div>" +
+    //   "</div>" +
+    //   '<img class="billboardImage" alt="billboard photo" src=' +
+    //   el.image +
+    //   ">" +
+    //   '<button class="btn end" data-lat=' +
+    //   latitude +
+    //   " data-long=" +
+    //   longitude +
+    //   " >Go Here</button>" +
+    //   '<button class="btn stop" data-lat=' +
+    //   latitude +
+    //   " data-long=" +
+    //   longitude +
+    //   " >Add Stop</button>" +
+    //   '<button class="btn start" data-lat=' +
+    //   latitude +
+    //   " data-long=" +
+    //   longitude +
+    //   " >Start Here</button><br/><div id='chart'></div>";
+
+    const contentString = addContentString(el)
 
     let marker = new google.maps.Marker({
       position: latlng,
@@ -528,7 +530,11 @@ function addBillboards(data) {
 
     google.maps.event.addListener(marker, "click", ((marker, el) => {
       return async () => {
+        infoWindow.setContent(contentString);
+        infoWindow.open(map, marker);
+
         await getPopData(el.longitude, el.latitude)
+
       };
     })(marker, el)
     );
@@ -539,9 +545,7 @@ function addBillboards(data) {
 
   });
 
-
   markerSpiderfier.addListener('click', function (marker, e) {
-    //infoWindow.setContent(marker.title);
     infoWindow.open(map, marker);
   });
 
@@ -581,6 +585,80 @@ function addBillboards(data) {
     }
   });
 
+}
+
+function addContentString(el) {
+
+  let address = el && parseData(el.address);
+  let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
+  let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
+  let direction =
+    el && el.direction && parseData(el.direction["characteristic_value"]);
+  let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
+  let clutter =
+    el && el.clutter && parseData(el.clutter["characteristic_value"]);
+  let size = el && el.size && parseData(el.size["characteristic_value"]);
+  let orientation =
+    el && el.orientation && parseData(el.orientation["characteristic_value"]);
+  let height = el && el.height && parseData(el.height["characteristic_value"]);
+  let side_of_road =
+    el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
+  let condition =
+    el && el.condition && parseData(el.condition["characteristic_value"]);
+  let visibility =
+    el && el.visibility && parseData(el.visibility["characteristic_value"]);
+  let traffic =
+    el && el.traffic && parseData(el.traffic["characteristic_value"]);
+  let traffic_q =
+    el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
+
+  let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
+  // let image = el && parseData(el.image);
+  let latitude = el && parseData(el.latitude);
+  let longitude = el && parseData(el.longitude);
+
+
+  const addBbImages = () => {
+    let imgString = '';
+    if (el.image == null) {
+      el.images.forEach(img => {
+        imgString += `<img class="billboardImage" alt="billboard photo" src='${img.path}'>`
+      })
+    } else {
+      imgString = `<img class="billboardImage" alt="billboard photo" src='${el.image}'>`
+    }
+
+    return imgString
+  };
+
+  let html =
+    `
+      <div class ="infoWindow">
+        <div>Address: <b>${address}</b></div>
+        <div>Medium Type: <b>${medium}</b></div>
+        <div>Lighting: <b>${site_lighting_illumination}</b></div>
+        <div>Direction: <b>${direction}</b></div>
+        <div>Faces: <b>${faces}</b></div>
+        <div>Clutter: <b>${clutter}</b></div>
+        <div>Size: <b>${size}</b></div>
+        <div>Orientation: <b>${orientation}</b></div>
+        <div>Height: <b>${height}</b></div>
+        <div>Road Side: <b>${parseData(side_of_road)}</b></div>
+        <div>Angle: <b>${parseData(angle)}</b></div>
+        <div>Score: <b>${'score'}</b></div>
+        <div id='bbImages'>
+          ${addBbImages()}
+        </div>
+        <button class="btn end" data-lat='${latitude}' data-long='${longitude}'>Go Here</button>
+        <button class="btn stop" data-lat='${latitude}' data-long='${longitude}'>Add Stop</button>
+        <button class="btn start" data-lat='${latitude}' data-long='${longitude}'>Start Here</button>
+        <br/>
+        <div id='chart'></div>
+      </div>
+    `;
+
+
+  return html;
 }
 
 function addDeliveries(data) {
@@ -1100,27 +1178,30 @@ function drawFilterIcon() {
 }
 
 async function getPopData(long, lat) {
-  try {
-    const res = await fetch(`/api/pois/pop/${long}/${lat}`);
-    const data = await res.json()
-    // draw pyramid
-    console.log(data);
 
-    drawPyr(dta)
-  } catch (e) {
-
+  const res = await fetch(`/api/pois/pop/${long}/${lat}`);
+  console.log(res);
+  if (res.ok) {
+    const popData = await res.json()
+    drawPyr(popData)
+  } else {
+    document.querySelector('#chart').style.display = 'none'
   }
+
 }
 
-function drawPyr(data) {
+function drawPyr(popData) {
+
   const categories = [
     '0-4', '5-9', '10-14', '15-19',
     '20-24', '25-29', '30-34', '35-39', '40-44',
     '45-49', '50-54', '55-59', '60-64', '65-69',
     '70-74', '75-79', '80+'
   ];
-  const chart = HighCharts.chart('chart', {
+
+  new Highcharts.Chart({
     chart: {
+      renderTo: document.querySelector('#chart'),
       type: 'bar'
     },
     title: {
@@ -1134,6 +1215,9 @@ function drawPyr(data) {
       reversed: false,
       labels: {
         step: 1
+      },
+      accessibility: {
+        description: 'Age (male)'
       }
     }, {
       opposite: true,
@@ -1142,6 +1226,9 @@ function drawPyr(data) {
       linkedTo: 0,
       labels: {
         step: 1
+      },
+      accessibility: {
+        description: 'Age (female)'
       }
     }],
     yAxis: {
@@ -1150,27 +1237,30 @@ function drawPyr(data) {
       },
       labels: {
         formatter: function () {
-          return Math.abs(this.value) + '%';
+          return Math.abs(this.value);
         }
-      }
+      },
     },
     plotOptions: {
       series: {
-        stacking: 'normalg'
+        stacking: 'normal'
       }
     },
     tooltip: {
       formatter: function () {
-        return '<b>' + this.series.name + ', age ' + this.point.category + '<b><br/>' + 'Population: ' + HighCharts.numberFormat(this.point.y)
+        return '<b>' + this.series.name + ', age ' + this.point.category + '</b><br/>' +
+          'Population: ' + this.point.y;
       }
     },
 
     series: [{
       name: 'Male',
-      data: []
+      data: popData['male']
     }, {
       name: 'Female',
-      data: []
+      data: popData['female']
     }]
-  })
+  });
+
+
 }

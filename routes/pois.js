@@ -129,13 +129,40 @@ router.get('/pop/:long/:lat', async (req, res) => {
     const ghData = await sequelize.query(
         `select
             adm2_name,
-            m0004_2020 as male004 ,m80pl_2020 as male80pl ,m0509_2020 as male0509 ,m1014_2020 as male1014 ,m1519_2020 as male1519 ,m2024_2020 as male2024 ,m2529_2020 as male2529 ,m3034_2020 as male3034 ,m3539_2020 as male3539 ,m4044_2020 as male4044 ,m4549_2020 as male4549 ,m5054_2020 as male5054 ,m5559_2020 as male5559 ,m6064_2020 as male6064 ,m6569_2020 as male6569 ,m7074_2020 as male7074 ,m7579_2020 as male7579 ,mtotl_2020 as maleTotal ,f0004_2020 as female004 ,f80pl_2020 as female80pl ,f0509_2020 as female0509 ,f1014_2020 as female1014 ,f1519_2020 as female1519 ,f2024_2020 as female2024 ,f2529_2020 as female2529 ,f3034_2020 as female3034 ,f3539_2020 as female3539 ,f4044_2020 as female4044 ,f4549_2020 as female4549 ,f5054_2020 as female5054 ,f5559_2020 as female5559 ,f6064_2020 as female6064 ,f6569_2020 as female6569 ,f7074_2020 as female7074 ,f7579_2020 as female7579 ,ftotl_2020 as femaleTotal ,btotl_2020 as totalPop
+            "m0004_2020","m0509_2020","m1014_2020","m1519_2020","m2024_2020","m2529_2020","m3034_2020", "m3539_2020","m4044_2020","m4549_2020","m5054_2020", "m5559_2020","m6064_2020","m6569_2020","m7074_2020",
+            "m7579_2020","m80pl_2020" , "mtotl_2020","f0004_2020", "f0509_2020",
+            "f1014_2020","f1519_2020","f2024_2020","f2529_2020","f3034_2020","f3539_2020","f4044_2020","f4549_2020","f5054_2020","f5559_2020","f6064_2020","f6569_2020", "f7074_2020","f7579_2020" , "f80pl_2020",
+            "ftotl_2020" ,"btotl_2020"
         from gh_pop_estimates_2020 as gh where ST_Contains( ST_SetSRID(gh.wkb_geometry,4326), ST_GeomFromText('POINT(${req.params.long} ${req.params.lat})',4326))`, { type: sequelize.QueryTypes.SELECT });
 
     if (!ghData) return res.status(404)
 
-    return res.json(ghData)
+    const popByGender = stripPopData(ghData)
+
+    return res.json({ adm2_name: ghData[0]['adm2_name'], male: popByGender['male'], female: popByGender['female'], femaleTotal: +ghData[0]['ftotl_2020'], maleTotal: +ghData[0]['mtotl_2020'], totalPop: +ghData[0]['btotl_2020'] })
 })
 
+function stripPopData(ghData) {
+    let malePop = [];
+    let femalePop = [];
 
+    console.log(ghData);
+
+    const maleAgeGroups = [
+        "m0004_2020", "m0509_2020", "m1014_2020", "m1519_2020", "m2024_2020", "m2529_2020", "m3034_2020", "m3539_2020", "m4044_2020", "m4549_2020", "m5054_2020", "m5559_2020", "m6064_2020", "m6569_2020", "m7074_2020", "m7579_2020", "m80pl_2020"];
+
+    const feAgeGroups = [
+        "f0004_2020", "f0509_2020", "f1014_2020", "f1519_2020", "f2024_2020", "f2529_2020", "f3034_2020", "f3539_2020", "f4044_2020", "f4549_2020", "f5054_2020", "f5559_2020", "f6064_2020", "f6569_2020", "f7074_2020", "f7579_2020", "f80pl_2020"];
+
+    for (const ageGroup of maleAgeGroups) {
+        if (ghData.length > 0) malePop.push(-Math.abs(+ghData[0][ageGroup]))
+    }
+
+
+    for (const ageGroup of feAgeGroups) {
+        if (ghData.length > 0) femalePop.push(+ghData[0][ageGroup])
+    }
+
+    return { male: malePop, female: femalePop };
+}
 module.exports = router;
