@@ -135,7 +135,7 @@ router.get('/pop/:long/:lat', async (req, res) => {
             "ftotl_2020" ,"btotl_2020"
         from gh_pop_estimates_2020 as gh where ST_Contains( ST_SetSRID(gh.wkb_geometry,4326), ST_GeomFromText('POINT(${req.params.long} ${req.params.lat})',4326))`, { type: sequelize.QueryTypes.SELECT });
 
-    if (!ghData) return res.status(404)
+    if (ghData.length == 0) return res.status(404)
 
     const popByGender = stripPopData(ghData)
 
@@ -146,8 +146,6 @@ function stripPopData(ghData) {
     let malePop = [];
     let femalePop = [];
 
-    console.log(ghData);
-
     const maleAgeGroups = [
         "m0004_2020", "m0509_2020", "m1014_2020", "m1519_2020", "m2024_2020", "m2529_2020", "m3034_2020", "m3539_2020", "m4044_2020", "m4549_2020", "m5054_2020", "m5559_2020", "m6064_2020", "m6569_2020", "m7074_2020", "m7579_2020", "m80pl_2020"];
 
@@ -157,7 +155,6 @@ function stripPopData(ghData) {
     for (const ageGroup of maleAgeGroups) {
         if (ghData.length > 0) malePop.push(-Math.abs(+ghData[0][ageGroup]))
     }
-
 
     for (const ageGroup of feAgeGroups) {
         if (ghData.length > 0) femalePop.push(+ghData[0][ageGroup])

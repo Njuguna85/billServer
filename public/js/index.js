@@ -6,7 +6,7 @@ const mapContainer = document.getElementById("map");
 var bounds, markerCluster, gmarkers = {};
 const filters = [];
 let billboardMarkers = [];
-let overallScore = 0, totalBB = 0;
+let overallScore = 0, totalBB = 0, totalScore = 17;
 const billboardTable = document.getElementById('billboardTable');
 
 let legend = document.createElement("div");
@@ -405,116 +405,16 @@ function addBillboards(data) {
     const iconUrl = `images/billboardColored.png`;
     let score;
 
-    // let address = el && parseData(el.address);
-    // let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
-    // let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
-    // let direction =
-    //   el && el.direction && parseData(el.direction["characteristic_value"]);
-    // let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
-    // let clutter =
-    //   el && el.clutter && parseData(el.clutter["characteristic_value"]);
-    // let size = el && el.size && parseData(el.size["characteristic_value"]);
-    // let orientation =
-    //   el && el.orientation && parseData(el.orientation["characteristic_value"]);
-    // let height = el && el.height && parseData(el.height["characteristic_value"]);
-    // let side_of_road =
-    //   el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
-    // let condition =
-    //   el && el.condition && parseData(el.condition["characteristic_value"]);
-    // let visibility =
-    //   el && el.visibility && parseData(el.visibility["characteristic_value"]);
-    // let traffic =
-    //   el && el.traffic && parseData(el.traffic["characteristic_value"]);
-    // let traffic_q =
-    //   el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
+    const { site_lighting_illumination, clutter, height, orientation } = parseBbPropNull(el)
+    const site_run_up = getNum(el.site_run_up)
 
-    // let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
-    // let image = el && parseData(el.image);
-    // let latitude = el && parseData(el.latitude);
-    // let longitude = el && parseData(el.longitude);
+    score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('height', height) + parseBBProps('clutter', clutter) + parseBBProps('site_run_up', site_run_up) + parseBBProps('orientation', orientation)
 
-    // score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('condition', condition) +
-    //   parseBBProps('visibility', visibility) + parseBBProps('height', height) + parseBBProps('traffic', traffic)
-    //   + parseBBProps('traffic_q', traffic_q) + parseBBProps('clutter', clutter)
+    el['score'] = score;
 
-    // el['score'] = score;
-
-    // data = {
-    //   site_lighting_illumination, condition, visibility, height, traffic, traffic_q, clutter
-    // }
+    data = { site_lighting_illumination, height, orientation, clutter, site_run_up }
 
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
-
-    // bounds.extend(latlng);
-    // let contentString =
-    //   '<div class ="infoWindow">' +
-    //   "<div>" +
-    //   "Address: <b>" +
-    //   address +
-    //   "</b></div>" +
-    //   "<div>" +
-    //   "Medium Type: <b>" +
-    //   medium +
-    //   "</b></div>" +
-    //   "<div>" +
-    //   "Lighting: <b>" +
-    //   site_lighting_illumination +
-    //   "</b></div>" +
-    //   "<div>" +
-    //   "Direction: <b>" +
-    //   direction +
-    //   "</b></div>" +
-    //   "<div>" +
-    //   "Faces: <b>" +
-    //   faces +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Clutter: <b>" +
-    //   clutter +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Size: <b>" +
-    //   size +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Orientation: <b>" +
-    //   orientation +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Height: <b>" +
-    //   height +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Road Side: <b>" +
-    //   parseData(side_of_road) +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Angle: <b>" +
-    //   parseData(angle) +
-    //   "</b> </div>" +
-    //   "<div>" +
-    //   "Score: <b>" +
-    //   el.score +
-    //   "</b> </div>" +
-    //   "</div>" +
-    //   '<img class="billboardImage" alt="billboard photo" src=' +
-    //   el.image +
-    //   ">" +
-    //   '<button class="btn end" data-lat=' +
-    //   latitude +
-    //   " data-long=" +
-    //   longitude +
-    //   " >Go Here</button>" +
-    //   '<button class="btn stop" data-lat=' +
-    //   latitude +
-    //   " data-long=" +
-    //   longitude +
-    //   " >Add Stop</button>" +
-    //   '<button class="btn start" data-lat=' +
-    //   latitude +
-    //   " data-long=" +
-    //   longitude +
-    //   " >Start Here</button><br/><div id='chart'></div>";
 
     const contentString = addContentString(el)
 
@@ -533,7 +433,11 @@ function addBillboards(data) {
         infoWindow.setContent(contentString);
         infoWindow.open(map, marker);
 
-        await getPopData(el.longitude, el.latitude)
+        const popData = await getPopData(el.longitude, el.latitude)
+        drawPyr(popData)
+
+        const { totalPop } = popData;
+        oppContact(score, totalPop)
 
       };
     })(marker, el)
@@ -587,7 +491,11 @@ function addBillboards(data) {
 
 }
 
-function addContentString(el) {
+function getNum(str) {
+  return str.replace(/[^0-9]/g, '')
+}
+
+function parseBbPropNull(el) {
 
   let address = el && parseData(el.address);
   let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
@@ -603,20 +511,21 @@ function addContentString(el) {
   let height = el && el.height && parseData(el.height["characteristic_value"]);
   let side_of_road =
     el && el.side_of_road && parseData(el.side_of_road["characteristic_value"]);
-  let condition =
-    el && el.condition && parseData(el.condition["characteristic_value"]);
-  let visibility =
-    el && el.visibility && parseData(el.visibility["characteristic_value"]);
-  let traffic =
-    el && el.traffic && parseData(el.traffic["characteristic_value"]);
-  let traffic_q =
-    el && el.traffic_q && parseData(el.traffic_quality["characteristic_value"]);
-
-  let angle = el && el.angle && parseData(el.angle["characteristic_value"]);
-  // let image = el && parseData(el.image);
+  let score = el.score;
   let latitude = el && parseData(el.latitude);
   let longitude = el && parseData(el.longitude);
+  let site_run_up = el && parseData(el.site_run_up)
 
+  return {
+    address, medium, site_lighting_illumination, direction, faces, clutter,
+    size, orientation, height, side_of_road, latitude, longitude, score, site_run_up
+  }
+
+}
+
+function addContentString(el) {
+
+  const { address, medium, site_lighting_illumination, direction, faces, clutter, size, orientation, height, side_of_road, latitude, longitude, score, site_run_up } = parseBbPropNull(el)
 
   const addBbImages = () => {
     let imgString = '';
@@ -643,9 +552,9 @@ function addContentString(el) {
         <div>Size: <b>${size}</b></div>
         <div>Orientation: <b>${orientation}</b></div>
         <div>Height: <b>${height}</b></div>
+        <div>Site Run Up: <b>${site_run_up}</b></div>
         <div>Road Side: <b>${parseData(side_of_road)}</b></div>
-        <div>Angle: <b>${parseData(angle)}</b></div>
-        <div>Score: <b>${'score'}</b></div>
+        <div>Visibility Adjustment: <b>${vAdj(score)}</b></div>
         <div id='bbImages'>
           ${addBbImages()}
         </div>
@@ -964,9 +873,16 @@ function accumulateFilters(name, value, remove = false) {
     // then remove it from the overall score
     if (filters.length > 0) {
       const prevFilterVal = filters[index]['value']
-      const prevScore = filterScores[name][prevFilterVal].score
-      overallScore -= prevScore
-      scoreBoard.innerHTML = vAdj(overallScore)
+      let prevScore;
+      if (name === 'site_run_up') {
+        prevScore = filterScores[name](prevFilterVal)['score']
+        overallScore -= prevScore
+        scoreBoard.innerHTML = vAdj(overallScore)
+      } else {
+        prevScore = filterScores[name][prevFilterVal].score
+        overallScore -= prevScore
+        scoreBoard.innerHTML = vAdj(overallScore)
+      }
     }
 
     filters.splice(index, 1);
@@ -978,9 +894,19 @@ function accumulateFilters(name, value, remove = false) {
   // add a filter
   // if name was not found in filters, push.
   if (index < 0) {
-    const score = filterScores[name][value].score
-    overallScore += score;
-    scoreBoard.innerHTML = vAdj(overallScore)
+    let score;
+    // exception for site_run_up
+    if (name === 'site_run_up') {
+      value = value.split('_')[0]
+
+      score = filterScores[name](value)['score']
+      overallScore += score;
+      scoreBoard.innerHTML = vAdj(overallScore)
+    } else {
+      score = filterScores[name][value].score
+      overallScore += score;
+      scoreBoard.innerHTML = vAdj(overallScore)
+    }
 
     filters.push({ name: name, value: value });
     applyFilters()
@@ -990,30 +916,57 @@ function accumulateFilters(name, value, remove = false) {
 
   // update a filter
   // if name was found, update with new value
-  const prevScore = filterScores[name][filters[index].value].score
+  let prevScore;
+  if (name === 'site_run_up') {
+    prevScore = filterScores[name](filters[index].value)['score']
+  } else {
+    prevScore = filterScores[name][filters[index].value].score
+  }
   overallScore -= prevScore;
-  const newScore = filterScores[name][value].score
-  overallScore += newScore;
-  scoreBoard.innerHTML = vAdj(overallScore)
 
+  let newScore;
+  if (name === 'site_run_up') {
+    value = value.split('_')[0]
+    newScore = filterScores[name](value)['score']
+
+    overallScore += newScore;
+    scoreBoard.innerHTML = vAdj(overallScore)
+  } else {
+    newScore = filterScores[name][value].score
+    overallScore += newScore;
+    scoreBoard.innerHTML = vAdj(overallScore)
+  }
   filters[index].value = value;
   applyFilters()
   updateFilterHtml()
 }
 
 function vAdj(score) {
-  const per = Math.round((100 * score) / 22)
+  const per = Math.round((100 * score) / totalScore)
   return `${per}%`;
 }
 
-// apply all fillters in the filters array
+function oppContact(score, totalPop) {
+  // need the visibility adjustment  and the population of that area.
+  // insert before images div
+  const oppCont = ((score / totalScore) * totalPop)
+  const html = `<div>Opportunity Contact: <b>${Math.round(oppCont)}</b></div>`
+  document.querySelector('#bbImages').insertAdjacentHTML('beforebegin', html)
+
+}
+
+// apply all filters in the filters array
 const applyFilters = () => {
   let counter = 0;
   // for each billboard check if it meets the filters 
   billboardMarkers.getMarkers().forEach(bm => {
 
     const viable = filters.reduce((acc, { name, value }) => {
-      return acc && bm.data[`${name}`]?.toLowerCase() === value
+      if (name === 'site_run_up') {
+        return acc && siteRunUpBool(value, bm.data[`${name}`])
+      } else {
+        return acc && bm.data[`${name}`]?.toLowerCase() === value
+      }
     }, true);
 
     const greyedIcon = {
@@ -1039,6 +992,10 @@ const applyFilters = () => {
   infoTab.querySelector("#bbCount").innerHTML = counter;
 }
 
+function siteRunUpBool(prefLength, bmLength) {
+  return +bmLength >= prefLength && bmLength <= (+prefLength + 49)
+}
+
 function stopAnimation(marker) {
   setTimeout(function () {
     marker.setAnimation(null);
@@ -1046,42 +1003,45 @@ function stopAnimation(marker) {
 }
 
 const filterScores = {
-  site_lighting_illumination: {
-    backlit: { score: 3, icon: 'bbBacklit1' },
-    frontlit: { score: 2, icon: "bbFrontlit1" },
-    unlit: { score: 1, icon: "bbNolit" },
+  'site_lighting_illumination': {
+    "backlit": { score: 3, icon: 'bbBacklit1' },
+    "frontlit": { score: 2, icon: "bbFrontlit1" },
+    "unlit": { score: 1, icon: "bbNolit" },
   },
-  condition: {
-    excellent: { score: 4, icon: "bbDgreen" },
-    good: { score: 3, icon: "bbLgreen" },
-    average: { score: 2, icon: "bbAmber" },
-    poor: { score: 1, icon: "bbRed" },
-  },
-  visibility: {
-    excellent: { score: 3, icon: "bbDgreen" },
-    good: { score: 2, icon: "bbAmber" },
-    poor: { score: 1, icon: "bbRed" },
-  },
-  height: {
+  'height': {
     "eye level": { score: 3, icon: "bbDgreen" },
-    moderate: { score: 2, icon: "bbAmber" },
+    "moderate": { score: 2, icon: "bbAmber" },
     "too high": { score: 1, icon: "bbRed" },
   },
-  traffic: {
-    slow: { score: 3, icon: 'bbDgreen' },
-    average: { score: 2, icon: 'bbAmber' },
-    fast: { score: 1, icon: 'bbRed' },
+  'clutter': {
+    "solus": { score: 3, icon: "bbBlue" },
+    "average": { score: 2, icon: "bbNolit" },
+    "cluttered": { score: 1, icon: "billboardGreyed1" },
   },
-  traffic_q: {
-    heavy: { score: 3, icon: 'bbDgreen' },
-    medium: { score: 2, icon: 'bbAmber' },
-    light: { score: 1, icon: 'bbRed' }
-  },
-  clutter: {
-    solus: { score: 3, icon: "bbBlue" },
-    average: { score: 2, icon: "bbNolit" },
-    cluttered: { score: 1, icon: "billboardGreyed1" },
-  },
+  'site_run_up':
+    function (length) {
+      length = parseInt(length)
+      if (length >= 0 && length <= 50) {
+        return { score: 1, icon: "bbNolit" }
+      }
+      if (length >= 51 && length <= 100) {
+        return { score: 2, icon: "bbRed" }
+      }
+      if (length >= 101 && length <= 150) {
+        return { score: 3, icon: "bbAmber" }
+      }
+      if (length >= 151 && length <= 200) {
+        return { score: 4, icon: "bbDgreen" }
+      }
+      if (length > 200) {
+        return { score: 5, icon: "bbBlue" }
+      }
+    },
+  'orientation': {
+    "landscape": { score: 3, icon: "bbDgreen" },
+    "portrait": { score: 2, icon: "bbAmber" },
+    "square": { score: 1, icon: "bbRed" },
+  }
 };
 
 function categorizeBB(category) {
@@ -1089,6 +1049,7 @@ function categorizeBB(category) {
     url: `./images/billboardColored.png`,
     scaledSize: new google.maps.Size(30, 30)
   }
+
   billboardMarkers.getMarkers().forEach(bm => {
     for (let [billboardProp, value] of Object.entries(bm.data)) {
       if (billboardProp.toLowerCase() === category.toLowerCase()) {
@@ -1098,23 +1059,41 @@ function categorizeBB(category) {
           value == undefined ||
           value == "undefined"
         ) {
-          // condition: null/undefined
-          bm.setIcon(defaultIcon);
-        } else {
-          // condition:poor
-          if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
+          return bm.setIcon(defaultIcon);
+        }
+
+        // exception for site_run_up
+        if (category === 'site_run_up') {
+
+          if (filterScores[category](value)) {
+
+            const { icon } = filterScores[category](value);
+
             const newIcon = {
-              url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
+              url: `./images/${icon}.png`,
               scaledSize: new google.maps.Size(30, 30)
             }
 
             bm.setIcon(newIcon);
             bm.setAnimation(google.maps.Animation.BOUNCE)
             stopAnimation(bm);
-          } else {
-            bm.setIcon(defaultIcon);
+            return;
           }
         }
+
+        if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
+          const newIcon = {
+            url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
+            scaledSize: new google.maps.Size(30, 30)
+          }
+
+          bm.setIcon(newIcon);
+          bm.setAnimation(google.maps.Animation.BOUNCE)
+          stopAnimation(bm);
+        } else {
+          bm.setIcon(defaultIcon);
+        }
+
       }
     }
   })
@@ -1122,19 +1101,43 @@ function categorizeBB(category) {
 }
 
 function drawCatIcons(category) {
-  let html = "";
-  for (const [k, v] of Object.entries(filterScores[category])) {
-    html +=
-      `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
-  }
+  if (category === 'site_run_up') {
 
-  infoTab.querySelector(".billboardCatInfo").innerHTML =
-    `<h4 class="info-header">Categories Key</h4>
+    const distances = { '0-50m': 25, "51-100m": 75, "101-150m": 125, "151-200m": 175, "200+": 225 };
+
+    let html = "";
+    for (const [range, dist] of Object.entries(distances)) {
+      const { icon } = filterScores[category](dist)
+      html +=
+        `<div> 
+          <h4> ${range} </h4> 
+          <img class="billboardCatInfo-img" src="./images/${icon}.png"> 
+        </div>`;
+    }
+
+    infoTab.querySelector(".billboardCatInfo").innerHTML =
+      `<h4 class="info-header">Categories Key</h4>
+          ${html}
+          <div>
+            <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+        </div>`
+
+
+  } else {
+
+    let html = "";
+    for (const [k, v] of Object.entries(filterScores[category])) {
+      html +=
+        `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+    }
+
+    infoTab.querySelector(".billboardCatInfo").innerHTML =
+      `<h4 class="info-header">Categories Key</h4>
     ${html}
     <div>
       <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
     </div>`
-
+  }
 }
 
 function capitalize(string) {
@@ -1167,30 +1170,34 @@ function updateFilterHtml() {
 }
 
 function drawFilterIcon() {
-  infoTab.querySelector('#filterIcons').innerHTML = `
-            <div>
-            Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
-            </div>
-            <div>
-            Does not meet Criteria <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
-            </div>
-            `;
+  infoTab.querySelector('#filterIcons').innerHTML =
+    `
+    <div>
+      Meets Criteria:
+      <img class="billboardCatInfo-img" src="./images/billboardColored.png">
+    </div>
+    <div>
+      Does not meet Criteria
+      <img class="billboardCatInfo-img" src="./images/billboardGreyed2.png">
+    </div>
+`;
 }
 
 async function getPopData(long, lat) {
+  let response;
 
-  const res = await fetch(`/api/pois/pop/${long}/${lat}`);
-  console.log(res);
-  if (res.ok) {
-    const popData = await res.json()
-    drawPyr(popData)
-  } else {
-    document.querySelector('#chart').style.display = 'none'
+  response = await fetch(`/api/pois/pop/${long}/${lat}`);
+
+  if (response.ok) {
+    return popData = await response.json()
+    // drawPyr(popData)
   }
+
 
 }
 
 function drawPyr(popData) {
+  document.querySelector('#chart').style.display = 'block'
 
   const categories = [
     '0-4', '5-9', '10-14', '15-19',
@@ -1205,7 +1212,7 @@ function drawPyr(popData) {
       type: 'bar'
     },
     title: {
-      text: "Population Estimate for Ghana 2020."
+      text: "Population Estimates for Ghana 2020."
     },
     subtitle: {
       text: "Source: Spatial Data Repository, The Demographic and Health Surveys Program. ICF International. Available from <a href='spatialdata.dhsprogram.com'>[Accessed 28 July 2021].</a>"

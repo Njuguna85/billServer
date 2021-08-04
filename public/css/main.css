@@ -374,13 +374,21 @@ h5.accordion.is-open {
 }
 
 #chart {
+  display: none;
   width: 100%;
   height: 400px;
+}
+
+.infoWindow {
+  padding: 10px;
 }
 
 .infoWindow > div {
   display: flex;
   justify-content: space-between;
+}
+#bbImages {
+  margin: 10px;
 }
 
 .billboardImage {
@@ -616,47 +624,6 @@ tr:nth-child(even) {
 }
 
 /* 
-  ##Device = Desktops
-  ##Screen = 1281px to higher resolution desktops
-*/
-
-@media (min-width: 1281px) {
-  h2 {
-    font-size: xx-large;
-  }
-}
-
-/* 
-    ##Device = Laptops, Desktops
-    ##Screen = B/w 1025px to 1280px
-  */
-
-@media (min-width: 1025px) and (max-width: 1280px) {
-  h2 {
-    font-size: x-large;
-  }
-}
-
-/* 
-    ##Device = Tablets, Ipads (portrait)
-    ##Screen = B/w 768px to 1024px
-  */
-
-@media (min-width: 768px) and (max-width: 1024px) {
-  .header h2 {
-    font-size: 16px;
-  }
-}
-
-/* 
-    ##Device = Tablets, Ipads (landscape)
-    ##Screen = B/w 768px to 1024px
-  */
-
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-}
-
-/* 
     ##Device = Low Resolution Tablets, Mobiles (Landscape)
     ##Screen = B/w 481px to 767px
   */
@@ -843,6 +810,14 @@ tr:nth-child(even) {
 
   #score {
     font-size: 1.5em;
+  }
+
+  .infoWindow {
+    font-size: 0.8em;
+  }
+
+  .highcharts-subtitle {
+    font-size: 0.7em;
   }
 }
 
