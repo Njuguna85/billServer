@@ -677,22 +677,33 @@ function addDeliveries(data) {
 function addGhanaPopulation() {
   const key = () => {
     info = infoTab.querySelector(".info");
-    info.innerHTML = ` <div class="sublocLegend">
-                <div> Ghana Districts Population </div> 
-                <div><span class="subColor" style="background-color:#ffffcc;"></span>241 - 99580</div>
-                <div><span class="subColor" style="background-color:#e4f4b6;"></span>99580 - 113844</div>
-                <div><span class="subColor" style="background-color:#c9e99f;"></span>113844 - 128037</div>
-                <div><span class="subColor" style="background-color:#a9dc8e;"></span>128037 - 142836</div>
-                <div><span class="subColor" style="background-color:#88cd80;"></span>142836 - 158718</div>
-                <div><span class="subColor" style="background-color:#68be71;"></span>158718 - 175951</div>
-                <div><span class="subColor" style="background-color:#48af60;"></span>175951 - 199264</div>
-                <div><span class="subColor" style="background-color:#2b9d51;"></span>199264 - 242204</div>
-                <div><span class="subColor" style="background-color:#158244;"></span>242204 - 304658</div>
-                <div><span class="subColor" style="background-color:#006837;"></span>304658 - 2578715</div>
-            </div>
+    info.innerHTML = `
+    <div class="sublocLegend">
+        <div> Ghana Population Estimates 2020 </div>
+        
+        <div><span class="subColor" style="background-color:#f7fcf5;"></span>19198 - 49793</div>
+
+        <div><span class="subColor" style="background-color:#e8f6e3;"></span>49793 - 62714</div>
+
+        <div><span class="subColor" style="background-color:#d0ecc9;"></span>62714 - 72954</div>
+
+        <div><span class="subColor" style="background-color:#b2e0ab;"></span>72954 - 84599</div>
+
+        <div><span class="subColor" style="background-color:#8ed08c;"></span>84599 - 98194</div>
+
+        <div><span class="subColor" style="background-color:#66bd6f;"></span>98194 - 116356</div>
+
+        <div><span class="subColor" style="background-color:#3da75a;"></span>116356 - 134829</div>
+
+        <div><span class="subColor" style="background-color:#248c45;"></span>134829 - 157751</div>
+
+        <div><span class="subColor" style="background-color:#03702e;"></span>157751 - 222312</div>
+
+        <div><span class="subColor" style="background-color:#232323;"></span>222312 - 2391823</div>
+    </div>
             `;
   };
-  const ghtile = getTiles("Pedictive-Analytics:ghanapopulation");
+  const ghtile = getTiles("Predictive:gh_pop_estimates_2020");
 
   const ghanaDist = new google.maps.ImageMapType({
     getTileUrl: ghtile,
