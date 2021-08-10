@@ -220,7 +220,7 @@ const getTiles = (lyr) => {
       "," +
       (top.lat() + deltaY);
     const url =
-      "http://localhost:8090/geoserver/Predictive-Analytics/wms?" +
+      "https://play.predictiveanalytics.co.ke/geoserver/Predictive/wms?" +
       "&service=WMS" +
       "&version=1.1.0" +
       "&request=GetMap" +
