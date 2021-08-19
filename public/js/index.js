@@ -65,10 +65,10 @@ const commD = [
 ];
 
 function initMap() {
-  const mapCentre = { lat: 5.970731, lng: -0.344567 }
+  const mapCentre = { lat: 1.282578, lng: 32.608635 }
 
   const mapOptions = {
-    zoom: 9,
+    zoom: 8,
     center: mapCentre,
     mapTypeControl: true,
     mapTypeControlOptions: {
@@ -176,7 +176,6 @@ async function fetchData() {
 function addOverlays(data) {
   addTrafficLayer();
   addGhanaPopulation();
-  addBillboards(data.billboards);
   addDeliveries(data.deliveries);
 
   for (const [key, value] of Object.entries(data.pois)) {
@@ -391,105 +390,7 @@ function parseBBProps(filterScoreProp, bbProp) {
   }
 }
 
-function addBillboards(data) {
-  const bounds = new google.maps.LatLngBounds();
 
-  var spiderConfig = {
-    keepSpiderfied: true,
-    event: 'mouseover'
-  };
-  var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
-
-  const markers = data.map((el) => {
-    totalBB++;
-    const iconUrl = `images/billboardColored.png`;
-    let score;
-
-    const { site_lighting_illumination, clutter, height, orientation } = parseBbPropNull(el)
-    const site_run_up = getNum(el.site_run_up)
-
-    score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('height', height) + parseBBProps('clutter', clutter) + parseBBProps('site_run_up', site_run_up) + parseBBProps('orientation', orientation)
-
-    el['score'] = score;
-
-    data = { site_lighting_illumination, height, orientation, clutter, site_run_up }
-
-    let latlng = new google.maps.LatLng(el.latitude, el.longitude);
-
-    const contentString = addContentString(el)
-
-    let marker = new google.maps.Marker({
-      position: latlng,
-      icon: {
-        url: iconUrl,
-        scaledSize: new google.maps.Size(30, 30),
-      },
-      optimized: false,
-      data
-    });
-
-    google.maps.event.addListener(marker, "click", ((marker, el) => {
-      return async () => {
-        infoWindow.setContent(contentString);
-        infoWindow.open(map, marker);
-
-        const popData = await getPopData(el.longitude, el.latitude)
-        drawPyr(popData)
-
-        const { totalPop } = popData;
-        oppContact(score, totalPop)
-
-      };
-    })(marker, el)
-    );
-
-    // Adds the Marker to OverlappingMarkerSpiderfier
-    markerSpiderfier.addMarker(marker);
-    return marker;
-
-  });
-
-  markerSpiderfier.addListener('click', function (marker, e) {
-    infoWindow.open(map, marker);
-  });
-
-  markerSpiderfier.addListener('spiderfy', function (markers) {
-    infoWindow.close();
-  });
-
-  billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
-
-  billboardMarkers.setMaxZoom(15);
-
-  billboardTable.style.display = 'block';
-  drawBBLegend()
-
-  div = document.createElement("div");
-  div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
-  essentialLayers.appendChild(div);
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#billboardChecked")) {
-      cb = document.getElementById("billboardChecked");
-      // if on
-      if (cb.checked) {
-        billboardMarkers.addMarkers(markers);
-        map.fitBounds(bounds);
-        map.panToBounds(bounds);
-
-        billboardTable.style.display = 'block';
-
-      }
-      if (!cb.checked) {
-        // if off
-        billboardMarkers.removeMarkers(markers);
-
-        billboardTable.style.display = 'none';
-        drawBBLegend()
-      }
-    }
-  });
-
-}
 
 function getNum(str) {
   return str.replace(/[^0-9]/g, '')
