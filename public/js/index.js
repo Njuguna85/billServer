@@ -175,8 +175,8 @@ async function fetchData() {
 
 function addOverlays(data) {
   addTrafficLayer();
-  addGhanaPopulation();
   addDeliveries(data.deliveries);
+  addugPopProj()
 
   for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {
@@ -575,67 +575,60 @@ function addDeliveries(data) {
 
 }
 
-function addGhanaPopulation() {
+function addugPopProj() {
   const key = () => {
     info = infoTab.querySelector(".info");
     info.innerHTML = `
-    <div class="sublocLegend">
-        <div> Ghana Population Estimates 2020 </div>
-        
-        <div><span class="subColor" style="background-color:#f7fcf5;"></span>19198 - 49793</div>
-
-        <div><span class="subColor" style="background-color:#e8f6e3;"></span>49793 - 62714</div>
-
-        <div><span class="subColor" style="background-color:#d0ecc9;"></span>62714 - 72954</div>
-
-        <div><span class="subColor" style="background-color:#b2e0ab;"></span>72954 - 84599</div>
-
-        <div><span class="subColor" style="background-color:#8ed08c;"></span>84599 - 98194</div>
-
-        <div><span class="subColor" style="background-color:#66bd6f;"></span>98194 - 116356</div>
-
-        <div><span class="subColor" style="background-color:#3da75a;"></span>116356 - 134829</div>
-
-        <div><span class="subColor" style="background-color:#248c45;"></span>134829 - 157751</div>
-
-        <div><span class="subColor" style="background-color:#03702e;"></span>157751 - 222312</div>
-
-        <div><span class="subColor" style="background-color:#232323;"></span>222312 - 2391823</div>
-    </div>
-            `;
+        <div class="sublocLegend">
+            <div>SubCounty Population Projection 2020</div>
+            <div><span class="subColor" style="background-color:#f7fbff;"></span>1600 - 9200</div>
+            <div><span class="subColor" style="background-color:#e2eef9;"></span>9200 - 12600</div>
+            <div><span class="subColor" style="background-color:#cde0f2;"></span>12600 - 15530</div>
+            <div><span class="subColor" style="background-color:#b0d2e8;"></span>15530 - 18640</div>
+            <div><span class="subColor" style="background-color:#89bfdd;"></span>18640 - 21900</div>
+            <div><span class="subColor" style="background-color:#60a6d2;"></span>21900 - 25200</div>
+            <div><span class="subColor" style="background-color:#3e8ec4;"></span>25200 - 30400</div>
+            <div><span class="subColor" style="background-color:#2172b6;"></span>30400 - 36400</div>
+            <div><span class="subColor" style="background-color:#0a549e;"></span>36400 - 47880</div>
+            <div><span class="subColor" style="background-color:#08306b;"></span>47880 - 445900</div>
+        </div>`;
   };
-  const ghtile = getTiles("Predictive:gh_pop_estimates_2020");
 
-  const ghanaDist = new google.maps.ImageMapType({
-    getTileUrl: ghtile,
+  const ugtile = getTiles("Predictive:ugsubcountiesprojection");
+
+  const ugPopProj = new google.maps.ImageMapType({
+    getTileUrl: ugtile,
     minZoom: 0,
     maxZoom: 19,
     opacity: 1.0,
-    alt: "Ghana Districts Population",
-    name: "Ghana Districts",
+    alt: "Uganda Population Projection 2020",
+    name: "ugPopProj",
     isPng: true,
     tileSize: new google.maps.Size(256, 256),
   });
 
   div = document.createElement("div");
-  div.innerHTML = `Ghana Districts <input id="ghCheck" type = "checkbox" />`;
+  div.innerHTML = `Uganda Population Projection 2020 <input id="ugPopProjCheck" type="checkbox" />`;
   mapLayersAccordion.appendChild(div);
+
   legend.addEventListener("change", (e) => {
-    if (e.target.matches("#ghCheck")) {
-      cb = document.getElementById("ghCheck");
+    if (e.target.matches("#ugPopProjCheck")) {
+      cb = document.getElementById("ugPopProjCheck");
       // if on
       if (cb.checked) {
-        map.overlayMapTypes.setAt(2, ghanaDist);
+        map.overlayMapTypes.setAt(1, ugPopProj);
         key();
       }
       if (!cb.checked) {
         // if off
-        map.overlayMapTypes.removeAt(2);
+        map.overlayMapTypes.removeAt(1);
+        //
         infoTab.querySelector(".info").innerHTML = "";
       }
     }
   });
 }
+
 
 function parseData(val) {
   if (val === null || val === undefined) {
