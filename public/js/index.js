@@ -161,7 +161,7 @@ function initMap() {
 }
 
 async function fetchData() {
-  let response = await fetch("/api/pois/abonten");
+  let response = await fetch("/api/pois/datalytics");
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
@@ -1095,84 +1095,23 @@ async function getPopData(long, lat) {
 
   if (response.ok) {
     return popData = await response.json()
-    // drawPyr(popData)
-  }
-
-
+    addPop(popData)
+  } 
 }
 
-function drawPyr(popData) {
-  document.querySelector('#chart').style.display = 'block'
-
-  const categories = [
-    '0-4', '5-9', '10-14', '15-19',
-    '20-24', '25-29', '30-34', '35-39', '40-44',
-    '45-49', '50-54', '55-59', '60-64', '65-69',
-    '70-74', '75-79', '80+'
-  ];
-
-  new Highcharts.Chart({
-    chart: {
-      renderTo: document.querySelector('#chart'),
-      type: 'bar'
-    },
-    title: {
-      text: "Population Estimates for Ghana 2020."
-    },
-    subtitle: {
-      text: "Source: Spatial Data Repository, The Demographic and Health Surveys Program. ICF International. Available from <a href='spatialdata.dhsprogram.com'>[Accessed 28 July 2021].</a>"
-    },
-    xAxis: [{
-      categories: categories,
-      reversed: false,
-      labels: {
-        step: 1
-      },
-      accessibility: {
-        description: 'Age (male)'
-      }
-    }, {
-      opposite: true,
-      reversed: false,
-      categories: categories,
-      linkedTo: 0,
-      labels: {
-        step: 1
-      },
-      accessibility: {
-        description: 'Age (female)'
-      }
-    }],
-    yAxis: {
-      title: {
-        text: null
-      },
-      labels: {
-        formatter: function () {
-          return Math.abs(this.value);
-        }
-      },
-    },
-    plotOptions: {
-      series: {
-        stacking: 'normal'
-      }
-    },
-    tooltip: {
-      formatter: function () {
-        return '<b>' + this.series.name + ', age ' + this.point.category + '</b><br/>' +
-          'Population: ' + this.point.y;
-      }
-    },
-
-    series: [{
-      name: 'Male',
-      data: popData['male']
-    }, {
-      name: 'Female',
-      data: popData['female']
-    }]
-  });
-
-
+function addPop(popData) {
+  const chart = document.querySelector('#chart')
+  if (popData) {
+    const popString = `
+    <div>Sub County: <b>${popData.subcounty}</b></div>
+    <div>District: <b>${popData.district}</b></div>
+    <div>Male Population: <b>${popData.male}</b></div>
+    <div>Female Population: <b>${popData.female}</b></div>
+    <div>Total Population: <b>${popData.total}</b></div>`;
+    
+    chart.style.display = 'block'
+    chart.innerHTML = popString
+  } else {
+    chart.innerHTML =`<div>No Population Estimates available at the moment</div>`
+  }
 }

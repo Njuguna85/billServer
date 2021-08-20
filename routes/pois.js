@@ -32,18 +32,18 @@ const fetchPoi = async (withinTable, poiColumn) => {
     );
 }
 
-router.get('/abonten', async (req, res) => {
+router.get('/datalytics', async (req, res) => {
     const pois = {};
 
-    let billboards, abontenData, deliveries;
+    let billboards, ugData, deliveries;
     try {
-        const responseToken = await axios.post('https://bi.abonten.com/oauth/token', {
+        const responseToken = await axios.post('https://bi.datalytics.co.ke/oauth/token', {
             "grant_type": "client_credentials",
             "client_id": 3,
             "client_secret": "69PInxj9q5sFDGAL9uBCIfG1IN5R6X1iKCSPLlrs"
         });
 
-        const responseBillboards = await axios.get('https://bi.abonten.com/api/billboard/', {
+        const responseBillboards = await axios.get('https://bi.datalytics.co.ke/api/billboard/', {
             headers: {
                 'Authorization': `Bearer ${responseToken.data.access_token}`,
                 'Access-Control-Allow-Methods': 'GET',
@@ -54,7 +54,7 @@ router.get('/abonten', async (req, res) => {
 
         billboards = responseBillboards.data;
 
-        const responseDeliveries = await axios.get('https://bi.abonten.com/api/all-deliveries', {
+        const responseDeliveries = await axios.get('https://bi.datalytics.co.ke/api/all-deliveries', {
             headers: {
                 'Authorization': `Bearer ${responseToken.data.access_token}`,
                 'Access-Control-Allow-Methods': 'GET',
@@ -63,7 +63,7 @@ router.get('/abonten', async (req, res) => {
             }
         });
         deliveries = responseDeliveries.data.data;
-        // client.del('abonten', async (err, reply) => {
+        // client.del('datalytics', async (err, reply) => {
         //     if (!err) {
         //         if (reply === 1) {
         //             console.log("Key is deleted");
@@ -73,26 +73,26 @@ router.get('/abonten', async (req, res) => {
         //     }
         // })
 
-        client.get('abonten', async (err, data) => {
+        client.get('datalytics', async (err, data) => {
             if (err) {
                 logger.error(`${req}-${err}`)
                 console.log('Error Fetching gh redis Cache', err)
 
                 return res.status(404).json({
-                    'message': 'Could not Fetch Abonteeh Data'
+                    'message': 'Could not Fetch Datalytics Data'
                 })
             }
             if (data) {
-                abontenData = JSON.parse(data)
+                ugData = JSON.parse(data)
                 return res.status(200).json({
-                    ...abontenData, billboards, deliveries
+                    ...ugData, billboards, deliveries
                 })
             } else {
 
                 for (const i of poiCategories) {
                     pois[i] = await fetchPoi('gh', i)
                 }
-                client.set('abonten', JSON.stringify({ pois }));
+                client.set('datalytics', JSON.stringify({ pois }));
 
                 return res.status(200).json({
                     pois, billboards, deliveries,
@@ -126,40 +126,19 @@ router.get('/pop/:long/:lat', async (req, res) => {
 
     if (!req.params.long || !req.params.lat) return res.status(404)
 
-    const ghData = await sequelize.query(
-        `select
-            adm2_name,
-            "m0004_2020","m0509_2020","m1014_2020","m1519_2020","m2024_2020","m2529_2020","m3034_2020", "m3539_2020","m4044_2020","m4549_2020","m5054_2020", "m5559_2020","m6064_2020","m6569_2020","m7074_2020",
-            "m7579_2020","m80pl_2020" , "mtotl_2020","f0004_2020", "f0509_2020",
-            "f1014_2020","f1519_2020","f2024_2020","f2529_2020","f3034_2020","f3539_2020","f4044_2020","f4549_2020","f5054_2020","f5559_2020","f6064_2020","f6569_2020", "f7074_2020","f7579_2020" , "f80pl_2020",
-            "ftotl_2020" ,"btotl_2020"
-        from gh_pop_estimates_2020 as gh where ST_Contains( ST_SetSRID(gh.wkb_geometry,4326), ST_GeomFromText('POINT(${req.params.long} ${req.params.lat})',4326))`, { type: sequelize.QueryTypes.SELECT });
+    const ugData = await sequelize.query(
+        `SELECT 
+            subcounty, district, male, female, total
+            
+        FROM 
+            public.ugsubcountiesprojection as ug
+        where 
+            ST_Contains(st_setsrid(ug.geom, 4326),
+                        st_geomfromtext('POINT(${req.params.long} ${req.params.lat})', 4326));`, { type: sequelize.QueryTypes.SELECT });
 
-    if (ghData.length == 0) return res.status(404)
+    if (ugData.length == 0) return res.status(404)
 
-    const popByGender = stripPopData(ghData)
-
-    return res.json({ adm2_name: ghData[0]['adm2_name'], male: popByGender['male'], female: popByGender['female'], femaleTotal: +ghData[0]['ftotl_2020'], maleTotal: +ghData[0]['mtotl_2020'], totalPop: +ghData[0]['btotl_2020'] })
+    return res.json(ugData)
 })
 
-function stripPopData(ghData) {
-    let malePop = [];
-    let femalePop = [];
-
-    const maleAgeGroups = [
-        "m0004_2020", "m0509_2020", "m1014_2020", "m1519_2020", "m2024_2020", "m2529_2020", "m3034_2020", "m3539_2020", "m4044_2020", "m4549_2020", "m5054_2020", "m5559_2020", "m6064_2020", "m6569_2020", "m7074_2020", "m7579_2020", "m80pl_2020"];
-
-    const feAgeGroups = [
-        "f0004_2020", "f0509_2020", "f1014_2020", "f1519_2020", "f2024_2020", "f2529_2020", "f3034_2020", "f3539_2020", "f4044_2020", "f4549_2020", "f5054_2020", "f5559_2020", "f6064_2020", "f6569_2020", "f7074_2020", "f7579_2020", "f80pl_2020"];
-
-    for (const ageGroup of maleAgeGroups) {
-        if (ghData.length > 0) malePop.push(-Math.abs(+ghData[0][ageGroup]))
-    }
-
-    for (const ageGroup of feAgeGroups) {
-        if (ghData.length > 0) femalePop.push(+ghData[0][ageGroup])
-    }
-
-    return { male: malePop, female: femalePop };
-}
 module.exports = router;
