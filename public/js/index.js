@@ -433,10 +433,10 @@ function addBillboards(data) {
         infoWindow.open(map, marker);
 
         const popData = await getPopData(el.longitude, el.latitude)
-        addPop(popData)
+        addPop(popData[0])
 
-        const { totalPop } = popData;
-        oppContact(score, totalPop)
+        const { total } = popData[0];
+        oppContact(score, total)
 
       };
     })(marker, el)
@@ -1198,7 +1198,8 @@ async function getPopData(long, lat) {
 }
 
 function addPop(popData) {
-  const chart = document.querySelector('#chart')
+  
+  const imgCont = document.querySelector('#bbImages')
   if (popData) {
     const popString = `
     <div>Sub County: <b>${popData.subcounty}</b></div>
@@ -1207,9 +1208,8 @@ function addPop(popData) {
     <div>Female Population: <b>${popData.female}</b></div>
     <div>Total Population: <b>${popData.total}</b></div>`;
     
-    chart.style.display = 'block'
-    chart.innerHTML = popString
+    imgCont.insertAdjacentHTML('beforebegin', popString) 
   } else {
-    chart.innerHTML =`<div>No Population Estimates available at the moment</div>`
+    imgCont.insertAdjacentHTML('beforebegin', `<div>No Population Estimates available at the moment</div>`)
   }
 }

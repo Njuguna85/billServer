@@ -40,7 +40,7 @@ router.get('/datalytics', async (req, res) => {
         const responseToken = await axios.post('https://bi.datalytics.co.ke/oauth/token', {
             "grant_type": "client_credentials",
             "client_id": 3,
-            "client_secret": "69PInxj9q5sFDGAL9uBCIfG1IN5R6X1iKCSPLlrs"
+            "client_secret": "4hLyAOKxwzjAZgNw237YMT97FcRI4DULTsVS8w2N"
         });
 
         const responseBillboards = await axios.get('https://bi.datalytics.co.ke/api/billboard/', {
