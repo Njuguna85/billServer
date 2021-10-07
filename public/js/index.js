@@ -176,7 +176,7 @@ function addOverlays(data) {
   addTrafficLayer();
   addGhanaPopulation();
   addBillboards(data.billboards);
-  addDeliveries(data.deliveries);
+  // addDeliveries(data.deliveries);
 
   for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {

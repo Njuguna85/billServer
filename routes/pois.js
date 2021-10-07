@@ -69,27 +69,28 @@ router.get("/abonten", async (req, res) => {
 
     billboards = responseBillboards.data;
 
-    const responseDeliveries = await axios.get(
-      "https://bi.abonten.com/api/all-deliveries",
-      {
-        headers: {
-          Authorization: `Bearer ${responseToken.data.access_token}`,
-          "Access-Control-Allow-Methods": "GET",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "X-Requested-With",
-        },
+    // const responseDeliveries = await axios.get(
+    //   "https://bi.abonten.com/api/all-deliveries",
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer ${responseToken.data.access_token}`,
+    //       "Access-Control-Allow-Methods": "GET",
+    //       "Access-Control-Allow-Origin": "*",
+    //       "Access-Control-Allow-Headers": "X-Requested-With",
+    //     },
+    //   }
+    // );
+    // deliveries = responseDeliveries.data.data;
+
+    client.del("abonten", async (err, reply) => {
+      if (!err) {
+        if (reply === 1) {
+          console.log("Key is deleted");
+        } else {
+          console.log("Does't exists");
+        }
       }
-    );
-    deliveries = responseDeliveries.data.data;
-    // client.del('abonten', async (err, reply) => {
-    //     if (!err) {
-    //         if (reply === 1) {
-    //             console.log("Key is deleted");
-    //         } else {
-    //             console.log("Does't exists");
-    //         }
-    //     }
-    // })
+    });
 
     client.get("abonten", async (err, data) => {
       if (err) {
@@ -102,21 +103,20 @@ router.get("/abonten", async (req, res) => {
       }
       if (data) {
         abontenData = JSON.parse(data);
+
         return res.status(200).json({
-          ...abontenData,
-          billboards,
-          deliveries,
+          pois: abontenData.pois,
+          billboards: abontenData.billboards,
         });
       } else {
         for (const i of poiCategories) {
           pois[i] = await fetchPoi("gh", i);
         }
-        client.set("abonten", JSON.stringify({ pois }));
+        client.set("abonten", JSON.stringify({ pois, billboards }));
 
         return res.status(200).json({
           pois,
           billboards,
-          deliveries,
           message: "cache miss",
         });
       }
