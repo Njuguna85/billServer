@@ -660,35 +660,62 @@ function getmobileMarkers(deliveriesData) {
   };
   var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
 
-  mobileMarkersDates = new Object();
-  const uploadDates = [];
   const markers = deliveriesData.map((el) => {
+    let product_name = el && parseData(el.product_name);
+    let product_description = el && parseData(el.product_description);
+    let total_price = el && parseData(el.total_price);
+    let quantity = el && parseData(el.quantity);
+
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
     bounds.extend(latlng);
+
     let contentString =
+      '<div class ="infoWindow">' +
+      "<div>" +
       "Product Name: <b>" +
-      parseData(el.product_name) +
-      "</b><br/>" +
-      "Delivered By: <b>" +
-      parseData(el.delivered_by) +
-      "</b> <br/>" +
-      "Description: <b>" +
-      parseData(el.product_description) +
-      "</b> <br/>" +
+      product_name +
+      "</b></div>" +
+      "<div>" +
+      "Product Price: <b>" +
+      total_price +
+      "</b></div>" +
+      "<div>" +
       "Quantity: <b>" +
-      parseData(el.quantity) +
-      "</b> <br/>" +
-      '<img class="billboardImage" alt="delivery photo" src=' +
+      quantity +
+      "</b></div>" +
+      "<div>" +
+      "Product Description: <b>" +
+      product_description +
+      "</b></div>" +
+      "</div>" +
+      '<img class="billboardImage" alt="Delivery photo" src=' +
       el.photo +
-      "></img>";
+      ">" +
+      '<button class="btn end" data-lat=' +
+      el.latitude +
+      " data-long=" +
+      el.longitude +
+      " >Go Here</button>" +
+      '<button class="btn stop" data-lat=' +
+      el.latitude +
+      " data-long=" +
+      el.longitude +
+      " >Add Stop</button>" +
+      '<button class="btn start" data-lat=' +
+      el.latitude +
+      " data-long=" +
+      el.longitude +
+      " >Start Here</button>";
+
     let marker = new google.maps.Marker({
       position: latlng,
       icon: {
-        url: `images/place.png`,
-        scaledSize: new google.maps.Size(20, 20),
+        url: `images/bbAmber.png`,
+        scaledSize: new google.maps.Size(30, 30),
       },
       optimized: false,
     });
+
     google.maps.event.addListener(
       marker,
       "click",
@@ -699,20 +726,11 @@ function getmobileMarkers(deliveriesData) {
         };
       })(marker, el)
     );
-    // add list of dates
-    if (el.created_at) {
-      let date = el.created_at.slice(0, 10);
-      if (uploadDates.length == 0) {
-        uploadDates.push(date);
-      } else {
-        if (uploadDates.includes(date) == false) {
-          uploadDates.push(date);
-        }
-      }
-    }
+
     markerSpiderfier.addMarker(marker);
     return marker;
   });
+
   markerSpiderfier.addListener("click", function (marker, e) {
     //infoWindow.setContent(marker.title);
     infoWindow.open(map, marker);
@@ -721,21 +739,26 @@ function getmobileMarkers(deliveriesData) {
   markerSpiderfier.addListener("spiderfy", function (markers) {
     infoWindow.close();
   });
-  mobileMarkersDates.dates = uploadDates;
-  const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
+
+  deliveryMarkers = new MarkerClusterer(map, [], { imagePath: "images/m" });
+  deliveryMarkers.setMaxZoom(15);
+
   div = document.createElement("div");
-  div.innerHTML = `<img src='images/place.png'/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
+  div.innerHTML = `<img src='images/bbAmber.png' alt='Delivery' /> Deliveries <input id="deliveryChecked" type="checkbox" />`;
   essentialLayers.appendChild(div);
+
   legend.addEventListener("change", (e) => {
-    if (e.target.matches("#mobileCheck")) {
-      cb = document.getElementById("mobileCheck");
+    if (e.target.matches("#deliveryChecked")) {
+      cb = document.getElementById("deliveryChecked");
       // if on
       if (cb.checked) {
-        markerCluster.addMarkers(markers);
+        deliveryMarkers.addMarkers(markers);
+        map.fitBounds(bounds);
+        map.panToBounds(bounds);
       }
       if (!cb.checked) {
         // if off
-        markerCluster.removeMarkers(markers);
+        deliveryMarkers.removeMarkers(markers);
       }
     }
   });
