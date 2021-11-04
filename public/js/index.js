@@ -3,11 +3,14 @@ let infoWindow;
 let directionsService;
 let directionsRenderer;
 const mapContainer = document.getElementById("map");
-let bounds, markerCluster, gmarkers = {};
+let bounds,
+  markerCluster,
+  gmarkers = {};
 const filters = [];
 let billboardMarkers = [];
-let overallScore = 0, totalBB = 0;
-const billboardTable = document.getElementById('billboardTable');
+let overallScore = 0,
+  totalBB = 0;
+const billboardTable = document.getElementById("billboardTable");
 
 let legend = document.createElement("div");
 legend.setAttribute("id", "legend");
@@ -37,8 +40,7 @@ poiLayers.appendChild(poiLayersAccordion);
 
 const infoTab = document.createElement("div");
 infoTab.setAttribute("id", "infoTab");
-infoTab.innerHTML =
-  `<h3>More Info</h3>
+infoTab.innerHTML = `<h3>More Info</h3>
   <div class="info"></div>
   <div class="billboardFilInfo"></div>
   <div class="billboardCatInfo"></div>`;
@@ -51,7 +53,7 @@ directionsPanel.innerHTML = `
             `;
 
 const commD = [
-  'atm',
+  "atm",
   "bank",
   "hospital",
   "police",
@@ -146,7 +148,6 @@ function initMap() {
   directionsRenderer.setMap(map);
 
   bounds = new google.maps.LatLngBounds();
-
 }
 
 async function fetchData() {
@@ -154,7 +155,7 @@ async function fetchData() {
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
-    saveData(data)
+    saveData(data);
   } else {
     alert(
       "Something went wrong while fetching data. Error: " + response.status
@@ -184,11 +185,10 @@ async function fetchMobileUploads() {
   if (response.ok) {
     mobileData = await response.json();
     getmobileMarkers(mobileData.data);
-
   } else {
     alert(
       "Something went wrong while fetching Mobile Uploads. Error: " +
-      response.status
+        response.status
     );
   }
 }
@@ -206,7 +206,6 @@ function addOverlays(data) {
     }
   }
   setTimeout(loader, 100);
-
 }
 
 const getTiles = (lyr) => {
@@ -454,7 +453,6 @@ function addTrafficLayer() {
 }
 
 function add(key, value) {
-
   // create a markers array
   const markers = value.map((el) => {
     // the x and y of the marker
@@ -507,12 +505,11 @@ function add(key, value) {
   div = document.createElement("div");
   div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" data-id="${key}" class='poi' type="checkbox" />`;
   poiLayersAccordion.appendChild(div);
-
 }
 
 function parseBBProps(filterScoreProp, bbProp) {
   if (filterScores[filterScoreProp].hasOwnProperty(bbProp?.toLowerCase())) {
-    return filterScores[filterScoreProp][bbProp.toLowerCase()].score
+    return filterScores[filterScoreProp][bbProp.toLowerCase()].score;
   } else {
     return 0;
   }
@@ -522,18 +519,26 @@ function addBillboards(data) {
   const bounds = new google.maps.LatLngBounds();
 
   const markers = data.map((el) => {
-    totalBB++
+    totalBB++;
     const iconUrl = `images/billboardColored.png`;
     let score;
 
     let latlng = new google.maps.LatLng(el.lat, el.long);
     bounds.extend(latlng);
 
-    score = parseBBProps('site_lighting_illumination', el.site_lighting_illumination) + parseBBProps('condition', el.condition) +
-      parseBBProps('visibility', el.visibility) + parseBBProps('height', el.height) + parseBBProps('traffic', el.traffic)
-      + parseBBProps('traffic_q', el.traffic_q) + parseBBProps('clutter', el.clutter)
+    score =
+      parseBBProps(
+        "site_lighting_illumination",
+        el.site_lighting_illumination
+      ) +
+      parseBBProps("condition", el.condition) +
+      parseBBProps("visibility", el.visibility) +
+      parseBBProps("height", el.height) +
+      parseBBProps("traffic", el.traffic) +
+      parseBBProps("traffic_q", el.traffic_q) +
+      parseBBProps("clutter", el.clutter);
 
-    el['score'] = score;
+    el["score"] = score;
 
     let contentString =
       '<div class ="infoWindow">' +
@@ -600,7 +605,7 @@ function addBillboards(data) {
         scaledSize: new google.maps.Size(30, 30),
       },
       optimized: false,
-      data: el
+      data: el,
     });
     google.maps.event.addListener(
       marker,
@@ -615,9 +620,11 @@ function addBillboards(data) {
     return marker;
   });
 
-  billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
-  billboardTable.style.display = 'block';
-  drawBBLegend()
+  billboardMarkers = new MarkerClusterer(map, markers, {
+    imagePath: "images/m",
+  });
+  billboardTable.style.display = "block";
+  drawBBLegend();
 
   div = document.createElement("div");
   div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
@@ -631,25 +638,33 @@ function addBillboards(data) {
         map.fitBounds(bounds);
         map.panToBounds(bounds);
 
-        billboardTable.style.display = 'block';
+        billboardTable.style.display = "block";
       }
       if (!cb.checked) {
         // if off
         billboardMarkers.removeMarkers(markers);
 
-        billboardTable.style.display = 'none';
-        drawBBLegend()
+        billboardTable.style.display = "none";
+        drawBBLegend();
       }
     }
   });
-
 }
 
 function getmobileMarkers(deliveriesData) {
+  const bounds = new google.maps.LatLngBounds();
+
+  var spiderConfig = {
+    keepSpiderfied: true,
+    event: "mouseover",
+  };
+  var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
+
   mobileMarkersDates = new Object();
   const uploadDates = [];
   const markers = deliveriesData.map((el) => {
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
+    bounds.extend(latlng);
     let contentString =
       "Product Name: <b>" +
       parseData(el.product_name) +
@@ -695,10 +710,19 @@ function getmobileMarkers(deliveriesData) {
         }
       }
     }
+    markerSpiderfier.addMarker(marker);
     return marker;
   });
+  markerSpiderfier.addListener("click", function (marker, e) {
+    //infoWindow.setContent(marker.title);
+    infoWindow.open(map, marker);
+  });
+
+  markerSpiderfier.addListener("spiderfy", function (markers) {
+    infoWindow.close();
+  });
   mobileMarkersDates.dates = uploadDates;
-  const markerCluster = new MarkerClusterer(map, [], { imagePath: 'images/m' });
+  const markerCluster = new MarkerClusterer(map, [], { imagePath: "images/m" });
   div = document.createElement("div");
   div.innerHTML = `<img src='images/place.png'/>Mobile Uploads<input id="mobileCheck" type="checkbox">`;
   essentialLayers.appendChild(div);
@@ -881,7 +905,7 @@ mapContainer.addEventListener("click", (e) => {
   }
 });
 
-poiLayersAccordion.addEventListener('change', (e) => {
+poiLayersAccordion.addEventListener("change", (e) => {
   if (e.target.matches(".poi")) {
     targetPoi = e.target.dataset.id;
     cb = document.getElementById(`${targetPoi}Checked`);
@@ -894,24 +918,24 @@ poiLayersAccordion.addEventListener('change', (e) => {
       markerCluster.removeMarkers(gmarkers[targetPoi]);
     }
   }
-})
+});
 
-billboardTable.addEventListener('click', e => {
-  if (e.target.matches('.category')) {
+billboardTable.addEventListener("click", (e) => {
+  if (e.target.matches(".category")) {
     // get the id/name of category
-    const category = e.target.value
-    categorizeBB(category)
+    const category = e.target.value;
+    categorizeBB(category);
   }
 
-  if (e.target.matches('.filter_selector')) {
-    const value = e.target.value.trim()
+  if (e.target.matches(".filter_selector")) {
+    const value = e.target.value.trim();
     if (value == "") {
-      accumulateFilters(e.target.name.toLowerCase(), "", true)
+      accumulateFilters(e.target.name.toLowerCase(), "", true);
     } else {
-      accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase())
+      accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase());
     }
   }
-})
+});
 
 function calcRoute(tracker) {
   div = document.createElement("div");
@@ -957,98 +981,96 @@ function loader() {
 }
 
 function saveData(data) {
-  //clear 
+  //clear
   localStorage.clear();
-  localStorage.setItem('nairobi', JSON.stringify(data));
+  localStorage.setItem("nairobi", JSON.stringify(data));
 }
 
 function accumulateFilters(name, value, remove = false) {
-  const index = filters.findIndex(f => f.name === name);
-  drawFilterIcon()
-  const scoreBoard = infoTab.querySelector('#score')
+  const index = filters.findIndex((f) => f.name === name);
+  drawFilterIcon();
+  const scoreBoard = infoTab.querySelector("#score");
 
   // remove a filter
   if (remove) {
     // user wants to remove a whole filter category
     // thus get the category from the accumulated filters
-    // and also get the score of the value previously added 
+    // and also get the score of the value previously added
     // then remove it from the overall score
     if (filters.length > 0) {
-      const prevFilterVal = filters[index]['value']
-      const prevScore = filterScores[name][prevFilterVal].score
-      overallScore -= prevScore
-      scoreBoard.innerHTML = vAdj(overallScore)
+      const prevFilterVal = filters[index]["value"];
+      const prevScore = filterScores[name][prevFilterVal].score;
+      overallScore -= prevScore;
+      scoreBoard.innerHTML = vAdj(overallScore);
     }
 
     filters.splice(index, 1);
-    applyFilters()
-    updateFilterHtml()
+    applyFilters();
+    updateFilterHtml();
     return;
   }
 
   // add a filter
   // if name was not found in filters, push.
   if (index < 0) {
-    const score = filterScores[name][value].score
+    const score = filterScores[name][value].score;
     overallScore += score;
-    scoreBoard.innerHTML = vAdj(overallScore)
+    scoreBoard.innerHTML = vAdj(overallScore);
 
     filters.push({ name: name, value: value });
-    applyFilters()
-    updateFilterHtml()
+    applyFilters();
+    updateFilterHtml();
     return;
   }
 
   // update a filter
   // if name was found, update with new value
-  const prevScore = filterScores[name][filters[index].value].score
+  const prevScore = filterScores[name][filters[index].value].score;
   overallScore -= prevScore;
-  const newScore = filterScores[name][value].score
+  const newScore = filterScores[name][value].score;
   overallScore += newScore;
-  scoreBoard.innerHTML = vAdj(overallScore)
+  scoreBoard.innerHTML = vAdj(overallScore);
 
   filters[index].value = value;
-  applyFilters()
-  updateFilterHtml()
+  applyFilters();
+  updateFilterHtml();
 }
 
 function vAdj(score) {
-  const per = Math.round((100 * score) / 22)
+  const per = Math.round((100 * score) / 22);
   return `${per}%`;
 }
 
 // apply all fillters in the filters array
 const applyFilters = () => {
   let counter = 0;
-  // for each billboard check if it meets the filters 
-  billboardMarkers.getMarkers().forEach(bm => {
-
+  // for each billboard check if it meets the filters
+  billboardMarkers.getMarkers().forEach((bm) => {
     const viable = filters.reduce((acc, { name, value }) => {
-      return acc && bm.data[`${name}`]?.toLowerCase() === value
+      return acc && bm.data[`${name}`]?.toLowerCase() === value;
     }, true);
 
     const greyedIcon = {
       url: `./images/billboardGreyed2.png`,
-      scaledSize: new google.maps.Size(30, 30)
+      scaledSize: new google.maps.Size(30, 30),
     };
 
     const coloredIcon = {
       url: `./images/billboardColored.png`,
-      scaledSize: new google.maps.Size(30, 30)
-    }
+      scaledSize: new google.maps.Size(30, 30),
+    };
 
     if (viable) {
-      counter++
+      counter++;
       bm.setIcon(coloredIcon);
-      bm.setAnimation(google.maps.Animation.BOUNCE)
+      bm.setAnimation(google.maps.Animation.BOUNCE);
       stopAnimation(bm);
       return;
     }
     bm.setIcon(greyedIcon);
-
-  })
+  });
   infoTab.querySelector("#bbCount").innerHTML = counter;
-}
+};
 
 function stopAnimation(marker) {
   setTimeout(function () {
@@ -1058,7 +1080,7 @@ function stopAnimation(marker) {
 
 const filterScores = {
   site_lighting_illumination: {
-    backlit: { score: 3, icon: 'bbBacklit1' },
+    backlit: { score: 3, icon: "bbBacklit1" },
     frontlit: { score: 2, icon: "bbFrontlit1" },
     unlit: { score: 1, icon: "bbNolit" },
   },
@@ -1079,14 +1101,14 @@ const filterScores = {
     "too high": { score: 1, icon: "bbRed" },
   },
   traffic: {
-    slow: { score: 3, icon: 'bbDgreen' },
-    average: { score: 2, icon: 'bbAmber' },
-    fast: { score: 1, icon: 'bbRed' },
+    slow: { score: 3, icon: "bbDgreen" },
+    average: { score: 2, icon: "bbAmber" },
+    fast: { score: 1, icon: "bbRed" },
   },
   traffic_q: {
-    heavy: { score: 3, icon: 'bbDgreen' },
-    medium: { score: 2, icon: 'bbAmber' },
-    light: { score: 1, icon: 'bbRed' }
+    heavy: { score: 3, icon: "bbDgreen" },
+    medium: { score: 2, icon: "bbAmber" },
+    light: { score: 1, icon: "bbRed" },
   },
   clutter: {
     solus: { score: 3, icon: "bbBlue" },
@@ -1098,9 +1120,9 @@ const filterScores = {
 function categorizeBB(category) {
   const defaultIcon = {
     url: `./images/billboardColored.png`,
-    scaledSize: new google.maps.Size(30, 30)
-  }
-  billboardMarkers.getMarkers().forEach(bm => {
+    scaledSize: new google.maps.Size(30, 30),
+  };
+  billboardMarkers.getMarkers().forEach((bm) => {
     for (let [billboardProp, value] of Object.entries(bm.data)) {
       if (billboardProp.toLowerCase() === category.toLowerCase()) {
         if (
@@ -1115,12 +1137,14 @@ function categorizeBB(category) {
           // condition:poor
           if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
             const newIcon = {
-              url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
-              scaledSize: new google.maps.Size(30, 30)
-            }
+              url: `./images/${
+                filterScores[category][value.toLowerCase()]["icon"]
+              }.png`,
+              scaledSize: new google.maps.Size(30, 30),
+            };
 
             bm.setIcon(newIcon);
-            bm.setAnimation(google.maps.Animation.BOUNCE)
+            bm.setAnimation(google.maps.Animation.BOUNCE);
             stopAnimation(bm);
           } else {
             bm.setIcon(defaultIcon);
@@ -1128,24 +1152,27 @@ function categorizeBB(category) {
         }
       }
     }
-  })
+  });
   drawCatIcons(category);
 }
 
 function drawCatIcons(category) {
   let html = "";
   for (const [k, v] of Object.entries(filterScores[category])) {
-    html +=
-      `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+    html += `<div> <h4> ${capitalize(
+      k
+    )} </h4> <img class="billboardCatInfo-img" src="./images/${
+      v.icon
+    }.png"> </div>`;
   }
 
-  infoTab.querySelector(".billboardCatInfo").innerHTML =
-    `<h4 class="info-header">Categories Key</h4>
+  infoTab.querySelector(
+    ".billboardCatInfo"
+  ).innerHTML = `<h4 class="info-header">Categories Key</h4>
     ${html}
     <div>
       <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
-    </div>`
-
+    </div>`;
 }
 
 function capitalize(string) {
@@ -1162,24 +1189,23 @@ function drawBBLegend() {
       <div style="text-align:centre;"> Filters </div>
       <div id="filters"></div>
       <hr class="hr">
-      <div id="filterIcons"> </div>`
+      <div id="filterIcons"> </div>`;
 
-  infoTab.querySelector(".billboardFilInfo").innerHTML = html
+  infoTab.querySelector(".billboardFilInfo").innerHTML = html;
 }
-
 
 function updateFilterHtml() {
   // filters :[...filter]
   // filter: {name: value}
-  let html = ''
+  let html = "";
   filters.forEach(({ name, value }) => {
-    html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`
+    html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`;
   });
-  infoTab.querySelector('#filters').innerHTML = html
+  infoTab.querySelector("#filters").innerHTML = html;
 }
 
 function drawFilterIcon() {
-  infoTab.querySelector('#filterIcons').innerHTML = `
+  infoTab.querySelector("#filterIcons").innerHTML = `
   <div>
   Meets Criteria: <img class="billboardCatInfo-img" src="./images/billboardColored.png">
   </div>
