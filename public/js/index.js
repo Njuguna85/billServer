@@ -3,11 +3,15 @@ let infoWindow;
 var directionsService;
 var directionsRenderer;
 const mapContainer = document.getElementById("map");
-var bounds, markerCluster, gmarkers = {};
+var bounds,
+  markerCluster,
+  gmarkers = {};
 const filters = [];
 let billboardMarkers = [];
-let overallScore = 0, totalBB = 0, totalScore = 17;
-const billboardTable = document.getElementById('billboardTable');
+let overallScore = 0,
+  totalBB = 0,
+  totalScore = 17;
+const billboardTable = document.getElementById("billboardTable");
 
 let legend = document.createElement("div");
 legend.setAttribute("id", "legend");
@@ -37,8 +41,7 @@ poiLayers.appendChild(poiLayersAccordion);
 
 const infoTab = document.createElement("div");
 infoTab.setAttribute("id", "infoTab");
-infoTab.innerHTML =
-  `<h3>More Info</h3>
+infoTab.innerHTML = `<h3>More Info</h3>
         <div class="info"></div>
         <div class="billboardFilInfo"></div>
         <div class="billboardCatInfo"></div>`;
@@ -51,7 +54,7 @@ directionsPanel.innerHTML = `
             `;
 
 const commD = [
-  'atm',
+  "atm",
   "bank",
   "hospital",
   "police",
@@ -65,7 +68,7 @@ const commD = [
 ];
 
 function initMap() {
-  const mapCentre = { lat: 1.282578, lng: 32.608635 }
+  const mapCentre = { lat: 1.282578, lng: 32.608635 };
 
   const mapOptions = {
     zoom: 8,
@@ -134,9 +137,7 @@ function initMap() {
   map.controls[google.maps.ControlPosition.RIGHT_TOP].push(legend);
   map.controls[google.maps.ControlPosition.LEFT_TOP].push(infoTab);
 
-
-  const content =
-    `<div class="businessesSuggestion">
+  const content = `<div class="businessesSuggestion">
         <h4><bold>Welcome to the landing page. To activate layers:  </h4></bold>
         <p>Pan to the yellow pane on the right</p>
         <p>Click the plus sign (+) to expand</p>
@@ -157,7 +158,6 @@ function initMap() {
   directionsRenderer.setMap(map);
 
   bounds = new google.maps.LatLngBounds();
-
 }
 
 async function fetchData() {
@@ -165,7 +165,6 @@ async function fetchData() {
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
-
   } else {
     alert(
       "Something went wrong while fetching data. Error: " + response.status
@@ -176,8 +175,8 @@ async function fetchData() {
 function addOverlays(data) {
   addTrafficLayer();
   addDeliveries(data.deliveries);
-  addugPopProj()
-  addBillboards(data.billboards)
+  addugPopProj();
+  addBillboards(data.billboards);
 
   for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {
@@ -185,7 +184,6 @@ function addOverlays(data) {
     }
   }
   setTimeout(loader, 100);
-
 }
 
 const getTiles = (lyr) => {
@@ -327,7 +325,6 @@ function addTrafficLayer() {
 }
 
 function add(key, value) {
-
   // create a markers array
   const markers = value.map((el) => {
     // the x and y of the marker
@@ -380,22 +377,22 @@ function add(key, value) {
   div = document.createElement("div");
   div.innerHTML = `<img src='${iconUrl}' alt="${key}"/> ${key}<input id="${key}Checked" data-id="${key}" class='poi' type="checkbox" />`;
   poiLayersAccordion.appendChild(div);
-
 }
 
 function parseBBProps(filterScoreProp, bbProp) {
   if (filterScores[filterScoreProp].hasOwnProperty(bbProp?.toLowerCase())) {
-    return filterScores[filterScoreProp][bbProp.toLowerCase()].score
+    return filterScores[filterScoreProp][bbProp.toLowerCase()].score;
   } else {
     return 0;
   }
 }
+
 function addBillboards(data) {
   const bounds = new google.maps.LatLngBounds();
 
   var spiderConfig = {
     keepSpiderfied: true,
-    event: 'mouseover'
+    event: "mouseover",
   };
   var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
 
@@ -404,18 +401,30 @@ function addBillboards(data) {
     const iconUrl = `images/billboardColored.png`;
     let score;
 
-    const { site_lighting_illumination, clutter, height, orientation } = parseBbPropNull(el)
-    const site_run_up = getNum(el.site_run_up)
+    const { site_lighting_illumination, clutter, height, orientation } =
+      parseBbPropNull(el);
+    const site_run_up = getNum(el.site_run_up);
 
-    score = parseBBProps('site_lighting_illumination', site_lighting_illumination) + parseBBProps('height', height) + parseBBProps('clutter', clutter) + parseBBProps('site_run_up', site_run_up) + parseBBProps('orientation', orientation)
+    score =
+      parseBBProps("site_lighting_illumination", site_lighting_illumination) +
+      parseBBProps("height", height) +
+      parseBBProps("clutter", clutter) +
+      parseBBProps("site_run_up", site_run_up) +
+      parseBBProps("orientation", orientation);
 
-    el['score'] = score;
+    el["score"] = score;
 
-    data = { site_lighting_illumination, height, orientation, clutter, site_run_up }
+    data = {
+      site_lighting_illumination,
+      height,
+      orientation,
+      clutter,
+      site_run_up,
+    };
 
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
 
-    const contentString = addContentString(el)
+    const contentString = addContentString(el);
 
     let marker = new google.maps.Marker({
       position: latlng,
@@ -424,44 +433,47 @@ function addBillboards(data) {
         scaledSize: new google.maps.Size(30, 30),
       },
       optimized: false,
-      data
+      data,
     });
 
-    google.maps.event.addListener(marker, "click", ((marker, el) => {
-      return async () => {
-        infoWindow.setContent(contentString);
-        infoWindow.open(map, marker);
+    google.maps.event.addListener(
+      marker,
+      "click",
+      ((marker, el) => {
+        return async () => {
+          infoWindow.setContent(contentString);
+          infoWindow.open(map, marker);
 
-        const popData = await getPopData(el.longitude, el.latitude)
-        addPop(popData[0])
+          const popData = await getPopData(el.longitude, el.latitude);
+          addPop(popData[0]);
 
-        const { total } = popData[0];
-        oppContact(score, total)
-
-      };
-    })(marker, el)
+          const { total } = popData[0];
+          oppContact(score, total);
+        };
+      })(marker, el)
     );
 
     // Adds the Marker to OverlappingMarkerSpiderfier
     markerSpiderfier.addMarker(marker);
     return marker;
-
   });
 
-  markerSpiderfier.addListener('click', function (marker, e) {
+  markerSpiderfier.addListener("click", function (marker, e) {
     infoWindow.open(map, marker);
   });
 
-  markerSpiderfier.addListener('spiderfy', function (markers) {
+  markerSpiderfier.addListener("spiderfy", function (markers) {
     infoWindow.close();
   });
 
-  billboardMarkers = new MarkerClusterer(map, markers, { imagePath: "images/m" });
+  billboardMarkers = new MarkerClusterer(map, markers, {
+    imagePath: "images/m",
+  });
 
   billboardMarkers.setMaxZoom(15);
 
-  billboardTable.style.display = 'block';
-  drawBBLegend()
+  billboardTable.style.display = "block";
+  drawBBLegend();
 
   div = document.createElement("div");
   div.innerHTML = `<img src='images/marker.png' alt='billboard' /> Billboards <input id="billboardChecked" checked type="checkbox" />`;
@@ -475,31 +487,28 @@ function addBillboards(data) {
         map.fitBounds(bounds);
         map.panToBounds(bounds);
 
-        billboardTable.style.display = 'block';
-
+        billboardTable.style.display = "block";
       }
       if (!cb.checked) {
         // if off
         billboardMarkers.removeMarkers(markers);
 
-        billboardTable.style.display = 'none';
-        drawBBLegend()
+        billboardTable.style.display = "none";
+        drawBBLegend();
       }
     }
   });
-
 }
 
-
 function getNum(str) {
-  return str.replace(/[^0-9]/g, '')
+  return str.replace(/[^0-9]/g, "");
 }
 
 function parseBbPropNull(el) {
-
   let address = el && parseData(el.address);
   let medium = el && el.medium && parseData(el.medium["characteristic_value"]);
-  let site_lighting_illumination = el && el.lighting && parseData(el.lighting["characteristic_value"]);
+  let site_lighting_illumination =
+    el && el.lighting && parseData(el.lighting["characteristic_value"]);
   let direction =
     el && el.direction && parseData(el.direction["characteristic_value"]);
   let faces = el && el.faces && parseData(el.faces["characteristic_value"]);
@@ -514,34 +523,55 @@ function parseBbPropNull(el) {
   let score = el.score;
   let latitude = el && parseData(el.latitude);
   let longitude = el && parseData(el.longitude);
-  let site_run_up = el && parseData(el.site_run_up)
+  let site_run_up = el && parseData(el.site_run_up);
 
   return {
-    address, medium, site_lighting_illumination, direction, faces, clutter,
-    size, orientation, height, side_of_road, latitude, longitude, score, site_run_up
-  }
-
+    address,
+    medium,
+    site_lighting_illumination,
+    direction,
+    faces,
+    clutter,
+    size,
+    orientation,
+    height,
+    side_of_road,
+    latitude,
+    longitude,
+    score,
+    site_run_up,
+  };
 }
 
 function addContentString(el) {
-
-  const { address, medium, site_lighting_illumination, direction, faces, clutter, size, orientation, height, side_of_road, latitude, longitude, score, site_run_up } = parseBbPropNull(el)
+  const {
+    address,
+    medium,
+    site_lighting_illumination,
+    direction,
+    faces,
+    clutter,
+    size,
+    orientation,
+    height,
+    side_of_road,
+    latitude,
+    longitude,
+    score,
+    site_run_up,
+  } = parseBbPropNull(el);
 
   const addBbImages = () => {
-    let imgString = '';
-    if (el.image == null) {
-      el.images.forEach(img => {
-        imgString += `<img class="billboardImage" alt="billboard photo" src='${img.path}'>`
-      })
-    } else {
-      imgString = `<img class="billboardImage" alt="billboard photo" src='${el.image}'>`
-    }
+    let imgString = "";
 
-    return imgString
+    el.images.forEach((img) => {
+      imgString += `<img class="billboardImage" alt="billboard photo" src='${img.path}'>`;
+    });
+
+    return imgString;
   };
 
-  let html =
-    `
+  let html = `
       <div class ="infoWindow">
         <div>Address: <b>${address}</b></div>
         <div>Medium Type: <b>${medium}</b></div>
@@ -566,24 +596,23 @@ function addContentString(el) {
       </div>
     `;
 
-
   return html;
 }
 
 function addDeliveries(data) {
   const bounds = new google.maps.LatLngBounds();
 
-  var spiderConfig = {
+  const spiderConfig = {
     keepSpiderfied: true,
-    event: 'mouseover'
+    event: "mouseover",
   };
-  var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
+  const markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
 
-  const markers = data.map(el => {
-    let product_name = el && parseData(el.product_name)
-    let product_description = el && parseData(el.product_description)
-    let total_price = el && parseData(el.total_price)
-    let quantity = el && parseData(el.quantity)
+  const markers = data.map((el) => {
+    let product_name = el && parseData(el.product_name);
+    let product_description = el && parseData(el.product_description);
+    let total_price = el && parseData(el.total_price);
+    let quantity = el && parseData(el.quantity);
 
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
     bounds.extend(latlng);
@@ -607,13 +636,24 @@ function addDeliveries(data) {
       product_description +
       "</b></div>" +
       "</div>" +
-      '<img class="billboardImage" alt="Delivery photo" src=' + el.photo + ">" +
-      '<button class="btn end" data-lat=' + el.latitude +
-      " data-long=" + el.longitude + " >Go Here</button>" +
-      '<button class="btn stop" data-lat=' + el.latitude +
-      " data-long=" + el.longitude + " >Add Stop</button>" +
-      '<button class="btn start" data-lat=' + el.latitude +
-      " data-long=" + el.longitude + " >Start Here</button>";
+      '<img class="billboardImage" alt="Delivery photo" src=' +
+      el.photo +
+      ">" +
+      '<button class="btn end" data-lat=' +
+      el.latitude +
+      " data-long=" +
+      el.longitude +
+      " >Go Here</button>" +
+      '<button class="btn stop" data-lat=' +
+      el.latitude +
+      " data-long=" +
+      el.longitude +
+      " >Add Stop</button>" +
+      '<button class="btn start" data-lat=' +
+      el.latitude +
+      " data-long=" +
+      el.longitude +
+      " >Start Here</button>";
 
     let marker = new google.maps.Marker({
       position: latlng,
@@ -625,7 +665,9 @@ function addDeliveries(data) {
     });
 
     google.maps.event.addListener(
-      marker, "click", ((marker, el) => {
+      marker,
+      "click",
+      ((marker, el) => {
         return () => {
           infoWindow.setContent(contentString);
           infoWindow.open(map, marker);
@@ -637,24 +679,21 @@ function addDeliveries(data) {
     return marker;
   });
 
-  markerSpiderfier.addListener('click', function (marker, e) {
+  markerSpiderfier.addListener("click", function (marker, e) {
     //infoWindow.setContent(marker.title);
     infoWindow.open(map, marker);
   });
 
-  markerSpiderfier.addListener('spiderfy', function (markers) {
+  markerSpiderfier.addListener("spiderfy", function (markers) {
     infoWindow.close();
   });
-
 
   deliveryMarkers = new MarkerClusterer(map, [], { imagePath: "images/m" });
   deliveryMarkers.setMaxZoom(15);
 
-
   div = document.createElement("div");
   div.innerHTML = `<img src='images/bbAmber.png' alt='Delivery' /> Deliveries <input id="deliveryChecked" type="checkbox" />`;
   essentialLayers.appendChild(div);
-
 
   legend.addEventListener("change", (e) => {
     if (e.target.matches("#deliveryChecked")) {
@@ -671,7 +710,6 @@ function addDeliveries(data) {
       }
     }
   });
-
 }
 
 function addugPopProj() {
@@ -727,7 +765,6 @@ function addugPopProj() {
     }
   });
 }
-
 
 function parseData(val) {
   if (val === null || val === undefined) {
@@ -789,7 +826,7 @@ mapContainer.addEventListener("click", (e) => {
   }
 });
 
-poiLayersAccordion.addEventListener('change', (e) => {
+poiLayersAccordion.addEventListener("change", (e) => {
   if (e.target.matches(".poi")) {
     targetPoi = e.target.dataset.id;
     cb = document.getElementById(`${targetPoi}Checked`);
@@ -802,24 +839,24 @@ poiLayersAccordion.addEventListener('change', (e) => {
       markerCluster.removeMarkers(gmarkers[targetPoi]);
     }
   }
-})
+});
 
-billboardTable.addEventListener('click', e => {
-  if (e.target.matches('.category')) {
+billboardTable.addEventListener("click", (e) => {
+  if (e.target.matches(".category")) {
     // get the id/name of category
-    const category = e.target.value
-    categorizeBB(category)
+    const category = e.target.value;
+    categorizeBB(category);
   }
 
-  if (e.target.matches('.filter_selector')) {
-    const value = e.target.value.trim()
+  if (e.target.matches(".filter_selector")) {
+    const value = e.target.value.trim();
     if (value == "") {
-      accumulateFilters(e.target.name.toLowerCase(), "", true)
+      accumulateFilters(e.target.name.toLowerCase(), "", true);
     } else {
-      accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase())
+      accumulateFilters(e.target.name.toLowerCase(), value.toLowerCase());
     }
   }
-})
+});
 
 function calcRoute(tracker) {
   div = document.createElement("div");
@@ -865,33 +902,33 @@ function loader() {
 }
 
 function accumulateFilters(name, value, remove = false) {
-  const index = filters.findIndex(f => f.name === name);
-  drawFilterIcon()
-  const scoreBoard = infoTab.querySelector('#score')
+  const index = filters.findIndex((f) => f.name === name);
+  drawFilterIcon();
+  const scoreBoard = infoTab.querySelector("#score");
 
   // remove a filter
   if (remove) {
     // user wants to remove a whole filter category
     // thus get the category from the accumulated filters
-    // and also get the score of the value previously added 
+    // and also get the score of the value previously added
     // then remove it from the overall score
     if (filters.length > 0) {
-      const prevFilterVal = filters[index]['value']
+      const prevFilterVal = filters[index]["value"];
       let prevScore;
-      if (name === 'site_run_up') {
-        prevScore = filterScores[name](prevFilterVal)['score']
-        overallScore -= prevScore
-        scoreBoard.innerHTML = vAdj(overallScore)
+      if (name === "site_run_up") {
+        prevScore = filterScores[name](prevFilterVal)["score"];
+        overallScore -= prevScore;
+        scoreBoard.innerHTML = vAdj(overallScore);
       } else {
-        prevScore = filterScores[name][prevFilterVal].score
-        overallScore -= prevScore
-        scoreBoard.innerHTML = vAdj(overallScore)
+        prevScore = filterScores[name][prevFilterVal].score;
+        overallScore -= prevScore;
+        scoreBoard.innerHTML = vAdj(overallScore);
       }
     }
 
     filters.splice(index, 1);
-    applyFilters()
-    updateFilterHtml()
+    applyFilters();
+    updateFilterHtml();
     return;
   }
 
@@ -900,104 +937,101 @@ function accumulateFilters(name, value, remove = false) {
   if (index < 0) {
     let score;
     // exception for site_run_up
-    if (name === 'site_run_up') {
-      value = value.split('_')[0]
+    if (name === "site_run_up") {
+      value = value.split("_")[0];
 
-      score = filterScores[name](value)['score']
+      score = filterScores[name](value)["score"];
       overallScore += score;
-      scoreBoard.innerHTML = vAdj(overallScore)
+      scoreBoard.innerHTML = vAdj(overallScore);
     } else {
-      score = filterScores[name][value].score
+      score = filterScores[name][value].score;
       overallScore += score;
-      scoreBoard.innerHTML = vAdj(overallScore)
+      scoreBoard.innerHTML = vAdj(overallScore);
     }
 
     filters.push({ name: name, value: value });
-    applyFilters()
-    updateFilterHtml()
+    applyFilters();
+    updateFilterHtml();
     return;
   }
 
   // update a filter
   // if name was found, update with new value
   let prevScore;
-  if (name === 'site_run_up') {
-    prevScore = filterScores[name](filters[index].value)['score']
+  if (name === "site_run_up") {
+    prevScore = filterScores[name](filters[index].value)["score"];
   } else {
-    prevScore = filterScores[name][filters[index].value].score
+    prevScore = filterScores[name][filters[index].value].score;
   }
   overallScore -= prevScore;
 
   let newScore;
-  if (name === 'site_run_up') {
-    value = value.split('_')[0]
-    newScore = filterScores[name](value)['score']
+  if (name === "site_run_up") {
+    value = value.split("_")[0];
+    newScore = filterScores[name](value)["score"];
 
     overallScore += newScore;
-    scoreBoard.innerHTML = vAdj(overallScore)
+    scoreBoard.innerHTML = vAdj(overallScore);
   } else {
-    newScore = filterScores[name][value].score
+    newScore = filterScores[name][value].score;
     overallScore += newScore;
-    scoreBoard.innerHTML = vAdj(overallScore)
+    scoreBoard.innerHTML = vAdj(overallScore);
   }
   filters[index].value = value;
-  applyFilters()
-  updateFilterHtml()
+  applyFilters();
+  updateFilterHtml();
 }
 
 function vAdj(score) {
-  const per = Math.round((100 * score) / totalScore)
+  const per = Math.round((100 * score) / totalScore);
   return `${per}%`;
 }
 
 function oppContact(score, totalPop) {
   // need the visibility adjustment  and the population of that area.
   // insert before images div
-  const oppCont = ((score / totalScore) * totalPop)
-  const html = `<div>Opportunity Contact: <b>${Math.round(oppCont)}</b></div>`
-  document.querySelector('#bbImages').insertAdjacentHTML('beforebegin', html)
-
+  const oppCont = (score / totalScore) * totalPop;
+  const html = `<div>Opportunity Contact: <b>${Math.round(oppCont)}</b></div>`;
+  document.querySelector("#bbImages").insertAdjacentHTML("beforebegin", html);
 }
 
 // apply all filters in the filters array
 const applyFilters = () => {
   let counter = 0;
-  // for each billboard check if it meets the filters 
-  billboardMarkers.getMarkers().forEach(bm => {
-
+  // for each billboard check if it meets the filters
+  billboardMarkers.getMarkers().forEach((bm) => {
     const viable = filters.reduce((acc, { name, value }) => {
-      if (name === 'site_run_up') {
-        return acc && siteRunUpBool(value, bm.data[`${name}`])
+      if (name === "site_run_up") {
+        return acc && siteRunUpBool(value, bm.data[`${name}`]);
       } else {
-        return acc && bm.data[`${name}`]?.toLowerCase() === value
+        return acc && bm.data[`${name}`]?.toLowerCase() === value;
       }
     }, true);
 
     const greyedIcon = {
       url: `./images/billboardGreyed2.png`,
-      scaledSize: new google.maps.Size(30, 30)
+      scaledSize: new google.maps.Size(30, 30),
     };
 
     const coloredIcon = {
       url: `./images/billboardColored.png`,
-      scaledSize: new google.maps.Size(30, 30)
-    }
+      scaledSize: new google.maps.Size(30, 30),
+    };
 
     if (viable) {
-      counter++
+      counter++;
       bm.setIcon(coloredIcon);
-      bm.setAnimation(google.maps.Animation.BOUNCE)
+      bm.setAnimation(google.maps.Animation.BOUNCE);
       stopAnimation(bm);
       return;
     }
     bm.setIcon(greyedIcon);
-
-  })
+  });
   infoTab.querySelector("#bbCount").innerHTML = counter;
-}
+};
 
 function siteRunUpBool(prefLength, bmLength) {
-  return +bmLength >= prefLength && bmLength <= (+prefLength + 49)
+  return +bmLength >= prefLength && bmLength <= +prefLength + 49;
 }
 
 function stopAnimation(marker) {
@@ -1007,54 +1041,53 @@ function stopAnimation(marker) {
 }
 
 const filterScores = {
-  'site_lighting_illumination': {
-    "backlit": { score: 3, icon: 'bbBacklit1' },
-    "frontlit": { score: 2, icon: "bbFrontlit1" },
-    "unlit": { score: 1, icon: "bbNolit" },
+  site_lighting_illumination: {
+    backlit: { score: 3, icon: "bbBacklit1" },
+    frontlit: { score: 2, icon: "bbFrontlit1" },
+    unlit: { score: 1, icon: "bbNolit" },
   },
-  'height': {
+  height: {
     "eye level": { score: 3, icon: "bbDgreen" },
-    "moderate": { score: 2, icon: "bbAmber" },
+    moderate: { score: 2, icon: "bbAmber" },
     "too high": { score: 1, icon: "bbRed" },
   },
-  'clutter': {
-    "solus": { score: 3, icon: "bbBlue" },
-    "average": { score: 2, icon: "bbNolit" },
-    "cluttered": { score: 1, icon: "billboardGreyed1" },
+  clutter: {
+    solus: { score: 3, icon: "bbBlue" },
+    average: { score: 2, icon: "bbNolit" },
+    cluttered: { score: 1, icon: "billboardGreyed1" },
   },
-  'site_run_up':
-    function (length) {
-      length = parseInt(length)
-      if (length >= 0 && length <= 50) {
-        return { score: 1, icon: "bbNolit" }
-      }
-      if (length >= 51 && length <= 100) {
-        return { score: 2, icon: "bbRed" }
-      }
-      if (length >= 101 && length <= 150) {
-        return { score: 3, icon: "bbAmber" }
-      }
-      if (length >= 151 && length <= 200) {
-        return { score: 4, icon: "bbDgreen" }
-      }
-      if (length > 200) {
-        return { score: 5, icon: "bbBlue" }
-      }
-    },
-  'orientation': {
-    "landscape": { score: 3, icon: "bbDgreen" },
-    "portrait": { score: 2, icon: "bbAmber" },
-    "square": { score: 1, icon: "bbRed" },
-  }
+  site_run_up: function (length) {
+    length = parseInt(length);
+    if (length >= 0 && length <= 50) {
+      return { score: 1, icon: "bbNolit" };
+    }
+    if (length >= 51 && length <= 100) {
+      return { score: 2, icon: "bbRed" };
+    }
+    if (length >= 101 && length <= 150) {
+      return { score: 3, icon: "bbAmber" };
+    }
+    if (length >= 151 && length <= 200) {
+      return { score: 4, icon: "bbDgreen" };
+    }
+    if (length > 200) {
+      return { score: 5, icon: "bbBlue" };
+    }
+  },
+  orientation: {
+    landscape: { score: 3, icon: "bbDgreen" },
+    portrait: { score: 2, icon: "bbAmber" },
+    square: { score: 1, icon: "bbRed" },
+  },
 };
 
 function categorizeBB(category) {
   const defaultIcon = {
     url: `./images/billboardColored.png`,
-    scaledSize: new google.maps.Size(30, 30)
-  }
+    scaledSize: new google.maps.Size(30, 30),
+  };
 
-  billboardMarkers.getMarkers().forEach(bm => {
+  billboardMarkers.getMarkers().forEach((bm) => {
     for (let [billboardProp, value] of Object.entries(bm.data)) {
       if (billboardProp.toLowerCase() === category.toLowerCase()) {
         if (
@@ -1067,19 +1100,17 @@ function categorizeBB(category) {
         }
 
         // exception for site_run_up
-        if (category === 'site_run_up') {
-
+        if (category === "site_run_up") {
           if (filterScores[category](value)) {
-
             const { icon } = filterScores[category](value);
 
             const newIcon = {
               url: `./images/${icon}.png`,
-              scaledSize: new google.maps.Size(30, 30)
-            }
+              scaledSize: new google.maps.Size(30, 30),
+            };
 
             bm.setIcon(newIcon);
-            bm.setAnimation(google.maps.Animation.BOUNCE)
+            bm.setAnimation(google.maps.Animation.BOUNCE);
             stopAnimation(bm);
             return;
           }
@@ -1087,60 +1118,67 @@ function categorizeBB(category) {
 
         if (filterScores[category].hasOwnProperty(value.toLowerCase())) {
           const newIcon = {
-            url: `./images/${filterScores[category][value.toLowerCase()]['icon']}.png`,
-            scaledSize: new google.maps.Size(30, 30)
-          }
+            url: `./images/${
+              filterScores[category][value.toLowerCase()]["icon"]
+            }.png`,
+            scaledSize: new google.maps.Size(30, 30),
+          };
 
           bm.setIcon(newIcon);
-          bm.setAnimation(google.maps.Animation.BOUNCE)
+          bm.setAnimation(google.maps.Animation.BOUNCE);
           stopAnimation(bm);
         } else {
           bm.setIcon(defaultIcon);
         }
-
       }
     }
-  })
+  });
   drawCatIcons(category);
 }
 
 function drawCatIcons(category) {
-  if (category === 'site_run_up') {
-
-    const distances = { '0-50m': 25, "51-100m": 75, "101-150m": 125, "151-200m": 175, "200+": 225 };
+  if (category === "site_run_up") {
+    const distances = {
+      "0-50m": 25,
+      "51-100m": 75,
+      "101-150m": 125,
+      "151-200m": 175,
+      "200+": 225,
+    };
 
     let html = "";
     for (const [range, dist] of Object.entries(distances)) {
-      const { icon } = filterScores[category](dist)
-      html +=
-        `<div> 
+      const { icon } = filterScores[category](dist);
+      html += `<div> 
           <h4> ${range} </h4> 
           <img class="billboardCatInfo-img" src="./images/${icon}.png"> 
         </div>`;
     }
 
-    infoTab.querySelector(".billboardCatInfo").innerHTML =
-      `<h4 class="info-header">Categories Key</h4>
+    infoTab.querySelector(
+      ".billboardCatInfo"
+    ).innerHTML = `<h4 class="info-header">Categories Key</h4>
           ${html}
           <div>
             <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
-        </div>`
-
-
+        </div>`;
   } else {
-
     let html = "";
     for (const [k, v] of Object.entries(filterScores[category])) {
-      html +=
-        `<div> <h4> ${capitalize(k)} </h4> <img class="billboardCatInfo-img" src="./images/${v.icon}.png"> </div>`;
+      html += `<div> <h4> ${capitalize(
+        k
+      )} </h4> <img class="billboardCatInfo-img" src="./images/${
+        v.icon
+      }.png"> </div>`;
     }
 
-    infoTab.querySelector(".billboardCatInfo").innerHTML =
-      `<h4 class="info-header">Categories Key</h4>
+    infoTab.querySelector(
+      ".billboardCatInfo"
+    ).innerHTML = `<h4 class="info-header">Categories Key</h4>
     ${html}
     <div>
       <h4> Value Not Found </h4> <img class="billboardCatInfo-img" src="./images/billboardColored.png">
-    </div>`
+    </div>`;
   }
 }
 
@@ -1158,24 +1196,23 @@ function drawBBLegend() {
       <div style="text-align:centre;"> Filters </div>
       <div id="filters"></div>
       <hr class="hr">
-      <div id="filterIcons"> </div>`
+      <div id="filterIcons"> </div>`;
 
-  infoTab.querySelector(".billboardFilInfo").innerHTML = html
+  infoTab.querySelector(".billboardFilInfo").innerHTML = html;
 }
 
 function updateFilterHtml() {
   // filters :[...filter]
   // filter: {name: value}
-  let html = ''
+  let html = "";
   filters.forEach(({ name, value }) => {
-    html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`
+    html += `<div>${capitalize(name)} --- ${capitalize(value)}</div>`;
   });
-  infoTab.querySelector('#filters').innerHTML = html
+  infoTab.querySelector("#filters").innerHTML = html;
 }
 
 function drawFilterIcon() {
-  infoTab.querySelector('#filterIcons').innerHTML =
-    `
+  infoTab.querySelector("#filterIcons").innerHTML = `
     <div>
       Meets Criteria:
       <img class="billboardCatInfo-img" src="./images/billboardColored.png">
@@ -1193,13 +1230,12 @@ async function getPopData(long, lat) {
   response = await fetch(`/api/pois/pop/${long}/${lat}`);
 
   if (response.ok) {
-    return popData = await response.json()
-  } 
+    return (popData = await response.json());
+  }
 }
 
 function addPop(popData) {
-  
-  const imgCont = document.querySelector('#bbImages')
+  const imgCont = document.querySelector("#bbImages");
   if (popData) {
     const popString = `
     <div>Sub County: <b>${popData.subcounty}</b></div>
@@ -1207,9 +1243,12 @@ function addPop(popData) {
     <div>Male Population: <b>${popData.male}</b></div>
     <div>Female Population: <b>${popData.female}</b></div>
     <div>Total Population: <b>${popData.total}</b></div>`;
-    
-    imgCont.insertAdjacentHTML('beforebegin', popString) 
+
+    imgCont.insertAdjacentHTML("beforebegin", popString);
   } else {
-    imgCont.insertAdjacentHTML('beforebegin', `<div>No Population Estimates available at the moment</div>`)
+    imgCont.insertAdjacentHTML(
+      "beforebegin",
+      `<div>No Population Estimates available at the moment</div>`
+    );
   }
 }
