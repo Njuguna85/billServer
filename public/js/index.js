@@ -68,10 +68,10 @@ const commD = [
 ];
 
 function initMap() {
-  const mapCentre = { lat: 5.970731, lng: -0.344567 };
+  const mapCentre = { lat: 1.282578, lng: 32.608635 };
 
   const mapOptions = {
-    zoom: 9,
+    zoom: 8,
     center: mapCentre,
     mapTypeControl: true,
     mapTypeControlOptions: {
@@ -161,7 +161,7 @@ function initMap() {
 }
 
 async function fetchData() {
-  let response = await fetch("/api/pois/abonten");
+  let response = await fetch("/api/pois/datalytics");
   if (response.ok) {
     data = await response.json();
     addOverlays(data);
@@ -174,9 +174,8 @@ async function fetchData() {
 
 function addOverlays(data) {
   addTrafficLayer();
-  addGhanaPopulation();
+  addugPopProj();
   addBillboards(data.billboards);
-  // addDeliveries(data.deliveries);
 
   for (const [key, value] of Object.entries(data.pois)) {
     if (commD.includes(key)) {
@@ -424,7 +423,6 @@ function addBillboards(data) {
 
     let latlng = new google.maps.LatLng(el.latitude, el.longitude);
     bounds.extend(latlng);
-
     const contentString = addContentString(el);
 
     let marker = new google.maps.Marker({
@@ -446,10 +444,10 @@ function addBillboards(data) {
           infoWindow.open(map, marker);
 
           const popData = await getPopData(el.longitude, el.latitude);
-          drawPyr(popData);
+          addPop(popData[0]);
 
-          const { totalPop } = popData;
-          oppContact(score, totalPop);
+          const { total } = popData[0];
+          oppContact(score, total);
         };
       })(marker, el)
     );
@@ -546,24 +544,27 @@ function parseBbPropNull(el) {
 
 function addContentString(el) {
   const {
+    address,
+    medium,
     site_lighting_illumination,
+    direction,
     faces,
     clutter,
     size,
+    orientation,
     height,
+    side_of_road,
     latitude,
     longitude,
     score,
+    site_run_up,
   } = parseBbPropNull(el);
 
   const addBbImages = () => {
     let imgString = "";
-    if (Object.keys(el.image).length > 0) {
-      for (const img of el.images) {
-        imgString += `<img class="billboardImage" alt="billboard photo" src='${img.path}'>`;
-      }
-    } else {
-      imgString = `<img class="billboardImage" alt="billboard photo" src='${el.image}'>`;
+
+    for (const img of el.images) {
+      imgString += `<img class="billboardImage" alt="billboard photo" src='${img.path}'>`;
     }
 
     return imgString;
@@ -571,11 +572,17 @@ function addContentString(el) {
 
   let html = `
       <div class ="infoWindow">
+        <div>Address: <b>${address}</b></div>
+        <div>Medium Type: <b>${medium}</b></div>
         <div>Lighting: <b>${site_lighting_illumination}</b></div>
+        <div>Direction: <b>${direction}</b></div>
         <div>Faces: <b>${faces}</b></div>
         <div>Clutter: <b>${clutter}</b></div>
         <div>Size: <b>${size}</b></div>
+        <div>Orientation: <b>${orientation}</b></div>
         <div>Height: <b>${height}</b></div>
+        <div>Site Run Up: <b>${site_run_up}</b></div>
+        <div>Road Side: <b>${parseData(side_of_road)}</b></div>
         <div>Visibility Adjustment: <b>${vAdj(score)}</b></div>
         <div id='bbImages'>
           ${addBbImages()}
@@ -591,177 +598,54 @@ function addContentString(el) {
   return html;
 }
 
-function addDeliveries(data) {
-  const bounds = new google.maps.LatLngBounds();
-
-  var spiderConfig = {
-    keepSpiderfied: true,
-    event: "mouseover",
-  };
-  var markerSpiderfier = new OverlappingMarkerSpiderfier(map, spiderConfig);
-
-  const markers = data.map((el) => {
-    let product_name = el && parseData(el.product_name);
-    let product_description = el && parseData(el.product_description);
-    let total_price = el && parseData(el.total_price);
-    let quantity = el && parseData(el.quantity);
-
-    let latlng = new google.maps.LatLng(el.latitude, el.longitude);
-    bounds.extend(latlng);
-
-    let contentString =
-      '<div class ="infoWindow">' +
-      "<div>" +
-      "Product Name: <b>" +
-      product_name +
-      "</b></div>" +
-      "<div>" +
-      "Product Price: <b>" +
-      total_price +
-      "</b></div>" +
-      "<div>" +
-      "Quantity: <b>" +
-      quantity +
-      "</b></div>" +
-      "<div>" +
-      "Product Description: <b>" +
-      product_description +
-      "</b></div>" +
-      "</div>" +
-      '<img class="billboardImage" alt="Delivery photo" src=' +
-      el.photo +
-      ">" +
-      '<button class="btn end" data-lat=' +
-      el.latitude +
-      " data-long=" +
-      el.longitude +
-      " >Go Here</button>" +
-      '<button class="btn stop" data-lat=' +
-      el.latitude +
-      " data-long=" +
-      el.longitude +
-      " >Add Stop</button>" +
-      '<button class="btn start" data-lat=' +
-      el.latitude +
-      " data-long=" +
-      el.longitude +
-      " >Start Here</button>";
-
-    let marker = new google.maps.Marker({
-      position: latlng,
-      icon: {
-        url: `images/bbAmber.png`,
-        scaledSize: new google.maps.Size(30, 30),
-      },
-      optimized: false,
-    });
-
-    google.maps.event.addListener(
-      marker,
-      "click",
-      ((marker, el) => {
-        return () => {
-          infoWindow.setContent(contentString);
-          infoWindow.open(map, marker);
-        };
-      })(marker, el)
-    );
-
-    markerSpiderfier.addMarker(marker);
-    return marker;
-  });
-
-  markerSpiderfier.addListener("click", function (marker, e) {
-    //infoWindow.setContent(marker.title);
-    infoWindow.open(map, marker);
-  });
-
-  markerSpiderfier.addListener("spiderfy", function (markers) {
-    infoWindow.close();
-  });
-
-  const deliveryMarkers = new MarkerClusterer(map, [], {
-    imagePath: "images/m",
-  });
-  deliveryMarkers.setMaxZoom(15);
-
-  div = document.createElement("div");
-  div.innerHTML = `<img src='images/bbAmber.png' alt='Deliveries' /> Deliveries <input id="deliveryChecked" type="checkbox" />`;
-  essentialLayers.appendChild(div);
-
-  legend.addEventListener("change", (e) => {
-    if (e.target.matches("#deliveryChecked")) {
-      cb = document.getElementById("deliveryChecked");
-      // if on
-      if (cb.checked) {
-        deliveryMarkers.addMarkers(markers);
-        map.fitBounds(bounds);
-        map.panToBounds(bounds);
-      }
-      if (!cb.checked) {
-        // if off
-        deliveryMarkers.removeMarkers(markers);
-      }
-    }
-  });
-}
-
-function addGhanaPopulation() {
+function addugPopProj() {
   const key = () => {
     info = infoTab.querySelector(".info");
     info.innerHTML = `
-    <div class="sublocLegend">
-        <div> Ghana Population Estimates 2020 </div>
-        
-        <div><span class="subColor" style="background-color:#f7fcf5;"></span>19198 - 49793</div>
-
-        <div><span class="subColor" style="background-color:#e8f6e3;"></span>49793 - 62714</div>
-
-        <div><span class="subColor" style="background-color:#d0ecc9;"></span>62714 - 72954</div>
-
-        <div><span class="subColor" style="background-color:#b2e0ab;"></span>72954 - 84599</div>
-
-        <div><span class="subColor" style="background-color:#8ed08c;"></span>84599 - 98194</div>
-
-        <div><span class="subColor" style="background-color:#66bd6f;"></span>98194 - 116356</div>
-
-        <div><span class="subColor" style="background-color:#3da75a;"></span>116356 - 134829</div>
-
-        <div><span class="subColor" style="background-color:#248c45;"></span>134829 - 157751</div>
-
-        <div><span class="subColor" style="background-color:#03702e;"></span>157751 - 222312</div>
-
-        <div><span class="subColor" style="background-color:#232323;"></span>222312 - 2391823</div>
-    </div>
-            `;
+        <div class="sublocLegend">
+            <div>SubCounty Population Projection 2020</div>
+            <div><span class="subColor" style="background-color:#f7fbff;"></span>1600 - 9200</div>
+            <div><span class="subColor" style="background-color:#e2eef9;"></span>9200 - 12600</div>
+            <div><span class="subColor" style="background-color:#cde0f2;"></span>12600 - 15530</div>
+            <div><span class="subColor" style="background-color:#b0d2e8;"></span>15530 - 18640</div>
+            <div><span class="subColor" style="background-color:#89bfdd;"></span>18640 - 21900</div>
+            <div><span class="subColor" style="background-color:#60a6d2;"></span>21900 - 25200</div>
+            <div><span class="subColor" style="background-color:#3e8ec4;"></span>25200 - 30400</div>
+            <div><span class="subColor" style="background-color:#2172b6;"></span>30400 - 36400</div>
+            <div><span class="subColor" style="background-color:#0a549e;"></span>36400 - 47880</div>
+            <div><span class="subColor" style="background-color:#08306b;"></span>47880 - 445900</div>
+        </div>`;
   };
-  const ghtile = getTiles("Predictive:gh_pop_estimates_2020");
 
-  const ghanaDist = new google.maps.ImageMapType({
-    getTileUrl: ghtile,
+  const ugtile = getTiles("Predictive:ugsubcountiesprojection");
+
+  const ugPopProj = new google.maps.ImageMapType({
+    getTileUrl: ugtile,
     minZoom: 0,
     maxZoom: 19,
     opacity: 1.0,
-    alt: "Ghana Districts Population",
-    name: "Ghana Districts",
+    alt: "Uganda Population Projection 2020",
+    name: "ugPopProj",
     isPng: true,
     tileSize: new google.maps.Size(256, 256),
   });
 
   div = document.createElement("div");
-  div.innerHTML = `Ghana Districts <input id="ghCheck" type = "checkbox" />`;
+  div.innerHTML = `Uganda Population Projection 2020 <input id="ugPopProjCheck" type="checkbox" />`;
   mapLayersAccordion.appendChild(div);
+
   legend.addEventListener("change", (e) => {
-    if (e.target.matches("#ghCheck")) {
-      cb = document.getElementById("ghCheck");
+    if (e.target.matches("#ugPopProjCheck")) {
+      cb = document.getElementById("ugPopProjCheck");
       // if on
       if (cb.checked) {
-        map.overlayMapTypes.setAt(2, ghanaDist);
+        map.overlayMapTypes.setAt(1, ugPopProj);
         key();
       }
       if (!cb.checked) {
         // if off
-        map.overlayMapTypes.removeAt(2);
+        map.overlayMapTypes.removeAt(1);
+        //
         infoTab.querySelector(".info").innerHTML = "";
       }
     }
@@ -1233,106 +1117,24 @@ async function getPopData(long, lat) {
 
   if (response.ok) {
     return (popData = await response.json());
-    // drawPyr(popData)
   }
 }
 
-function drawPyr(popData) {
-  document.querySelector("#chart").style.display = "block";
+function addPop(popData) {
+  const imgCont = document.querySelector("#bbImages");
+  if (popData) {
+    const popString = `
+    <div>Sub County: <b>${popData.subcounty}</b></div>
+    <div>District: <b>${popData.district}</b></div>
+    <div>Male Population: <b>${popData.male}</b></div>
+    <div>Female Population: <b>${popData.female}</b></div>
+    <div>Total Population: <b>${popData.total}</b></div>`;
 
-  const categories = [
-    "0-4",
-    "5-9",
-    "10-14",
-    "15-19",
-    "20-24",
-    "25-29",
-    "30-34",
-    "35-39",
-    "40-44",
-    "45-49",
-    "50-54",
-    "55-59",
-    "60-64",
-    "65-69",
-    "70-74",
-    "75-79",
-    "80+",
-  ];
-
-  new Highcharts.Chart({
-    chart: {
-      renderTo: document.querySelector("#chart"),
-      type: "bar",
-    },
-    title: {
-      text: "Population Estimates for Ghana 2020.",
-    },
-    subtitle: {
-      text: "Source: Spatial Data Repository, The Demographic and Health Surveys Program. ICF International. Available from <a href='spatialdata.dhsprogram.com'>[Accessed 28 July 2021].</a>",
-    },
-    xAxis: [
-      {
-        categories: categories,
-        reversed: false,
-        labels: {
-          step: 1,
-        },
-        accessibility: {
-          description: "Age (male)",
-        },
-      },
-      {
-        opposite: true,
-        reversed: false,
-        categories: categories,
-        linkedTo: 0,
-        labels: {
-          step: 1,
-        },
-        accessibility: {
-          description: "Age (female)",
-        },
-      },
-    ],
-    yAxis: {
-      title: {
-        text: null,
-      },
-      labels: {
-        formatter: function () {
-          return Math.abs(this.value);
-        },
-      },
-    },
-    plotOptions: {
-      series: {
-        stacking: "normal",
-      },
-    },
-    tooltip: {
-      formatter: function () {
-        return (
-          "<b>" +
-          this.series.name +
-          ", age " +
-          this.point.category +
-          "</b><br/>" +
-          "Population: " +
-          this.point.y
-        );
-      },
-    },
-
-    series: [
-      {
-        name: "Male",
-        data: popData["male"],
-      },
-      {
-        name: "Female",
-        data: popData["female"],
-      },
-    ],
-  });
+    imgCont.insertAdjacentHTML("beforebegin", popString);
+  } else {
+    imgCont.insertAdjacentHTML(
+      "beforebegin",
+      `<div>No Population Estimates available at the moment</div>`
+    );
+  }
 }
